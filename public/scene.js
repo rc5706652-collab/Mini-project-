@@ -5,7 +5,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.m
 export function createSonicCore(host) {
   const canvas = host.querySelector("canvas");
   if (!canvas || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    return { setMode() {}, setEnergy() {}, destroy() {} };
+    return { setMode() {}, setEnergy() {}, setPaused() {}, destroy() {} };
   }
   let renderer;
   try {
@@ -85,7 +85,7 @@ export function createSonicCore(host) {
     new THREE.PointsMaterial({ color: 0x9acfff, size: .027, transparent:true, opacity:.75, sizeAttenuation:true }));
   group.add(particles);
 
-  let mode="idle", energy=.12, current=.12, active=true, visible=true, raf=0, pointerX=0, pointerY=0;
+  let mode="idle", energy=.12, current=.12, active=true, visible=true, paused=false, raf=0, pointerX=0, pointerY=0;
   const clock = new THREE.Clock();
   function resize() {
     const w=Math.max(1,host.clientWidth), h=Math.max(1,host.clientHeight);
@@ -106,10 +106,10 @@ export function createSonicCore(host) {
   };
   host.addEventListener("pointermove",onPointer,{passive:true});
   document.addEventListener("visibilitychange",onVisibility);
-  function request(){if(active && visible && !document.hidden && !raf)raf=requestAnimationFrame(frame);}
+  function request(){if(active && visible && !paused && !document.hidden && !raf)raf=requestAnimationFrame(frame);}
   function frame(){
     raf=0;
-    if(!active || !visible || document.hidden)return;
+    if(!active || !visible || paused || document.hidden)return;
     const t=clock.getElapsedTime();
     const baseline=mode==="processing"?.55:mode==="listening"?.27:mode==="complete"?.42:.12;
     current+=(Math.max(energy,baseline)-current)*.07;
@@ -129,6 +129,7 @@ export function createSonicCore(host) {
   return {
     setMode(value){mode=value;host.dataset.mode=value;},
     setEnergy(value){energy=Math.max(0,Math.min(1,Number(value)||0));},
+    setPaused(value){paused=Boolean(value);if(paused){cancelAnimationFrame(raf);raf=0;}else request();},
     destroy(){
       active=false;cancelAnimationFrame(raf);observer.disconnect();intersection.disconnect();
       host.removeEventListener("pointermove",onPointer);
