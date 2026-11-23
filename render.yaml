@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: audionotes-studio
+    runtime: static
+    buildCommand: echo "Static app - no build step"
+    staticPublishPath: ./public
