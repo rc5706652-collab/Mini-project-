@@ -1,0 +1,27 @@
+name: Validate NoteWave
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/app.js
+          node --check public/notes.js
+          node --check public/worker.js
+      - name: Run NLP unit tests
+        run: node --test tests/*.test.mjs
+      - name: Verify required static assets
+        run: |
+          test -s public/index.html
+          test -s public/style.css
+          test -s public/app.js
+          test -s public/worker.js
+          test -s render.yaml
