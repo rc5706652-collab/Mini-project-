@@ -4,6 +4,37 @@ Turn spoken English audio into structured notes you can explore, search, and stu
 
 NoteWave combines an interactive Sonic Core 3D experience with Liquid Glass Aurora panels. It offers genuine in-browser speech recognition, extractive NLP notes, and on-device semantic retrieval. No paid AI API key or database is required.
 
+
+## NoteWave 3.0 — Interactive Learning Universe
+
+Five new modules build on the current Sonic Core 3D, Particle Alchemy, Liquid Glass design, and the original recording/transcription/study workflows:
+
+1. **Knowledge Galaxy**: up to ten interactive CSS 3D concepts. Stars and connecting lines come from transcript words and sentence co-mentions. Co-mention does not prove a causal relationship. No additional WebGL context is used, so the 3D map remains lightweight on phones.
+2. **Quiz Arena**: up to six multiple-choice questions built from source sentence blanks and source-derived distractors. Scores, correct answers and evidence appear immediately. If insufficient distinct concepts exist, the app explains why the quiz cannot be generated.
+3. **AI Personal Tutor**: starts with evidence retrieval using transcript keywords; its default response quotes source material. An opt-in locally downloads Xenova/flan-t5-small and drafts a simple **English** explanation. It may hallucinate, so the UI labels generated text as unverified and presents original evidence. It is designed for desktop use and may be slow on mobile.
+4. **AI Knowledge Memory**: IndexedDB stores session text records, not raw audio, with cross-session search. Prior localStorage history is migrated automatically. Notes remain on the same browser profile; clearing storage, private browsing or quota eviction may delete them.
+5. **Multilingual Notes**: English uses Xenova/whisper-tiny.en. Auto, Hindi, Kannada, Telugu, Tamil and Malayalam use Xenova/whisper-tiny with transcription into the spoken language or Whisper's audio-to-English translation task. Native-script transcripts are tokenized for extractive summaries and keywords. This is not a general-purpose translator for arbitrary pasted text, and recognition/translation accuracy is especially limited for lower-resource languages and noisy audio.
+
+### Compute, privacy and availability
+
+- This remains a static Render site; no paid model APIs, tokens, backend inference service or account are needed.
+- The existing Whisper Worker, optional semantic worker and optional tutor worker are independent modules. Only the selected models are downloaded, and optional tutor generation is never automatic.
+- The quiz and graph involve only small amounts of text and no heavyweight inference. The 3D Galaxy uses CSS perspective rather than a second WebGL renderer. Reduced-motion and mobile styles are included.
+- The first use of speech recognition, semantic search or optional tutor generation fetches model weights and JavaScript libraries from external providers; this means internet access may be required even though recording data stays local. The models are not guaranteed to be available offline.
+- Do not assume generative explanations are factual. Verify any important claim against the source quote.
+- The multilingual Tiny model may produce errors or incorrect English translations. Always inspect the editable transcript.
+- GitHub browser smoke tests simulate Whisper output to verify interface and worker option wiring. They do not measure true accuracy of any downloadable AI model; real-device audio tests are still needed.
+
+### New files
+
+- public/knowledge.js, public/quiz.js, public/tutor.js: pure, independently testable data processing.
+- public/memory.js: IndexedDB persistence, migration, and keyword search.
+- public/advanced-ui.js and public/advanced-template.html: lazy-loaded learning suite interface.
+- public/tutor-worker.js: optional on-device FLAN-T5 explanation model.
+- public/whisper-config.js and public/worker.js: language-selected multilingual ASR or speech translation.
+- tests/new-features.test.mjs: graph, quiz, tutor and memory tests.
+
+
 ## Features
 
 1. Upload audio, record through the microphone, or paste a transcript.
