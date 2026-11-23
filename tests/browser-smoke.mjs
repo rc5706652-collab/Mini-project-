@@ -101,6 +101,24 @@ try{
  assert.equal(await audio.locator(".chapter").count(),1);
  assert.equal(await audio.locator("#preview-audio").isVisible(),true);
  assert.equal(await audio.locator("#alchemy-stage").isVisible(),false);
+
+ // A second generation must reuse the same canvas without losing its WebGL context.
+ await audio.locator("#nav-new").click();
+ await audio.locator("#text-tab").click();
+ await audio.locator("#pasted").fill(transcript);
+ await audio.locator("#generate").click();
+ await audio.locator("#results").waitFor({state:"visible",timeout:12000});
+ assert.ok((await audio.locator("#summary").innerText()).includes("renewable energy"));
+
+ // Cancellation must terminate processing, release 3D resources and unlock controls.
+ await audio.locator("#nav-new").click();
+ await audio.locator("#upload-tab").click();
+ await audio.locator("#file").setInputFiles({name:"cancel.wav",mimeType:"audio/wav",buffer:wavFixture()});
+ await audio.locator("#generate").click();
+ await audio.locator("#alchemy-stage").waitFor({state:"visible",timeout:4000});
+ await audio.locator("#cancel").click();
+ await audio.locator("#working").waitFor({state:"hidden",timeout:8000});
+ assert.equal(await audio.locator("#generate").isEnabled(),true);
  assert.deepEqual(audioErrors,[]);
 
  // Reduced-motion stays fully functional, skipping WebGL while retaining notes.
