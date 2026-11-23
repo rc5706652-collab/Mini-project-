@@ -21,6 +21,8 @@ jobs:
           node --check public/learning-ui.js
           node --check public/semantic-worker.js
           node --check public/scene.js
+          node --check public/alchemy.js
+          node --check public/alchemy-shapes.js
       - name: Run NLP and regression tests
         run: node --test tests/*.test.mjs
       - name: Verify static assets
@@ -29,6 +31,8 @@ jobs:
           test -s public/style.css
           test -s public/app.js
           test -s public/worker.js
+          test -s public/alchemy.js
+          test -s public/alchemy-shapes.js
           test -s render.yaml
       - name: Install browser smoke test dependencies
         run: |

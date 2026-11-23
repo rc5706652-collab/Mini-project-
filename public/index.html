@@ -87,7 +87,14 @@
 
           <div class="file-info hidden" id="file-info"><span class="file-icon">♫</span><div><strong id="filename"></strong><small id="filesize"></small></div><button id="remove" class="icon-button" aria-label="Remove file">✕</button></div>
           <div id="error" class="error hidden" role="alert"></div>
-          <div id="working" class="working hidden" aria-live="polite"><div class="working-header"><div class="spin"></div><div><strong id="work-title">Preparing your recording</strong><p id="work-detail">Initializing local AI…</p></div></div><div class="track"><div id="progress"></div></div><button class="link-button" id="cancel">Cancel processing</button></div>
+          <div id="working" class="working hidden" aria-live="polite">
+            <div id="alchemy-stage" class="alchemy-stage hidden" data-phase="processing" aria-label="Particle Alchemy: audio transforming into organized notes">
+              <div class="alchemy-aura" aria-hidden="true"></div>
+              <div class="alchemy-fallback-orb" aria-hidden="true"></div>
+              <canvas id="alchemy-canvas" aria-hidden="true"></canvas>
+              <div class="alchemy-caption" aria-hidden="true"><span id="alchemy-phase-label">SOUND IS BECOMING KNOWLEDGE</span><span class="alchemy-mini-bars"><i></i><i></i><i></i><i></i><i></i></span></div>
+            </div>
+            <div class="working-header"><div class="spin"></div><div><strong id="work-title">Preparing your recording</strong><p id="work-detail">Initializing local AI…</p></div></div><div class="track"><div id="progress"></div></div><button class="link-button" id="cancel">Cancel processing</button></div>
           <div class="panel-bottom"><div class="assurance"><span>✧</span> No login <i>·</i> Private audio <i>·</i> No paid AI key</div><button class="cta generate" id="generate">✦ Generate intelligence <span>↗</span></button></div>
         </div>
         <aside class="insight-stack" aria-label="AI capabilities">

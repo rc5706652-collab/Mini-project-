@@ -8,9 +8,64 @@ const show=(id,visible)=>$(id).classList.toggle("hidden",!visible);
 const state={
   inputMode:"upload",file:null,source:"",notes:null,segments:[],audioURL:null,
   worker:null,rejectTranscription:null,busy:false,recorder:null,stream:null,
-  chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null
+  chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null,operationId:0
 };
 const lab=createLearningStudio();
+
+/* Particle Alchemy is presentation-only; failure to load WebGL never blocks transcription. */
+const alchemy=(()=>{
+  const stage=$("alchemy-stage");
+  let instance=null,load=null,generation=0,active=false;
+  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  function reset(){
+    generation++;active=false;
+    instance?.destroy();instance=null;load=null;
+    show("alchemy-stage",false);
+    stage.classList.remove("alchemy-rendering","alchemy-fallback");
+    stage.dataset.phase="processing";
+    state.orb?.setPaused?.(false);
+  }
+  function start(){
+    reset();
+    const current=++generation;
+    active=true;
+    stage.dataset.phase="processing";
+    show("alchemy-stage",true);
+    put("alchemy-phase-label","FROM SOUND TO KNOWLEDGE");
+    state.orb?.setPaused?.(true);
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches || navigator.connection?.saveData){
+      stage.classList.add("alchemy-fallback");return;
+    }
+    load=import("./alchemy.js").then(module=>{
+      if(current!==generation||!active)return;
+      instance=module.createParticleAlchemy(stage);
+      instance.start();
+    }).catch(()=>{
+      if(current===generation&&active)stage.classList.add("alchemy-fallback");
+    });
+  }
+  function setProgress(value){instance?.setProgress?.(value);}
+  async function complete(){
+    if(!active)return;
+    const current=generation;
+    stage.dataset.phase="ready";
+    put("alchemy-phase-label","KNOWLEDGE ASSEMBLED");
+    if(load)await Promise.race([load,delay(850)]);
+    if(current!==generation)return;
+    if(instance){
+      try{await Promise.race([instance.complete(),delay(1900)]);}
+      catch{stage.classList.add("alchemy-fallback");}
+    }else{
+      stage.classList.add("alchemy-fallback");
+      await delay(380);
+    }
+    if(current!==generation)return;
+    await delay(190);
+    if(current===generation)reset();
+  }
+  return {start,complete,reset,setProgress};
+})();
+
 const STORE="notewave-history-v1";
 let saved=[];
 try{const data=JSON.parse(localStorage.getItem(STORE)||"[]");if(Array.isArray(data))saved=data.filter(item=>item?.notes?.transcript).slice(0,12);}catch{}
@@ -26,6 +81,7 @@ function clearError(){show("error",false);}
 function status(title,detail,percent){
   show("working",true);put("work-title",title);put("work-detail",detail);
   $("progress").style.width=Math.min(100,Math.max(0,Number(percent)||0))+"%";
+  alchemy.setProgress((Number(percent)||0)/100);
 }
 function orbMode(mode){
   $("orb-stage").dataset.mode=mode;
@@ -35,6 +91,7 @@ function orbMode(mode){
 import("./scene.js").then(m=>{
   state.orb=m.createSonicCore($("orb-stage"));
   state.orb.setMode($("orb-stage").dataset.mode||"idle");
+  if(!$("alchemy-stage").classList.contains("hidden"))state.orb.setPaused?.(true);
 }).catch(()=>$("orb-stage").classList.add("orb-fallback"));
 function switchMode(mode){
   if(state.busy||state.recorder?.state==="recording")return;
@@ -178,9 +235,12 @@ function recognize(samples){
   });
 }
 $("cancel").addEventListener("click",()=>{
+  if(!state.busy)return;
+  state.operationId++;
   state.worker?.terminate();state.worker=null;
   state.rejectTranscription?.(Error("Processing cancelled."));
   state.rejectTranscription=null;
+  alchemy.reset();
 });
 function clearAudio(){
   if(state.audioURL)URL.revokeObjectURL(state.audioURL);
@@ -194,7 +254,7 @@ function renderBullets(id,items,placeholder){
     const li=document.createElement("li");li.textContent=value;$(id).append(li);
   }
 }
-function renderNotes(note,source,segments=[],audioFile=null){
+function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
   if(!note){error("We couldn't find enough words to create notes.");return;}
   state.notes=note;state.source=source;state.segments=segments;
   clearAudio();
@@ -211,6 +271,7 @@ function renderNotes(note,source,segments=[],audioFile=null){
   $("keywords").replaceChildren();
   for(const keyword of note.keywords){const span=document.createElement("span");span.textContent=keyword;$("keywords").append(span);}
   $("editor").value=note.transcript;
+  $("results").classList.toggle("alchemy-reveal",fromAlchemy);
   show("main-view",true);show("saved-panel",false);show("results",true);
   put("breadcrumb","AI studio");
   $("nav-new").classList.add("selected");$("nav-saved").classList.remove("selected");
@@ -224,21 +285,42 @@ $("generate").addEventListener("click",async()=>{
   if(state.inputMode==="text"){
     const value=$("pasted").value.trim();
     if(!value){error("Paste a transcript to begin.");return;}
-    renderNotes(createNotes(value),"Pasted transcript");return;
+    toggleBusy(true);
+    const operation=++state.operationId;
+    status("Transforming words into knowledge","Building a grounded set of notes and study tools…",55);
+    alchemy.start();
+    try{
+      const notes=createNotes(value);
+      await alchemy.complete();
+      if(operation!==state.operationId)throw Error("Processing cancelled.");
+      renderNotes(notes,"Pasted transcript",[],null,true);
+    }catch(err){error(err.message||"Unable to generate notes.");}
+    finally{alchemy.reset();toggleBusy(false);show("working",false);}
+    return;
   }
   if(state.recorder?.state==="recording"){error("Stop the recording first.");return;}
   if(!state.file){error("Upload or record an audio file first.");return;}
   const audioFile=state.file;
   toggleBusy(true);orbMode("processing");
+  const operation=++state.operationId;
+  status("Preparing Particle Alchemy","Turning your recording into organized knowledge…",2);
+  alchemy.start();
   try{
     const pcm=await decodeAudio(audioFile);
+    if(operation!==state.operationId)throw Error("Processing cancelled.");
     const result=await recognize(pcm);
+    if(operation!==state.operationId)throw Error("Processing cancelled.");
     if(!result.transcript?.trim())throw Error("No speech detected. Use clear English audio or paste the transcript.");
-    renderNotes(createNotes(result.transcript),audioFile.name,result.segments,audioFile);
+    const notes=createNotes(result.transcript);
+    await alchemy.complete();
+    if(operation!==state.operationId)throw Error("Processing cancelled.");
+    renderNotes(notes,audioFile.name,result.segments,audioFile,true);
   }catch(err){
     orbMode("ready");
     error(err.name==="EncodingError"?"Unsupported audio codec. Convert to WAV or MP3 and retry.":err.message||"Audio processing failed.");
-  }finally{toggleBusy(false);show("working",false);}
+  }finally{
+    alchemy.reset();toggleBusy(false);show("working",false);
+  }
 });
 $("regenerate").addEventListener("click",()=>{
   const corrected=$("editor").value.trim();
@@ -289,6 +371,7 @@ function openStudio(){
 }
 function newSession(){
   if(state.busy||state.recorder?.state==="recording")return;
+  alchemy.reset();
   openStudio();show("results",false);clearError();
   state.file=null;state.segments=[];state.notes=null;
   $("file").value="";$("pasted").value="";show("file-info",false);
