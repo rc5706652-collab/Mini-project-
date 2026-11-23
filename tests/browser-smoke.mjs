@@ -119,6 +119,8 @@ try{
  await audio.locator("#cancel").click();
  await audio.locator("#working").waitFor({state:"hidden",timeout:8000});
  assert.equal(await audio.locator("#generate").isEnabled(),true);
+ assert.equal(await audio.locator("#results").isVisible(),false);
+ assert.ok((await audio.locator("#error").innerText()).includes("cancelled"));
  assert.deepEqual(audioErrors,[]);
 
  // Reduced-motion stays fully functional, skipping WebGL while retaining notes.
