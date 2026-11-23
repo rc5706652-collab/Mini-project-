@@ -156,7 +156,7 @@ export function createParticleAlchemy(host) {
       document.removeEventListener("visibilitychange",onVisibility);
       host.classList.remove("alchemy-rendering");
       geometry.dispose();material.dispose();renderer.dispose();
-      renderer.forceContextLoss();
+      // Keep the canvas context reusable for later recordings. dispose() frees scene GPU resources.
     }
   };
 }
