@@ -1,40 +1,45 @@
-// Whisper runs in a worker, avoiding UI freezes.
+// Whisper inference runs in a dedicated worker so the UI remains responsive.
 import { pipeline } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm";
-let recognizer;
-let modelPromise;
-const CHUNK_SECONDS = 25;
+import { whisperCallOptions, WHISPER_MODEL } from "./whisper-config.js";
+
+let recognizer, modelPromise;
+const RATE = 16000, CHUNK_SECONDS = 25;
 async function loadModel() {
   if (recognizer) return recognizer;
   if (!modelPromise) {
-    self.postMessage({ type: "stage", message: "Loading Whisper model. The first download may take a while…" });
-    modelPromise = pipeline("automatic-speech-recognition", "Xenova/whisper-tiny.en", {
-      device: "wasm", dtype: "q8",
-      progress_callback: p => {
-        if (p.status === "progress" && typeof p.progress === "number") self.postMessage({ type: "download", progress: Math.round(p.progress) });
+    postMessage({ type: "stage", message: "Preparing on-device Whisper model…" });
+    modelPromise = pipeline("automatic-speech-recognition", WHISPER_MODEL, {
+      device: "wasm",
+      dtype: "q8",
+      progress_callback: progress => {
+        if (progress.status === "progress" && Number.isFinite(progress.progress)) {
+          postMessage({ type: "download", progress: Math.round(progress.progress) });
+        }
       }
     }).catch(err => { modelPromise = null; throw err; });
   }
   recognizer = await modelPromise;
   return recognizer;
 }
-self.onmessage = async event => {
-  const { type, samples } = event.data || {};
-  if (type !== "transcribe" || !samples) return;
+
+self.onmessage = async ({ data }) => {
+  if (data?.type !== "transcribe" || !data.samples) return;
   try {
-    const asr = await loadModel();
-    const size = 16000 * CHUNK_SECONDS;
-    const total = Math.max(1, Math.ceil(samples.length / size));
+    const asr = await loadModel(), samples = data.samples;
+    const chunkSize = RATE * CHUNK_SECONDS;
+    const total = Math.max(1, Math.ceil(samples.length / chunkSize));
     const segments = [];
     for (let i = 0; i < total; i++) {
-      self.postMessage({ type: "stage", message: "Transcribing segment " + (i + 1) + " of " + total + "…" });
-      const slice = samples.slice(i * size, Math.min(samples.length, (i + 1) * size));
-      const result = await asr(slice, { task: "transcribe" });
-      const text = (result?.text || "").trim();
-      if (text) segments.push(text);
-      self.postMessage({ type: "segment", index: i + 1, total, text, progress: Math.round(((i + 1) / total) * 100) });
+      postMessage({ type: "stage", message: "Transcribing segment " + (i + 1) + " of " + total });
+      const chunk = samples.subarray(i * chunkSize, Math.min(samples.length, (i + 1) * chunkSize));
+      // Critical: English-only .en models must NOT receive a task or language argument.
+      const output = await asr(chunk, whisperCallOptions(WHISPER_MODEL));
+      const text = (output?.text ?? "").trim();
+      if (text) segments.push({ text, start: i * CHUNK_SECONDS, end: Math.min(samples.length / RATE, (i + 1) * CHUNK_SECONDS) });
+      postMessage({ type: "segment", index: i + 1, total, text, progress: Math.round(100 * (i + 1) / total) });
     }
-    self.postMessage({ type: "complete", text: segments.join(" ").trim() });
+    postMessage({ type: "complete", text: segments.map(item => item.text).join(" ").trim(), segments });
   } catch (err) {
-    self.postMessage({ type: "error", message: err?.message || "Speech recognition failed." });
+    postMessage({ type: "error", message: err?.message || "Speech recognition failed." });
   }
 };
