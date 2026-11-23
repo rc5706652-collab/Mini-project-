@@ -7,14 +7,14 @@ export function cleanText(value) {
   return String(value ?? "").replace(/\r/g, "\n").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
 }
 export function tokenize(value) {
-  return (String(value).toLowerCase().match(/[a-z][a-z'-]{2,}/g) || [])
+  return (String(value).toLocaleLowerCase().match(/[\p{L}][\p{L}\p{M}\p{N}'-]{1,}/gu) || [])
     .map(w => w.replace(/^'+|'+$/g, ""))
     .filter(w => !STOP.has(w) && w.length > 2);
 }
 export function splitSentences(value) {
   const text = cleanText(value);
   if (!text) return [];
-  const parts = text.split(/(?<=[.!?])\s+|\n+/).map(x => x.trim()).filter(Boolean);
+  const parts = text.split(/(?<=[.!?।॥؟。])\s*|\n+/).map(x => x.trim()).filter(Boolean);
   const output = [];
   for (const part of parts) {
     if (part.length <= 320) { output.push(part); continue; }

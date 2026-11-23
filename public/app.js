@@ -1,6 +1,7 @@
 import { createNotes, toMarkdown } from "./notes.js";
 import { createLearningStudio } from "./learning-ui.js";
 import { formatTime } from "./study.js";
+import { createAdvancedStudio } from "./advanced-ui.js";
 
 const $=id=>document.getElementById(id);
 const put=(id,value)=>{$(id).textContent=String(value??"");};
@@ -69,6 +70,10 @@ const alchemy=(()=>{
 const STORE="notewave-history-v1";
 let saved=[];
 try{const data=JSON.parse(localStorage.getItem(STORE)||"[]");if(Array.isArray(data))saved=data.filter(item=>item?.notes?.transcript).slice(0,12);}catch{}
+const advancedPromise=createAdvancedStudio({
+ openSaved:item=>renderNotes(item.notes,item.source,item.segments||[]),
+ onDelete:id=>{saved=saved.filter(entry=>entry.id!==id);persist();renderSaved();}
+}).then(suite=>{suite.init();return suite;}).catch(error=>{console.warn("Advanced studio unavailable",error);return null;});
 function persist(){
   try{localStorage.setItem(STORE,JSON.stringify(saved));return true;}
   catch{error("Browser storage is full or unavailable. Download your notes instead.");return false;}
@@ -101,6 +106,7 @@ function switchMode(mode){
     $(t+"-tab").classList.toggle("active",t===mode);
     $(t+"-tab").setAttribute("aria-selected",String(t===mode));
   }
+  if($("language-controls"))show("language-controls",mode!=="text");
   clearError();
 }
 ["upload","record","text"].forEach(mode=>$(mode+"-tab").addEventListener("click",()=>switchMode(mode)));
@@ -231,7 +237,7 @@ function recognize(samples){
       state.rejectTranscription=null;worker.terminate();state.worker=null;
       reject(Error("Whisper model failed to load. Check internet access and browser memory."));
     };
-    worker.postMessage({type:"transcribe",samples},[samples.buffer]);
+    worker.postMessage({type:"transcribe",samples,language:$("audio-language")?.value||"en",output:$("audio-output")?.value||"original"},[samples.buffer]);
   });
 }
 $("cancel").addEventListener("click",()=>{
@@ -277,6 +283,7 @@ function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
   $("nav-new").classList.add("selected");$("nav-saved").classList.remove("selected");
   put("save","♡ Save");
   lab.update(note,segments,state.audioURL);
+  advancedPromise.then(suite=>suite?.update(note));
   orbMode("complete");$("results").scrollIntoView({behavior:"smooth",block:"start"});
 }
 $("generate").addEventListener("click",async()=>{
@@ -343,7 +350,9 @@ $("export").addEventListener("click",()=>{
 $("print").addEventListener("click",()=>window.print());
 $("save").addEventListener("click",()=>{
   if(!state.notes)return;
-  saved.unshift({id:String(Date.now()),source:state.source,notes:state.notes,segments:state.segments,created:new Date().toISOString()});
+  const session={id:String(Date.now()),source:state.source,notes:state.notes,segments:state.segments,language:$("audio-language")?.value||"en",created:new Date().toISOString()};
+  saved.unshift(session);
+  advancedPromise.then(suite=>suite?.save(session));
   saved=saved.slice(0,12);
   if(persist()){put("save","✓ Saved");renderSaved();}
 });
@@ -361,7 +370,7 @@ function renderSaved(){
     const h=document.createElement("h3");h.textContent=item.notes.title;
     const p=document.createElement("p");p.textContent=new Date(item.created).toLocaleDateString()+" · "+(item.notes.wordCount||0)+" words";
     const open=document.createElement("button");open.textContent="Open";open.onclick=()=>renderNotes(item.notes,item.source,item.segments||[]);
-    const remove=document.createElement("button");remove.textContent="Delete";remove.onclick=()=>{saved=saved.filter(row=>row.id!==item.id);persist();renderSaved();};
+    const remove=document.createElement("button");remove.textContent="Delete";remove.onclick=()=>{saved=saved.filter(row=>row.id!==item.id);persist();renderSaved();advancedPromise.then(suite=>suite?.remove(item.id));};
     card.append(h,p,open,remove);$("saved-list").append(card);
   }
 }
@@ -386,6 +395,6 @@ $("nav-saved").addEventListener("click",()=>{
   window.scrollTo({top:0,behavior:"smooth"});
 });
 $("clear").addEventListener("click",()=>{
-  if(saved.length&&confirm("Delete all saved notes from this browser?")){saved=[];persist();renderSaved();}
+  if(confirm("Delete every saved note from this browser, including Knowledge Memory?")){saved=[];persist();renderSaved();advancedPromise.then(suite=>suite?.clear());}
 });
 renderSaved();

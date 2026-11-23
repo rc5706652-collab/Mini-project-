@@ -1,0 +1,46 @@
+<section id="advanced-suite" class="advanced-suite">
+<div class="studio-heading"><div><span class="mini-kicker">✦ NOTEWAVE 3.0 · LEARNING UNIVERSE</span><h2>More than notes. A universe of ideas.</h2><p>Explore connected concepts, challenge your memory, and learn from your transcript.</p></div><span class="model-label">LOCAL FIRST</span></div>
+<div class="studio-panel glass">
+<div class="studio-tabs advanced-tabs" role="tablist" aria-label="Advanced learning tools">
+<button class="studio-tab active" id="galaxy-tab" role="tab" aria-selected="true">✦ 3D Galaxy</button>
+<button class="studio-tab" id="quiz-tab" role="tab" aria-selected="false">◇ Quiz Arena</button>
+<button class="studio-tab" id="tutor-tab" role="tab" aria-selected="false">◎ AI Tutor</button>
+</div>
+<div id="galaxy-panel" class="studio-content">
+<div class="module-heading"><div><h3>Explore the ideas behind your recording.</h3><p>Drag the galaxy. Select a star to see the exact evidence. Lines mean the ideas appeared in the same sentence, not that one caused another.</p></div><span class="module-badge">3D CONCEPT MAP</span></div>
+<div id="galaxy-scene" class="galaxy-scene" aria-label="Three-dimensional concept network"><div id="galaxy-space" class="galaxy-space"></div></div>
+<div id="galaxy-evidence" class="galaxy-evidence" aria-live="polite">Tap a star to open the original source passage.</div>
+</div>
+<div id="quiz-panel" class="studio-content hidden">
+<div class="module-heading"><div><h3>Test what you learned.</h3><p>Fill missing concepts with multiple-choice answers directly sourced from the recording.</p></div><span class="module-badge">QUIZ ARENA</span></div>
+<div id="quiz-questions" class="quiz-questions"></div><p id="quiz-score" class="quiz-score" aria-live="polite"></p><button id="quiz-restart" class="soft-button" type="button">↻ Restart quiz</button>
+</div>
+<div id="tutor-panel" class="studio-content hidden">
+<div class="module-heading"><div><h3>Your personal learning companion.</h3><p>Read the source evidence or opt in to a local AI-generated English explanation.</p></div><span class="module-badge">SOURCE-GROUNDED</span></div>
+<form id="tutor-form" class="ask-form"><label class="sr-only" for="tutor-question">Ask the AI tutor</label><input id="tutor-question" maxlength="220" placeholder="Explain the main idea of the lecture"><button id="tutor-submit" class="cta" type="submit">Explain ↗</button></form>
+<label class="tutor-optin"><input type="checkbox" id="tutor-generative"> Optional English explanation with a downloadable local model (best on desktop)</label>
+<p id="tutor-status" class="muted tiny" role="status"></p><div id="tutor-result" class="tutor-result" aria-live="polite">Ask about your recording to begin.</div>
+</div>
+</div>
+</section>
+
+<!-- AUDIO_LANGUAGE -->
+<div id="language-controls" class="language-controls">
+<label for="audio-language">Recording language
+<select id="audio-language">
+<option value="en">English · fast</option><option value="auto">Automatic detection</option>
+<option value="hi">Hindi · हिन्दी</option><option value="kn">Kannada · ಕನ್ನಡ</option>
+<option value="te">Telugu · తెలుగు</option><option value="ta">Tamil · தமிழ்</option>
+<option value="ml">Malayalam · മലയാളം</option>
+</select></label>
+<label for="audio-output">Speech output
+<select id="audio-output"><option value="original">Keep spoken language</option><option value="english">Translate speech to English</option></select></label>
+<p class="tiny muted">The multilingual model is larger and may be inaccurate for some languages or accents. Review every transcript.</p>
+</div>
+<!-- MEMORY -->
+<div class="memory-module">
+<div class="memory-toolbar glass"><label for="memory-search" class="mini-kicker">✦ SEARCH ACROSS SAVED RECORDINGS</label>
+<input type="search" id="memory-search" placeholder="Find topics, terms, or passages across sessions">
+<p class="muted tiny">Text notes stay in this browser using IndexedDB. Raw recordings are never stored.</p></div>
+<p id="memory-status" role="status" class="muted tiny"></p><div id="memory-results" class="saved-list"></div>
+</div>

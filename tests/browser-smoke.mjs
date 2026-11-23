@@ -24,6 +24,19 @@ try{
  await page.locator("#pasted").fill(transcript);
  await page.locator("#generate").click();
  await page.locator("#results").waitFor({state:"visible",timeout:10000});
+ await page.locator("#advanced-suite").waitFor({state:"visible",timeout:7000});
+ assert.ok((await page.locator(".galaxy-node").count())>=3);
+ await page.locator(".galaxy-node").first().click();
+ assert.ok((await page.locator("#galaxy-evidence").innerText()).length>15);
+ await page.locator("#quiz-tab").click();
+ assert.ok((await page.locator(".quiz-card").count())>=1);
+ await page.locator(".quiz-card .quiz-choice").first().click();
+ assert.ok((await page.locator("#quiz-score").innerText()).includes("Score"));
+ await page.locator("#quiz-restart").click();
+ await page.locator("#tutor-tab").click();
+ await page.locator("#tutor-question").fill("What are solar panels?");
+ await page.locator("#tutor-submit").click();
+ assert.ok((await page.locator("#tutor-result").innerText()).includes("solar panels"));
  assert.ok((await page.locator("#summary").innerText()).length>15);
  assert.ok((await page.locator("#points li").count())>0);
  assert.ok((await page.locator("#actions").innerText()).includes("submit"));
@@ -39,8 +52,10 @@ try{
  assert.equal((await dl).suggestedFilename(),"NoteWave-notes.md");
  await page.locator("#save").click();
  await page.locator("#nav-saved").click();
- assert.ok((await page.locator("#saved-list").innerText()).includes("words"));
- await page.locator("#saved-list button").first().click();
+ await page.locator("#memory-results .saved-item").first().waitFor({state:"visible",timeout:8000});
+ await page.locator("#memory-search").fill("solar");
+ assert.ok((await page.locator("#memory-results .saved-item").count())>=1);
+ await page.locator("#memory-results .saved-item button").first().click();
  await page.locator("#results").waitFor({state:"visible"});
  assert.ok((await page.locator("#editor").inputValue()).includes("solar panels"));
  assert.deepEqual(crashes,[]);
@@ -67,6 +82,7 @@ try{
      constructor(){this.onmessage=null;this.onerror=null;this.cancelled=false;}
      postMessage(message){
        if(message?.type!=="transcribe")return;
+       window.latestWhisperRequest={language:message.language,output:message.output};
        setTimeout(()=>{if(!this.cancelled)this.onmessage?.({data:{type:"stage",message:"Testing recognition"}});},100);
        setTimeout(()=>{
          if(this.cancelled)return;
@@ -89,10 +105,14 @@ try{
    for(let i=0;i<frames;i++)b.writeInt16LE(Math.round(1200*Math.sin(i*.03)),44+i*2);
    return b;
  }
+ await audio.locator("#audio-language").selectOption("hi");
+ await audio.locator("#audio-output").selectOption("english");
  await audio.locator("#file").setInputFiles({name:"demo.wav",mimeType:"audio/wav",buffer:wavFixture()});
  await audio.locator("#generate").click();
  await audio.locator("#alchemy-stage").waitFor({state:"visible",timeout:4000});
  assert.equal(await audio.locator("#alchemy-stage").getAttribute("data-phase"),"processing");
+ await audio.waitForFunction(()=>window.latestWhisperRequest!==undefined,{timeout:6000});
+ assert.deepEqual(await audio.evaluate(()=>window.latestWhisperRequest),{language:"hi",output:"english"});
  await audio.locator("#results").waitFor({state:"visible",timeout:12000});
  assert.ok(await audio.locator("#results").evaluate(node=>node.classList.contains("alchemy-reveal")));
  assert.ok((await audio.locator("#summary").innerText()).includes("renewable energy"));
