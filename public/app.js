@@ -1,31 +1,308 @@
 import { createNotes, toMarkdown } from "./notes.js";
-const el=id=>document.getElementById(id);let mode="upload",file=null,notes=null,source="",worker=null,pending=null,busy=false,recorder=null,stream=null,chunks=[],timerId=null,seconds=0;
-const STORE="notewave-history-v1";let saved=[];try{saved=JSON.parse(localStorage.getItem(STORE)||"[]");if(!Array.isArray(saved))saved=[];}catch{saved=[];}
-function error(msg){el("error").textContent=msg;el("error").classList.remove("hidden");}function clearError(){el("error").classList.add("hidden");}
-function setMode(next){if(busy)return;mode=next;["upload","record","text"].forEach(v=>{el(v+"-area").classList.toggle("hidden",v!==next);el(v+"-tab").classList.toggle("active",v===next);});clearError();}
-["upload","record","text"].forEach(v=>el(v+"-tab").onclick=()=>setMode(v));
-function setFile(f){if(!f)return;if(f.size>150*1024*1024)return error("File exceeds 150 MB. Please select a smaller recording.");file=f;source=f.name;el("filename").textContent=f.name;el("filesize").textContent=(f.size/1048576).toFixed(1)+" MB · Ready";el("file-info").classList.remove("hidden");clearError();}
-el("drop").onclick=()=>el("file").click();el("drop").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el("file").click();}};el("file").onchange=e=>setFile(e.target.files[0]);el("drop").ondragover=e=>{e.preventDefault();el("drop").classList.add("drag");};el("drop").ondragleave=()=>el("drop").classList.remove("drag");el("drop").ondrop=e=>{e.preventDefault();el("drop").classList.remove("drag");setFile(e.dataTransfer.files[0]);};el("remove").onclick=()=>{file=null;el("file").value="";el("file-info").classList.add("hidden");};
-el("record").onclick=async()=>{
- if(recorder?.state==="recording"){recorder.stop();return;}
- if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)return error("Microphone recording is not supported here. Use Chrome/Edge over HTTPS or upload audio.");
- try{clearError();stream=await navigator.mediaDevices.getUserMedia({audio:true});const type=["audio/webm;codecs=opus","audio/webm","audio/mp4"].find(x=>MediaRecorder.isTypeSupported(x));recorder=new MediaRecorder(stream,type?{mimeType:type}:{});chunks=[];recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};recorder.onstop=()=>{clearInterval(timerId);stream?.getTracks().forEach(t=>t.stop());el("record").textContent="● Start recording";el("mic").classList.remove("on");if(chunks.length){const ext=recorder.mimeType.includes("mp4")?"m4a":"webm";setFile(new File(chunks,"Recording-"+Date.now()+"."+ext,{type:recorder.mimeType}));}};recorder.start(1000);seconds=0;el("mic").classList.add("on");el("record").textContent="■ Stop recording";timerId=setInterval(()=>{seconds++;el("timer").textContent=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");if(seconds>=1800)recorder.stop();},1000);}
- catch(e){error(e.name==="NotAllowedError"?"Microphone permission denied. Allow it in the browser settings.":e.message);}
+import { createLearningStudio } from "./learning-ui.js";
+import { formatTime } from "./study.js";
+
+const $=id=>document.getElementById(id);
+const put=(id,value)=>{$(id).textContent=String(value??"");};
+const show=(id,visible)=>$(id).classList.toggle("hidden",!visible);
+const state={
+  inputMode:"upload",file:null,source:"",notes:null,segments:[],audioURL:null,
+  worker:null,rejectTranscription:null,busy:false,recorder:null,stream:null,
+  chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null
 };
-function status(title,detail,pct){el("working").classList.remove("hidden");el("work-title").textContent=title;el("work-detail").textContent=detail;el("progress").style.width=Math.min(100,pct)+"%";}
-function toggleBusy(v){busy=v;el("generate").disabled=v;["upload-tab","record-tab","text-tab","record"].forEach(id=>el(id).disabled=v);}
-async function decode(f){status("Decoding audio","Converting your recording to the 16 kHz format…",5);const ctx=new (window.AudioContext||window.webkitAudioContext)();try{const audio=await ctx.decodeAudioData(await f.arrayBuffer());if(audio.duration>1800)throw Error("Recordings must be 30 minutes or shorter. Please split longer audio.");const mix=new Float32Array(audio.length);for(let c=0;c<audio.numberOfChannels;c++){const ch=audio.getChannelData(c);for(let i=0;i<ch.length;i++)mix[i]+=ch[i]/audio.numberOfChannels;}const ratio=audio.sampleRate/16000;const out=new Float32Array(Math.ceil(mix.length/ratio));for(let i=0;i<out.length;i++){const p=i*ratio,j=Math.floor(p),t=p-j;out[i]=(mix[j]||0)*(1-t)+(mix[Math.min(j+1,mix.length-1)]||0)*t;}return out;}finally{await ctx.close();}}
-function recognize(samples){return new Promise((resolve,reject)=>{worker??=new Worker("./worker.js",{type:"module"});pending={reject};worker.onmessage=e=>{const m=e.data;if(m.type==="stage")status("Speech recognition",m.message,15);if(m.type==="download")status("Downloading Whisper model","First use can take a few minutes depending on your connection.",Math.round(m.progress*.4));if(m.type==="segment")status("Speech recognition","Transcribing segment "+m.index+" of "+m.total,40+Math.round(m.progress*.6));if(m.type==="complete"){pending=null;resolve(m.text);}if(m.type==="error"){pending=null;reject(Error(m.message));}};worker.onerror=()=>{pending=null;reject(Error("Could not load AI model. Check internet access and browser compatibility."));};worker.postMessage({type:"transcribe",samples},[samples.buffer]);});}
-el("cancel").onclick=()=>{worker?.terminate();worker=null;pending?.reject(Error("Processing cancelled."));pending=null;};
-function list(id,items,fallback){el(id).replaceChildren();for(const v of items.length?items:[fallback]){const li=document.createElement("li");li.textContent=v;el(id).append(li);}}
-function showNotes(n,src){notes=n;source=src;el("result-title").textContent=n.title;el("metadata").textContent=n.wordCount+" words · "+src;el("summary").textContent=n.summary;list("points",n.points,"No takeaways found.");list("actions",n.actions,"No explicit action items detected.");list("details",n.details,"No dates or numerical details detected.");el("keywords").replaceChildren();for(const k of n.keywords){const s=document.createElement("span");s.textContent=k;el("keywords").append(s);}el("editor").value=n.transcript;el("results").classList.remove("hidden");el("saved-panel").classList.add("hidden");el("create-panel").classList.remove("hidden");el("results").scrollIntoView({behavior:"smooth"});}
-el("generate").onclick=async()=>{if(busy)return;clearError();if(mode==="text"){const text=el("pasted").value.trim();if(!text)return error("Please paste a transcript.");return showNotes(createNotes(text),"Pasted transcript");}if(recorder?.state==="recording")return error("Stop recording first.");if(!file)return error("Please upload or record audio first.");toggleBusy(true);try{const pcm=await decode(file);const text=await recognize(pcm);if(!text.trim())throw Error("No speech recognized. Try clearer audio or paste a transcript.");showNotes(createNotes(text),file.name);}catch(e){error(e.message||"Audio processing failed. Try another file.");}finally{toggleBusy(false);el("working").classList.add("hidden");}};
-el("regenerate").onclick=()=>{const text=el("editor").value.trim();if(text)showNotes(createNotes(text),source);else error("Transcript cannot be empty.");};
-function markdown(){return toMarkdown(notes,source);}el("copy").onclick=async()=>{try{await navigator.clipboard.writeText(markdown());el("copy").textContent="✓ Copied";setTimeout(()=>el("copy").textContent="⧉ Copy",1800);}catch{error("Clipboard unavailable. Download the Markdown instead.");}};
-el("export").onclick=()=>{if(!notes)return;const url=URL.createObjectURL(new Blob([markdown()],{type:"text/markdown;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="NoteWave-notes.md";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-el("print").onclick=()=>window.print();
-function store(){try{localStorage.setItem(STORE,JSON.stringify(saved));return true;}catch{error("Browser storage unavailable. Export the notes instead.");return false;}}
-el("save").onclick=()=>{if(!notes)return;saved.unshift({id:String(Date.now()),notes,source,created:new Date().toISOString()});saved=saved.slice(0,12);if(store()){el("save").textContent="✓ Saved";renderSaved();}};
-function renderSaved(){el("recent").replaceChildren();el("saved-list").replaceChildren();el("count").textContent=saved.length;for(const item of saved){const btn=document.createElement("button");btn.className="recent-item";btn.textContent="▤ "+item.notes.title;btn.onclick=()=>showNotes(item.notes,item.source);el("recent").append(btn);const card=document.createElement("div");card.className="saved-item";const h=document.createElement("h3");h.textContent=item.notes.title;const p=document.createElement("p");p.textContent=new Date(item.created).toLocaleDateString()+" · "+item.notes.wordCount+" words";const open=document.createElement("button");open.textContent="Open";open.onclick=()=>showNotes(item.notes,item.source);const del=document.createElement("button");del.textContent="Delete";del.onclick=()=>{saved=saved.filter(x=>x.id!==item.id);store();renderSaved();};card.append(h,p,open,del);el("saved-list").append(card);}}
-el("nav-new").onclick=()=>{el("create-panel").classList.remove("hidden");el("results").classList.add("hidden");el("saved-panel").classList.add("hidden");el("breadcrumb").textContent="Create notes";el("nav-new").classList.add("selected");el("nav-saved").classList.remove("selected");};
-el("nav-saved").onclick=()=>{renderSaved();el("create-panel").classList.add("hidden");el("results").classList.add("hidden");el("saved-panel").classList.remove("hidden");el("breadcrumb").textContent="Saved notes";el("nav-new").classList.remove("selected");el("nav-saved").classList.add("selected");};el("clear").onclick=()=>{if(confirm("Delete all notes saved in this browser?")){saved=[];store();renderSaved();}};renderSaved();
+const lab=createLearningStudio();
+const STORE="notewave-history-v1";
+let saved=[];
+try{const data=JSON.parse(localStorage.getItem(STORE)||"[]");if(Array.isArray(data))saved=data.filter(item=>item?.notes?.transcript).slice(0,12);}catch{}
+function persist(){
+  try{localStorage.setItem(STORE,JSON.stringify(saved));return true;}
+  catch{error("Browser storage is full or unavailable. Download your notes instead.");return false;}
+}
+function error(message){
+  put("error",message);show("error",true);
+  $("create-panel").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function clearError(){show("error",false);}
+function status(title,detail,percent){
+  show("working",true);put("work-title",title);put("work-detail",detail);
+  $("progress").style.width=Math.min(100,Math.max(0,Number(percent)||0))+"%";
+}
+function orbMode(mode){
+  $("orb-stage").dataset.mode=mode;
+  state.orb?.setMode(mode);
+  put("orb-label",({idle:"Your ideas, amplified",ready:"Ready to understand",listening:"Listening to your voice",processing:"Turning sound into insight",complete:"Intelligence unlocked"})[mode]||"Your ideas, amplified");
+}
+import("./scene.js").then(m=>{
+  state.orb=m.createSonicCore($("orb-stage"));
+  state.orb.setMode($("orb-stage").dataset.mode||"idle");
+}).catch(()=>$("orb-stage").classList.add("orb-fallback"));
+function switchMode(mode){
+  if(state.busy||state.recorder?.state==="recording")return;
+  state.inputMode=mode;
+  for(const t of ["upload","record","text"]){
+    show(t+"-area",t===mode);
+    $(t+"-tab").classList.toggle("active",t===mode);
+    $(t+"-tab").setAttribute("aria-selected",String(t===mode));
+  }
+  clearError();
+}
+["upload","record","text"].forEach(mode=>$(mode+"-tab").addEventListener("click",()=>switchMode(mode)));
+function setFile(file){
+  if(!file)return;
+  if(file.size>150*1048576){error("Audio exceeds 150 MB. Try splitting it into shorter recordings.");return;}
+  state.file=file;state.source=file.name;
+  put("filename",file.name);put("filesize",(file.size/1048576).toFixed(2)+" MB · Ready to transcribe");
+  show("file-info",true);clearError();orbMode("ready");
+}
+$("drop").addEventListener("click",()=>$("file").click());
+$("drop").addEventListener("keydown",event=>{
+  if(event.key==="Enter"||event.key===" "){event.preventDefault();$("file").click();}
+});
+$("file").addEventListener("change",event=>setFile(event.target.files[0]));
+$("drop").addEventListener("dragover",event=>{event.preventDefault();$("drop").classList.add("drag");});
+$("drop").addEventListener("dragleave",()=>$("drop").classList.remove("drag"));
+$("drop").addEventListener("drop",event=>{
+  event.preventDefault();$("drop").classList.remove("drag");setFile(event.dataTransfer.files[0]);
+});
+$("remove").addEventListener("click",()=>{
+  state.file=null;$("file").value="";show("file-info",false);orbMode("idle");
+});
+function stopMeter(){
+  cancelAnimationFrame(state.levelFrame);state.levelFrame=0;
+  state.micSource?.disconnect();state.micSource=null;
+  if(state.micContext)state.micContext.close().catch(()=>{});
+  state.micContext=null;state.analyser=null;state.orb?.setEnergy(0);
+}
+function startMeter(stream){
+  try{
+    const AudioContext=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContext)return;
+    state.micContext=new AudioContext();
+    state.micSource=state.micContext.createMediaStreamSource(stream);
+    state.analyser=state.micContext.createAnalyser();state.analyser.fftSize=256;
+    state.micSource.connect(state.analyser);
+    const bins=new Uint8Array(state.analyser.frequencyBinCount);
+    const loop=()=>{
+      if(state.recorder?.state!=="recording")return;
+      state.analyser.getByteFrequencyData(bins);
+      const energy=bins.reduce((sum,value)=>sum+value,0)/(bins.length*255);
+      state.orb?.setEnergy(Math.min(1,energy*4));
+      state.levelFrame=requestAnimationFrame(loop);
+    };
+    loop();
+  }catch{stopMeter();}
+}
+$("record").addEventListener("click",async()=>{
+  if(state.recorder?.state==="recording"){state.recorder.stop();return;}
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){
+    error("Microphone recording is not supported here. Use Chrome or Edge over HTTPS.");return;
+  }
+  try{
+    clearError();
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const type=["audio/webm;codecs=opus","audio/webm","audio/mp4"].find(item=>MediaRecorder.isTypeSupported(item));
+    state.stream=stream;state.chunks=[];
+    const recorder=new MediaRecorder(stream,type?{mimeType:type}:{});
+    state.recorder=recorder;
+    recorder.ondataavailable=event=>{if(event.data.size)state.chunks.push(event.data);};
+    recorder.onerror=()=>error("An error interrupted the microphone recording.");
+    recorder.onstop=()=>{
+      clearInterval(state.recordTimer);stopMeter();
+      stream.getTracks().forEach(track=>track.stop());state.stream=null;
+      $("mic").classList.remove("on");put("record","● Start recording");
+      if(state.chunks.length){
+        const ext=recorder.mimeType.includes("mp4")?"m4a":"webm";
+        setFile(new File(state.chunks,"Recording-"+Date.now()+"."+ext,{type:recorder.mimeType}));
+      }else{orbMode("idle");error("No audio was recorded. Please try again.");}
+    };
+    recorder.start(1000);
+    state.elapsed=0;put("timer","00:00");put("record","■ Stop recording");
+    $("mic").classList.add("on");orbMode("listening");
+    state.recordTimer=setInterval(()=>{
+      state.elapsed++;put("timer",formatTime(state.elapsed));
+      if(state.elapsed>=1800&&recorder.state==="recording")recorder.stop();
+    },1000);
+    startMeter(stream);
+  }catch(err){
+    state.stream?.getTracks().forEach(track=>track.stop());stopMeter();orbMode("idle");
+    error(err.name==="NotAllowedError"?"Microphone permission was denied. Allow it in your browser settings.":"Microphone unavailable: "+err.message);
+  }
+});
+function toggleBusy(value){
+  state.busy=value;
+  ["generate","upload-tab","record-tab","text-tab","record","remove"].forEach(id=>$(id).disabled=value);
+}
+async function decodeAudio(file){
+  status("Preparing audio","Decoding and converting to 16 kHz mono locally…",5);
+  const Context=window.AudioContext||window.webkitAudioContext;
+  if(!Context)throw Error("Audio decoding isn't supported by this browser.");
+  const context=new Context();
+  try{
+    const decoded=await context.decodeAudioData(await file.arrayBuffer());
+    if(!decoded.length)throw Error("The audio file has no playable samples.");
+    if(decoded.duration>1800)throw Error("Please split recordings longer than 30 minutes into shorter files.");
+    if(window.OfflineAudioContext){
+      const offline=new OfflineAudioContext(1,Math.max(1,Math.ceil(decoded.duration*16000)),16000);
+      const source=offline.createBufferSource();source.buffer=decoded;
+      source.connect(offline.destination);source.start();
+      const rendered=await offline.startRendering();
+      return new Float32Array(rendered.getChannelData(0));
+    }
+    const mono=new Float32Array(decoded.length);
+    for(let ch=0;ch<decoded.numberOfChannels;ch++){
+      const input=decoded.getChannelData(ch);
+      for(let i=0;i<input.length;i++)mono[i]+=input[i]/decoded.numberOfChannels;
+    }
+    const factor=decoded.sampleRate/16000,pcm=new Float32Array(Math.ceil(mono.length/factor));
+    for(let i=0;i<pcm.length;i++)pcm[i]=mono[Math.min(mono.length-1,Math.floor(i*factor))];
+    return pcm;
+  }finally{await context.close();}
+}
+function recognize(samples){
+  return new Promise((resolve,reject)=>{
+    state.worker??=new Worker("./worker.js",{type:"module"});
+    const worker=state.worker;state.rejectTranscription=reject;
+    worker.onmessage=({data})=>{
+      const m=data||{};
+      if(m.type==="stage")status("Whisper speech recognition",m.message,12);
+      if(m.type==="download")status("Downloading local AI model","One-time download; keep the tab open.",Math.round(m.progress*.4));
+      if(m.type==="segment")status("Transcribing your recording","Processed "+m.index+" / "+m.total+" segments.",40+Math.round(m.progress*.6));
+      if(m.type==="complete"){state.rejectTranscription=null;resolve({transcript:m.text,segments:m.segments||[]});}
+      if(m.type==="error"){state.rejectTranscription=null;reject(Error(m.message));}
+    };
+    worker.onerror=()=>{
+      state.rejectTranscription=null;worker.terminate();state.worker=null;
+      reject(Error("Whisper model failed to load. Check internet access and browser memory."));
+    };
+    worker.postMessage({type:"transcribe",samples},[samples.buffer]);
+  });
+}
+$("cancel").addEventListener("click",()=>{
+  state.worker?.terminate();state.worker=null;
+  state.rejectTranscription?.(Error("Processing cancelled."));
+  state.rejectTranscription=null;
+});
+function clearAudio(){
+  if(state.audioURL)URL.revokeObjectURL(state.audioURL);
+  state.audioURL=null;
+  $("preview-audio").removeAttribute("src");$("preview-audio").load();
+  show("preview-audio",false);
+}
+function renderBullets(id,items,placeholder){
+  $(id).replaceChildren();
+  for(const value of items.length?items:[placeholder]){
+    const li=document.createElement("li");li.textContent=value;$(id).append(li);
+  }
+}
+function renderNotes(note,source,segments=[],audioFile=null){
+  if(!note){error("We couldn't find enough words to create notes.");return;}
+  state.notes=note;state.source=source;state.segments=segments;
+  clearAudio();
+  if(audioFile){
+    state.file=audioFile;
+    state.audioURL=URL.createObjectURL(audioFile);
+    $("preview-audio").src=state.audioURL;show("preview-audio",true);
+  }
+  put("result-title",note.title);put("metadata",note.wordCount+" words · "+source);
+  put("summary",note.summary);
+  renderBullets("points",note.points,"No key points detected.");
+  renderBullets("actions",note.actions,"No explicit action items detected.");
+  renderBullets("details",note.details,"No numerical or dated details found.");
+  $("keywords").replaceChildren();
+  for(const keyword of note.keywords){const span=document.createElement("span");span.textContent=keyword;$("keywords").append(span);}
+  $("editor").value=note.transcript;
+  show("main-view",true);show("saved-panel",false);show("results",true);
+  put("breadcrumb","AI studio");
+  $("nav-new").classList.add("selected");$("nav-saved").classList.remove("selected");
+  put("save","♡ Save");
+  lab.update(note,segments,state.audioURL);
+  orbMode("complete");$("results").scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("generate").addEventListener("click",async()=>{
+  if(state.busy)return;
+  clearError();
+  if(state.inputMode==="text"){
+    const value=$("pasted").value.trim();
+    if(!value){error("Paste a transcript to begin.");return;}
+    renderNotes(createNotes(value),"Pasted transcript");return;
+  }
+  if(state.recorder?.state==="recording"){error("Stop the recording first.");return;}
+  if(!state.file){error("Upload or record an audio file first.");return;}
+  const audioFile=state.file;
+  toggleBusy(true);orbMode("processing");
+  try{
+    const pcm=await decodeAudio(audioFile);
+    const result=await recognize(pcm);
+    if(!result.transcript?.trim())throw Error("No speech detected. Use clear English audio or paste the transcript.");
+    renderNotes(createNotes(result.transcript),audioFile.name,result.segments,audioFile);
+  }catch(err){
+    orbMode("ready");
+    error(err.name==="EncodingError"?"Unsupported audio codec. Convert to WAV or MP3 and retry.":err.message||"Audio processing failed.");
+  }finally{toggleBusy(false);show("working",false);}
+});
+$("regenerate").addEventListener("click",()=>{
+  const corrected=$("editor").value.trim();
+  if(!corrected){error("The transcript cannot be empty.");return;}
+  const same=corrected===state.notes?.transcript;
+  renderNotes(createNotes(corrected),state.source,same?state.segments:[],same&&state.audioURL?state.file:null);
+});
+const markdown=()=>toMarkdown(state.notes,state.source);
+$("copy").addEventListener("click",async()=>{
+  if(!state.notes)return;
+  try{await navigator.clipboard.writeText(markdown());put("copy","✓ Copied");setTimeout(()=>put("copy","⧉ Copy"),1800);}
+  catch{error("Clipboard access blocked. Export your notes instead.");}
+});
+$("export").addEventListener("click",()=>{
+  if(!state.notes)return;
+  const url=URL.createObjectURL(new Blob([markdown()],{type:"text/markdown;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download="NoteWave-notes.md";document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
+$("print").addEventListener("click",()=>window.print());
+$("save").addEventListener("click",()=>{
+  if(!state.notes)return;
+  saved.unshift({id:String(Date.now()),source:state.source,notes:state.notes,segments:state.segments,created:new Date().toISOString()});
+  saved=saved.slice(0,12);
+  if(persist()){put("save","✓ Saved");renderSaved();}
+});
+function renderSaved(){
+  put("count",saved.length);$("recent").replaceChildren();$("saved-list").replaceChildren();
+  if(!saved.length){
+    const p=document.createElement("p");p.className="muted tiny";p.textContent="Your saved notes appear here.";$("recent").append(p);
+    const empty=document.createElement("p");empty.className="muted";empty.textContent="Nothing saved yet. Generate notes, then tap Save.";$("saved-list").append(empty);
+  }
+  for(const item of saved){
+    const btn=document.createElement("button");btn.className="recent-item";btn.textContent="▤ "+item.notes.title;
+    btn.onclick=()=>renderNotes(item.notes,item.source,item.segments||[]);
+    $("recent").append(btn);
+    const card=document.createElement("article");card.className="saved-item";
+    const h=document.createElement("h3");h.textContent=item.notes.title;
+    const p=document.createElement("p");p.textContent=new Date(item.created).toLocaleDateString()+" · "+(item.notes.wordCount||0)+" words";
+    const open=document.createElement("button");open.textContent="Open";open.onclick=()=>renderNotes(item.notes,item.source,item.segments||[]);
+    const remove=document.createElement("button");remove.textContent="Delete";remove.onclick=()=>{saved=saved.filter(row=>row.id!==item.id);persist();renderSaved();};
+    card.append(h,p,open,remove);$("saved-list").append(card);
+  }
+}
+function openStudio(){
+  show("main-view",true);show("saved-panel",false);put("breadcrumb","AI studio");
+  $("nav-new").classList.add("selected");$("nav-saved").classList.remove("selected");
+}
+function newSession(){
+  if(state.busy||state.recorder?.state==="recording")return;
+  openStudio();show("results",false);clearError();
+  state.file=null;state.segments=[];state.notes=null;
+  $("file").value="";$("pasted").value="";show("file-info",false);
+  clearAudio();orbMode("idle");$("create-panel").scrollIntoView({behavior:"smooth"});
+}
+$("nav-new").addEventListener("click",newSession);
+$("top-create").addEventListener("click",newSession);
+$("nav-saved").addEventListener("click",()=>{
+  if(state.busy||state.recorder?.state==="recording")return;
+  renderSaved();show("main-view",false);show("saved-panel",true);
+  put("breadcrumb","My library");$("nav-new").classList.remove("selected");$("nav-saved").classList.add("selected");
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+$("clear").addEventListener("click",()=>{
+  if(saved.length&&confirm("Delete all saved notes from this browser?")){saved=[];persist();renderSaved();}
+});
+renderSaved();
