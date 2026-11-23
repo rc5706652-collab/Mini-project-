@@ -10,7 +10,7 @@ export function makeFlashcards(notes, limit = 8) {
   const terms = uniquify(notes.keywords || []).filter(w => w.length > 3);
   const cards = [];
   for (const term of terms) {
-    const pattern = new RegExp("\\b" + term.replace(ESCAPE_REGEX, "\\$&") + "\\b", "i");
+    const pattern = new RegExp("(?<![\\p{L}\\p{N}])" + term.replace(ESCAPE_REGEX, "\\const pattern = new RegExp("\\b" + term.replace(ESCAPE_REGEX, "\\$&") + "\\b", "i");") + "(?![\\p{L}\\p{N}])", "iu");
     const original = sentences.find(sentence => pattern.test(sentence) && sentence.split(/\s+/).length >= 6 && sentence.length <= 340);
     if (!original) continue;
     const prompt = original.replace(pattern, "________");
