@@ -41,17 +41,18 @@ export async function createAdvancedStudio({openSaved,onDelete}){
  function galaxy(){
   space.replaceChildren();
   const graph=makeGalaxy(notes),mobile=scene.clientWidth<600,scale=mobile?64:106;
+  const width=Math.max(1,scene.clientWidth),height=Math.max(1,scene.clientHeight);
   if(!graph.nodes.length){space.append(el("p","muted","Not enough concepts to map."));return;}
   const positions=galaxyCoordinates(graph.nodes.length);
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.setAttribute("class","galaxy-lines");svg.setAttribute("viewBox","0 0 1000 650");
+  svg.setAttribute("class","galaxy-lines");svg.setAttribute("viewBox","0 0 "+width+" "+height);
   const positionById=new Map(graph.nodes.map((n,i)=>[n.id,positions[i]]));
   for(const edge of graph.edges.slice(0,25)){
    const a=positionById.get(edge.from),b=positionById.get(edge.to);
    if(!a||!b)continue;
    const line=document.createElementNS("http://www.w3.org/2000/svg","line");
-   line.setAttribute("x1",500+a.x*scale);line.setAttribute("y1",325+a.y*scale);
-   line.setAttribute("x2",500+b.x*scale);line.setAttribute("y2",325+b.y*scale);
+   line.setAttribute("x1",width/2+a.x*scale);line.setAttribute("y1",height/2+a.y*scale);
+   line.setAttribute("x2",width/2+b.x*scale);line.setAttribute("y2",height/2+b.y*scale);
    svg.append(line);
   }
   space.append(svg);
