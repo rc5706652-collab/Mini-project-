@@ -23,6 +23,7 @@ export function createParticleAlchemy(host) {
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(40,Math.max(1,width/height),.1,100);
   camera.position.z=8.5;
   renderer.setClearColor(0x000000,0);
+  host.classList.add("alchemy-rendering");
   const geometry=new THREE.BufferGeometry();
   const sphere=fibonacciSphere(count),scatter=scatteredCloud(count);
   const position=new Float32Array(sphere);
@@ -40,7 +41,6 @@ export function createParticleAlchemy(host) {
   const material=new THREE.ShaderMaterial({
     uniforms:{uSize:{value:window.innerWidth<600?14:17},uAlpha:{value:1}},
     vertexShader: [
-      "attribute vec3 color;",
       "varying vec3 vColor;",
       "uniform float uSize;",
       "void main(){",
@@ -154,6 +154,7 @@ export function createParticleAlchemy(host) {
       if(finishResolve){finishResolve();finishResolve=null;}
       resizeObserver?.disconnect();
       document.removeEventListener("visibilitychange",onVisibility);
+      host.classList.remove("alchemy-rendering");
       geometry.dispose();material.dispose();renderer.dispose();
       renderer.forceContextLoss();
     }
