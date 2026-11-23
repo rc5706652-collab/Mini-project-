@@ -56,6 +56,67 @@ try{
  const widths=await mobile.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:window.innerWidth}));
  assert.ok(widths.scroll<=widths.viewport+2,"Mobile horizontal overflow: "+JSON.stringify(widths));
  assert.deepEqual(mobileErrors,[]);
+
+ // Exercise the original audio processing path with a deterministic fake transcript.
+ // This checks audio decoding and UI orchestration without downloading Whisper weights.
+ const audio=await browser.newPage({viewport:{width:1100,height:850}});
+ const audioErrors=[];
+ audio.on("pageerror",err=>audioErrors.push(err.message));
+ await audio.addInitScript(()=>{
+   window.Worker=class FakeWhisperWorker {
+     constructor(){this.onmessage=null;this.onerror=null;this.cancelled=false;}
+     postMessage(message){
+       if(message?.type!=="transcribe")return;
+       setTimeout(()=>{if(!this.cancelled)this.onmessage?.({data:{type:"stage",message:"Testing recognition"}});},100);
+       setTimeout(()=>{
+         if(this.cancelled)return;
+         const transcript="Today we studied renewable energy. Students must submit a report by Friday. Our experiment uses 25 solar panels.";
+         this.onmessage?.({data:{type:"segment",index:1,total:1,text:transcript,progress:100}});
+         this.onmessage?.({data:{type:"complete",text:transcript,segments:[{start:0,end:1,text:transcript}]}});
+       },650);
+     }
+     terminate(){this.cancelled=true;}
+   };
+ });
+ await audio.goto(url,{waitUntil:"domcontentloaded"});
+ function wavFixture(){
+   const frames=16000,sampleRate=16000,b=Buffer.alloc(44+frames*2);
+   b.write("RIFF",0);b.writeUInt32LE(36+frames*2,4);b.write("WAVE",8);
+   b.write("fmt ",12);b.writeUInt32LE(16,16);b.writeUInt16LE(1,20);
+   b.writeUInt16LE(1,22);b.writeUInt32LE(sampleRate,24);
+   b.writeUInt32LE(sampleRate*2,28);b.writeUInt16LE(2,32);
+   b.writeUInt16LE(16,34);b.write("data",36);b.writeUInt32LE(frames*2,40);
+   for(let i=0;i<frames;i++)b.writeInt16LE(Math.round(1200*Math.sin(i*.03)),44+i*2);
+   return b;
+ }
+ await audio.locator("#file").setInputFiles({name:"demo.wav",mimeType:"audio/wav",buffer:wavFixture()});
+ await audio.locator("#generate").click();
+ await audio.locator("#alchemy-stage").waitFor({state:"visible",timeout:4000});
+ assert.equal(await audio.locator("#alchemy-stage").getAttribute("data-phase"),"processing");
+ await audio.locator("#results").waitFor({state:"visible",timeout:12000});
+ assert.ok(await audio.locator("#results").evaluate(node=>node.classList.contains("alchemy-reveal")));
+ assert.ok((await audio.locator("#summary").innerText()).includes("renewable energy"));
+ assert.ok((await audio.locator("#chapter-list").innerText()).length>10);
+ await audio.locator("#chapters-tab").click();
+ assert.equal(await audio.locator(".chapter").count(),1);
+ assert.equal(await audio.locator("#preview-audio").isVisible(),true);
+ assert.equal(await audio.locator("#alchemy-stage").isVisible(),false);
+ assert.deepEqual(audioErrors,[]);
+
+ // Reduced-motion stays fully functional, skipping WebGL while retaining notes.
+ const reduced=await browser.newPage({viewport:{width:390,height:844},reducedMotion:"reduce"});
+ const reducedErrors=[];
+ reduced.on("pageerror",err=>reducedErrors.push(err.message));
+ await reduced.goto(url,{waitUntil:"domcontentloaded"});
+ await reduced.locator("#text-tab").click();
+ await reduced.locator("#pasted").fill(transcript);
+ await reduced.locator("#generate").click();
+ await reduced.locator("#results").waitFor({state:"visible",timeout:8000});
+ assert.equal(await reduced.evaluate(()=>matchMedia("(prefers-reduced-motion: reduce)").matches),true);
+ assert.ok((await reduced.locator("#summary").innerText()).length>15);
+ assert.deepEqual(reducedErrors,[]);
+ console.log("PASS: Particle Alchemy WAV processing, on-device fallback, depth-reveal notes and reduced-motion functionality");
+
  console.log("PASS: desktop notes, key details, flashcards, chapters fallback, export, persistence, mobile layout");
 }finally{
  await browser?.close();
