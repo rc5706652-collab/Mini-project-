@@ -1,16 +1,140 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d1b"><title>NoteWave — Automated Audio Notes</title><link rel="stylesheet" href="./style.css"></head>
-<body><div class="app"><aside><div class="logo">◈ <span>note<b>wave</b><small>AI AUDIO NOTES</small></span></div><div class="aside-label">WORKSPACE</div><button class="side-nav selected" id="nav-new">✦ &nbsp; Create notes</button><button class="side-nav" id="nav-saved">▤ &nbsp; Saved notes <span id="count">0</span></button><div class="aside-label top-space">RECENT NOTES</div><div id="recent"></div><div class="privacy">● &nbsp; Your audio stays on this device.</div></aside>
-<main><header><span>Workspace &nbsp; / &nbsp; <strong id="breadcrumb">Create notes</strong></span><label>● &nbsp; Private AI Processing</label></header><section class="hero"><div class="eyebrow">✧ POWERED BY SPEECH RECOGNITION & NLP</div><h1>Every word matters.<br><em>We make it count.</em></h1><p>Transform lectures, meetings and voice recordings into clear, organized notes. Spend less time writing and more time learning.</p></section>
-<section class="panel" id="create-panel"><div class="panel-title"><h2>Create your notes</h2><span>01 &nbsp;→&nbsp; 02 &nbsp;→&nbsp; 03</span></div><div class="tabs"><button class="tab active" id="upload-tab">⇧ &nbsp; Upload audio</button><button class="tab" id="record-tab">◉ &nbsp; Record audio</button><button class="tab" id="text-tab">▤ &nbsp; Paste transcript</button></div>
-<div id="upload-area"><input type="file" id="file" accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg" hidden><div class="drop" id="drop" role="button" tabindex="0"><div class="upload-symbol">⇧</div><h3>Drop your audio file here</h3><p>or <b>browse files</b> from your device</p><small>MP3, WAV, M4A, WebM · Maximum 30 minutes</small></div></div>
-<div id="record-area" class="hidden record"><div class="mic" id="mic">🎙</div><h3>Ready when you are</h3><p>Capture your lecture or meeting through the microphone.</p><div class="timer" id="timer">00:00</div><button class="primary" id="record">● Start recording</button><p><small>Microphone access requires permission and a secure connection.</small></p></div>
-<div id="text-area" class="hidden"><p class="field-label">YOUR TRANSCRIPT</p><textarea id="pasted" rows="8" placeholder="Paste spoken text here to generate notes without audio processing…"></textarea></div>
-<div id="file-info" class="file-info hidden"><span>♫</span><div><strong id="filename"></strong><small id="filesize"></small></div><button id="remove">✕</button></div>
-<div id="error" class="error hidden" role="alert"></div><div id="working" class="working hidden"><strong id="work-title">Processing audio</strong><p id="work-detail">Preparing…</p><div class="track"><div id="progress"></div></div><button id="cancel" class="ghost">Cancel processing</button></div>
-<div class="panel-bottom"><small>✧ No sign-up · No paid API key</small><button class="primary" id="generate">✦ &nbsp; Generate notes &nbsp; ↗</button></div></section>
-<section id="results" class="hidden"><div class="results-head"><div><div class="eyebrow">✧ GENERATED WORKSPACE</div><h2 id="result-title">Your notes</h2><small id="metadata"></small></div><div class="buttons"><button id="copy">⧉ Copy</button><button id="save">♡ Save</button><button id="export">↓ Markdown</button><button id="print">↗ PDF</button></div></div>
-<div class="grid"><article class="note wide"><h3>✧ &nbsp; EXECUTIVE SUMMARY</h3><p id="summary"></p></article><article class="note"><h3>☷ &nbsp; KEY TAKEAWAYS</h3><ul id="points"></ul></article><article class="note"><h3>✓ &nbsp; ACTION ITEMS</h3><ul id="actions"></ul></article><article class="note wide"><h3>◷ &nbsp; IMPORTANT DETAILS</h3><ul id="details"></ul></article></div>
-<article class="note keywords"><h3>TOP KEYWORDS</h3><div id="keywords"></div></article><article class="note transcript"><div class="results-head"><div><h2>Full transcript</h2><small>Review recognition mistakes and regenerate notes.</small></div><button id="regenerate">↻ Regenerate</button></div><textarea rows="11" id="editor" aria-label="Editable transcript"></textarea></article></section>
-<section class="panel hidden" id="saved-panel"><h2>Saved notes</h2><p>Saved in this browser only. Recordings are never saved.</p><div id="saved-list"></div><button id="clear">Delete all saved notes</button></section>
-<footer>Designed for better learning ✦ Speech recognition + extractive NLP</footer></main></div><script type="module" src="./app.js"></script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b19">
+  <meta name="description" content="NoteWave Sonic Studio — private on-device transcription, smart notes, semantic Q&A, flashcards, and audio chapters.">
+  <title>NoteWave | Sonic AI Learning Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="aurora aurora-one" aria-hidden="true"></div><div class="aurora aurora-two" aria-hidden="true"></div>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Navigation">
+    <a class="brand" href="./"><span class="brand-mark">◈</span><span>note<span class="brand-light">wave</span><small>SONIC INTELLIGENCE</small></span></a>
+    <div class="nav-kicker">WORKSPACE</div>
+    <button class="side-link selected" id="nav-new"><span class="side-icon">✦</span> AI studio <span class="nav-dot"></span></button>
+    <button class="side-link" id="nav-saved"><span class="side-icon">▤</span> My library <span id="count" class="count">0</span></button>
+    <div class="nav-kicker nav-gap">RECENT SESSIONS</div>
+    <div id="recent" class="recent-list"><p class="muted tiny">Your saved notes appear here.</p></div>
+    <div class="side-footer">
+      <div class="privacy-indicator"><span class="live-dot"></span> LOCAL-FIRST AI</div>
+      <p>Audio stays in your browser.<br>No account or API keys.</p>
+      <div class="side-version">NOTEWAVE / STUDIO 2.0</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb"><span class="crumb-muted">Workspace</span><span class="slash">/</span><strong id="breadcrumb">AI studio</strong></div>
+      <div class="top-actions"><span class="online"><span class="live-dot"></span> Private processing</span><button class="top-create" id="top-create">＋ New session</button></div>
+    </header>
+
+    <div id="main-view">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <span class="hero-kicker"><span class="kicker-mark">✳</span> THE NEXT WAVE OF NOTE-TAKING</span>
+          <h1 id="hero-title">Turn sound into<br><span class="gradient-text">something brilliant.</span></h1>
+          <p>Not just a transcript. Transform every lecture, conversation and recording into answers, insights, flashcards and moments worth remembering.</p>
+          <div class="hero-actions"><a href="#create-panel" class="cta">Start creating <span>↗</span></a><span class="hero-sub">✧ Powered by private, on-device AI</span></div>
+          <div class="hero-stats"><div><strong>03<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
+        </div>
+        <div class="hero-visual">
+          <div id="orb-stage" class="orb-stage" data-mode="idle" aria-label="Animated three-dimensional audio sphere">
+            <div class="orb-glow"></div>
+            <div class="css-orb-fallback"><div class="css-orb-inner"></div></div>
+            <canvas id="orb-canvas" aria-hidden="true"></canvas>
+            <div class="orb-grain" aria-hidden="true"></div>
+            <div class="float-chip chip-a"><span class="chip-icon">〰</span><span>VOICE <strong>→ MEANING</strong></span></div>
+            <div class="float-chip chip-b"><span class="chip-icon">✧</span><span>INTELLIGENCE <strong>ACTIVE</strong></span></div>
+            <div class="orb-bottom"><div class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><strong id="orb-label">Your ideas, amplified</strong><small>Interactive Sonic Core</small></div></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="flow-line" aria-label="Workflow"><div><span>01</span> CAPTURE</div><i></i><div><span>02</span> UNDERSTAND</div><i></i><div><span>03</span> LEARN</div></div>
+
+      <section id="create-panel" class="creator-layout" aria-labelledby="create-title">
+        <div class="composer glass">
+          <div class="panel-top"><div><div class="mini-kicker">✦ CREATE A SESSION</div><h2 id="create-title">Your next big idea starts here.</h2></div><span class="step-pill">NEW SESSION <span>↗</span></span></div>
+          <div class="tabs" role="tablist" aria-label="Input method">
+            <button class="tab active" id="upload-tab" role="tab" aria-selected="true"><span>⇧</span> Upload audio</button>
+            <button class="tab" id="record-tab" role="tab" aria-selected="false"><span>◉</span> Record live</button>
+            <button class="tab" id="text-tab" role="tab" aria-selected="false"><span>▤</span> Paste text</button>
+          </div>
+          <div id="upload-area">
+            <input type="file" id="file" accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg,.mp4" hidden>
+            <div id="drop" class="drop-area" role="button" tabindex="0" aria-label="Browse or drop an audio file">
+              <span class="drop-icon">⇧</span>
+              <h3>Drop your audio into the studio</h3>
+              <p>or <strong>browse your files</strong> to get started</p>
+              <small>MP3 · WAV · M4A · WEBM and browser-supported formats</small>
+            </div>
+          </div>
+          <div id="record-area" class="record-panel hidden">
+            <div class="mic-stage" id="mic"><span>🎙</span><div class="mic-ripple"></div></div>
+            <h3>Record a thought. Keep the insight.</h3>
+            <p>Lectures, brainstorms, interviews or meetings.</p>
+            <div class="timer" id="timer" aria-live="off">00:00</div>
+            <button class="cta record-action" id="record">● Start recording</button>
+            <small>Microphone access requires browser permission.</small>
+          </div>
+          <div id="text-area" class="text-panel hidden"><label for="pasted" class="field-label">PASTE YOUR TRANSCRIPT</label><textarea id="pasted" rows="7" placeholder="Paste a lecture or meeting transcript here. Turn it into notes, flashcards and searchable answers…"></textarea><p class="muted tiny">Already have the text? The study features work without a microphone or model download.</p></div>
+
+          <div class="file-info hidden" id="file-info"><span class="file-icon">♫</span><div><strong id="filename"></strong><small id="filesize"></small></div><button id="remove" class="icon-button" aria-label="Remove file">✕</button></div>
+          <div id="error" class="error hidden" role="alert"></div>
+          <div id="working" class="working hidden" aria-live="polite"><div class="working-header"><div class="spin"></div><div><strong id="work-title">Preparing your recording</strong><p id="work-detail">Initializing local AI…</p></div></div><div class="track"><div id="progress"></div></div><button class="link-button" id="cancel">Cancel processing</button></div>
+          <div class="panel-bottom"><div class="assurance"><span>✧</span> No login <i>·</i> Private audio <i>·</i> No paid AI key</div><button class="cta generate" id="generate">✦ Generate intelligence <span>↗</span></button></div>
+        </div>
+        <aside class="insight-stack" aria-label="AI capabilities">
+          <div class="side-feature glass"><span class="feature-number">01 / UNDERSTAND</span><span class="feature-glyph">◎</span><h3>From sound to clarity.</h3><p>Whisper turns spoken words into a transcript you can inspect and refine.</p></div>
+          <div class="side-feature glass"><span class="feature-number">02 / EXPLORE</span><span class="feature-glyph">✧</span><h3>Ask what mattered.</h3><p>Find relevant passages with local semantic search, grounded in your own words.</p></div>
+          <div class="side-feature glass"><span class="feature-number">03 / REMEMBER</span><span class="feature-glyph">◇</span><h3>Learn, don't just save.</h3><p>Practice recall with flashcards and jump to recording chapters.</p></div>
+        </aside>
+      </section>
+
+      <section id="results" class="results hidden" aria-labelledby="result-title">
+        <div class="section-header"><div><span class="mini-kicker">✧ YOUR AUDIO, DECODED</span><h2 id="result-title">Your intelligence brief</h2><small id="metadata"></small></div><div class="buttons"><button id="copy">⧉ Copy</button><button id="save">♡ Save</button><button id="export">↓ .md</button><button id="print">↗ PDF</button></div></div>
+        <div class="notes-grid">
+          <article class="note glass summary"><div class="note-label"><span class="note-icon purple">✧</span> THE ESSENTIAL SUMMARY</div><p id="summary"></p></article>
+          <article class="note glass"><div class="note-label"><span class="note-icon cyan">≡</span> KEY TAKEAWAYS</div><ul id="points"></ul></article>
+          <article class="note glass"><div class="note-label"><span class="note-icon green">✓</span> ACTION ITEMS</div><ul id="actions"></ul></article>
+          <article class="note glass"><div class="note-label"><span class="note-icon amber">◷</span> IMPORTANT DETAILS</div><ul id="details"></ul></article>
+          <article class="note glass keyword-card"><div class="note-label"><span class="note-icon purple">#</span> KEY CONCEPTS</div><div id="keywords" class="keyword-pills"></div></article>
+        </div>
+
+        <div class="studio-heading"><div><span class="mini-kicker">✦ NOTEWAVE INTELLIGENCE</span><h2>Take your learning further.</h2><p>Turn passive recordings into something you can explore and remember.</p></div><span class="model-label">⌁ LOCAL STUDY STUDIO</span></div>
+        <section class="studio-panel glass" aria-label="AI learning tools">
+          <div class="studio-tabs" role="tablist" aria-label="Learning tool"><button class="studio-tab active" id="ask-tab" role="tab" aria-selected="true">✧ Ask your recording</button><button class="studio-tab" id="cards-tab" role="tab" aria-selected="false">◇ Recall cards</button><button class="studio-tab" id="chapters-tab" role="tab" aria-selected="false">◷ Audio chapters</button></div>
+          <div id="ask-panel" class="studio-content">
+            <div class="module-heading"><div><h3>Search beyond exact words.</h3><p>A small language model finds relevant passages in your transcript. Every result includes original evidence—not invented answers.</p></div><span class="module-badge">SEMANTIC AI</span></div>
+            <form id="ask-form" class="ask-form"><label for="ask-input" class="sr-only">Ask a question about the recording</label><input id="ask-input" maxlength="250" autocomplete="off" placeholder="What were the key decisions or deadlines?"><button class="cta" id="ask-button" type="submit">Find evidence <span>↗</span></button></form>
+            <div class="question-suggestions"><span>TRY ASKING</span><button type="button" data-question="What are the main ideas?">Main ideas</button><button type="button" data-question="What should be completed next?">Next steps</button><button type="button" data-question="What dates or numbers were mentioned?">Dates & numbers</button></div>
+            <div id="ask-status" class="ask-status" role="status"></div><div id="ask-output" class="evidence-list" aria-live="polite"><p class="muted">Your grounded answers will appear here.</p></div>
+          </div>
+          <div id="cards-panel" class="studio-content hidden">
+            <div class="module-heading"><div><h3>Make it stick.</h3><p>Tap the card to reveal a key concept taken directly from your transcript.</p></div><span class="module-badge">ACTIVE RECALL</span></div>
+            <button id="flashcard" class="flashcard" aria-label="Reveal flashcard answer"><span class="flashcard-kicker" id="flashcard-kicker">FILL IN THE BLANK</span><span class="flashcard-text" id="flashcard-text">Select this mode after generating notes.</span><span class="flashcard-hint" id="flashcard-hint">Tap to reveal</span></button>
+            <div class="flash-controls"><button id="prev-card">← Previous</button><span id="card-progress">0 / 0</span><button id="next-card">Next →</button></div>
+          </div>
+          <div id="chapters-panel" class="studio-content hidden">
+            <div class="module-heading"><div><h3>Every moment, mapped.</h3><p>Jump to approximate time ranges from the original audio. These are 25-second recognition segments, not word-level timestamps.</p></div><span class="module-badge">TIME NAVIGATOR</span></div>
+            <audio id="preview-audio" controls class="audio-player hidden"></audio><div id="chapter-list" class="chapter-list"><p class="muted">Upload or record audio to see chapters.</p></div>
+          </div>
+        </section>
+
+        <article class="note glass transcript"><div class="transcript-heading"><div><span class="mini-kicker">FULL RECORD</span><h3>Editable transcript</h3><p>Review speech-recognition mistakes, then regenerate all notes and study materials.</p></div><button class="soft-button" id="regenerate">↻ Regenerate</button></div><textarea rows="12" id="editor" aria-label="Editable transcript"></textarea></article>
+      </section>
+    </div>
+
+    <section class="saved-view hidden" id="saved-panel"><div class="mini-kicker">YOUR PRIVATE LIBRARY</div><h2>Memories worth keeping.</h2><p class="muted">Saved transcripts stay in this browser. Raw audio is not stored or synced.</p><div id="saved-list" class="saved-list"></div><button class="soft-button" id="clear">Delete all saved notes</button></section>
+    <footer><span>◈ NOTEWAVE</span><span>MADE FOR THE WAY YOU THINK · LOCAL-FIRST AI</span></footer>
+  </main>
+</div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
