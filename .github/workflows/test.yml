@@ -16,12 +16,23 @@ jobs:
           node --check public/app.js
           node --check public/notes.js
           node --check public/worker.js
-      - name: Run NLP unit tests
+          node --check public/whisper-config.js
+          node --check public/study.js
+          node --check public/learning-ui.js
+          node --check public/semantic-worker.js
+          node --check public/scene.js
+      - name: Run NLP and regression tests
         run: node --test tests/*.test.mjs
-      - name: Verify required static assets
+      - name: Verify static assets
         run: |
           test -s public/index.html
           test -s public/style.css
           test -s public/app.js
           test -s public/worker.js
           test -s render.yaml
+      - name: Install browser smoke test dependencies
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Smoke test desktop and mobile
+        run: node tests/browser-smoke.mjs
