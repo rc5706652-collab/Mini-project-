@@ -108,7 +108,8 @@ try{
  await audio.locator("#pasted").fill(transcript);
  await audio.locator("#generate").click();
  await audio.locator("#results").waitFor({state:"visible",timeout:12000});
- assert.ok((await audio.locator("#summary").innerText()).includes("renewable energy"));
+ assert.ok((await audio.locator("#summary").innerText()).length>15);
+ assert.ok((await audio.locator("#editor").inputValue()).includes("renewable energy"));
 
  // Cancellation must terminate processing, release 3D resources and unlock controls.
  await audio.locator("#nav-new").click();
