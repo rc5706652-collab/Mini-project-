@@ -4,7 +4,7 @@ export const MULTILINGUAL_MODEL="Xenova/whisper-tiny";
 export const LANGUAGES={en:"english",auto:null,hi:"hindi",kn:"kannada",te:"telugu",ta:"tamil",ml:"malayalam"};
 export function resolveWhisperModel(language="en",output="original"){
  const lang=Object.hasOwn(LANGUAGES,language)?language:"en";
- return lang==="en"&&output!=="english"?WHISPER_MODEL:MULTILINGUAL_MODEL;
+ return lang==="en"?WHISPER_MODEL:MULTILINGUAL_MODEL;
 }
 export function whisperCallOptions(modelId=WHISPER_MODEL,language="en",output="original"){
  if(/\.en$/i.test(modelId))return {};
