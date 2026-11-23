@@ -8,7 +8,7 @@ const show=(id,visible)=>$(id).classList.toggle("hidden",!visible);
 const state={
   inputMode:"upload",file:null,source:"",notes:null,segments:[],audioURL:null,
   worker:null,rejectTranscription:null,busy:false,recorder:null,stream:null,
-  chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null
+  chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null,operationId:0
 };
 const lab=createLearningStudio();
 
@@ -235,6 +235,8 @@ function recognize(samples){
   });
 }
 $("cancel").addEventListener("click",()=>{
+  if(!state.busy)return;
+  state.operationId++;
   state.worker?.terminate();state.worker=null;
   state.rejectTranscription?.(Error("Processing cancelled."));
   state.rejectTranscription=null;
@@ -284,11 +286,13 @@ $("generate").addEventListener("click",async()=>{
     const value=$("pasted").value.trim();
     if(!value){error("Paste a transcript to begin.");return;}
     toggleBusy(true);
+    const operation=++state.operationId;
     status("Transforming words into knowledge","Building a grounded set of notes and study tools…",55);
     alchemy.start();
     try{
       const notes=createNotes(value);
       await alchemy.complete();
+      if(operation!==state.operationId)throw Error("Processing cancelled.");
       renderNotes(notes,"Pasted transcript",[],null,true);
     }catch(err){error(err.message||"Unable to generate notes.");}
     finally{alchemy.reset();toggleBusy(false);show("working",false);}
@@ -298,14 +302,18 @@ $("generate").addEventListener("click",async()=>{
   if(!state.file){error("Upload or record an audio file first.");return;}
   const audioFile=state.file;
   toggleBusy(true);orbMode("processing");
+  const operation=++state.operationId;
   status("Preparing Particle Alchemy","Turning your recording into organized knowledge…",2);
   alchemy.start();
   try{
     const pcm=await decodeAudio(audioFile);
+    if(operation!==state.operationId)throw Error("Processing cancelled.");
     const result=await recognize(pcm);
+    if(operation!==state.operationId)throw Error("Processing cancelled.");
     if(!result.transcript?.trim())throw Error("No speech detected. Use clear English audio or paste the transcript.");
     const notes=createNotes(result.transcript);
     await alchemy.complete();
+    if(operation!==state.operationId)throw Error("Processing cancelled.");
     renderNotes(notes,audioFile.name,result.segments,audioFile,true);
   }catch(err){
     orbMode("ready");
