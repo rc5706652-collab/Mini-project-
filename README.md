@@ -15,6 +15,21 @@ NoteWave combines an interactive Sonic Core 3D experience with Liquid Glass Auro
    - **Audio Chapters**: Approximate timed chapter markers derived from Whisper chunk positions, with audio playback navigation.
 5. Edit or regenerate the transcript, copy notes, download Markdown, print/save to PDF, and save notes locally.
 
+
+## Particle Alchemy (Sonic Core transition)
+
+When you press **Generate intelligence**, the processing card displays an interactive three-dimensional particle transition:
+
+1. A dense sphere appears as the recording enters speech recognition. As work continues, its points scatter into a floating purple/cyan particle cloud.
+2. After the transcript is ready, particles converge into **NOTES READY**, followed by depth-animated summary, takeaway, action and keyword cards.
+3. The normal Sonic Core pauses while the effect runs, and resumes after it finishes. Generation is not blocked if the 3D library cannot load.
+
+This is an actual GPU-batched Three.js point cloud, with a deterministic geometry module (public/alchemy-shapes.js) and a dedicated renderer (public/alchemy.js), not just a decorative video. The renderer is lazy-loaded only upon generating notes; its GPU resources are released afterward. Particle counts are capped (2,200 desktop, 720 mobile, 440 on low-memory or data-saving devices). There is a CSS fallback, a reduced-motion experience, and a maximum render rate of roughly 30 FPS on mobile.
+
+No audio data is submitted to the animation engine, and the effect does not call an AI API. The existing private English-only Whisper transcription, extractive notes, flashcards, semantic evidence retrieval and chapter navigator are unchanged.
+
+The browser CI test uses a deterministic fake speech-recognition worker for the audio workflow so it can verify UI orchestration without downloading the real Whisper model. Actual Whisper model inference still requires testing in a real browser with a recording.
+
 ## Architecture
 
 - public/index.html + public/style.css: responsive 3D + glass interface.
