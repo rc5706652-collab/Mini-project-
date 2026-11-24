@@ -51,8 +51,20 @@ async function translatedAudioScenario(browser){
  const page=await browser.newPage({viewport:{width:1280,height:830},reducedMotion:"reduce"});
  const errors=[];page.on("pageerror",e=>errors.push(e.message));
  await page.addInitScript(()=>{
-  // Force this test down the worker route; a separate scenario covers the native translator.
+  // No local pack installed; never download NLLB weights in this path.
   globalThis.Translator=undefined;
+  globalThis.__fastRequests=0;globalThis.__unexpectedWeightDownload=false;
+  const originalFetch=globalThis.fetch.bind(globalThis);
+  globalThis.fetch=async(input,options)=>{
+   const url=String(input);
+   if(url.startsWith("https://api.mymemory.translated.net/get?")){
+    globalThis.__fastRequests++;
+    return {ok:true,status:200,async json(){return {
+     responseStatus:200,responseData:{translatedText:"சூரிய சக்தி மின்சாரத்தை உருவாக்குகிறது. காற்றாலைகள் மின்சாரத்தை உருவாக்குகின்றன. புதுப்பிக்கத்தக்க ஆற்றல் முக்கியமானது."}
+    }}};
+   }
+   return originalFetch(input,options);
+  };
   globalThis.Worker=class FakeWorker{
    constructor(path){this.path=String(path);this.onmessage=null;this.cancelled=false;}
    postMessage(message){
@@ -62,15 +74,9 @@ async function translatedAudioScenario(browser){
       if(this.cancelled)return;
       const text="Solar panels produce electricity from sunlight. Energy storage batteries save power for later use. Wind turbines produce electricity from moving air.";
       this.onmessage?.({data:{type:"complete",text,segments:[{text,start:0,end:1}]}});
-     },100);
+     },50);
     }
-    if(message.type==="translate"){
-     globalThis.__translationRequest={sourceCode:message.sourceCode,targetCode:message.targetCode};
-     setTimeout(()=>{
-      if(this.cancelled)return;
-      this.onmessage?.({data:{type:"complete",requestId:message.requestId,text:"சூரிய சக்தி மின்சாரத்தை உருவாக்குகிறது. காற்றாலை மின்சாரத்தை உருவாக்குகிறது."}});
-     },90);
-    }
+    if(message.type==="translate"){globalThis.__unexpectedWeightDownload=true;throw Error("Do not automatically download NLLB");}
    }
    terminate(){this.cancelled=true;}
   };
@@ -81,25 +87,22 @@ async function translatedAudioScenario(browser){
   await page.locator("#audio-output").selectOption("ta");
   await page.locator("#file").setInputFiles({name:"lecture.wav",mimeType:"audio/wav",buffer:wavFixture()});
   await page.locator("#generate").click();
-  try{await page.locator("#results").waitFor({state:"visible",timeout:12000});}
-  catch(err){
-   const details=await page.evaluate(()=>({
-    error:document.querySelector("#error")?.textContent,
-    status:document.querySelector("#working")?.textContent?.slice(0,400),
-    request:globalThis.__translationRequest,
-    speech:globalThis.__speechRequest
-   }));
-   throw Error("Fallback translation test failed: "+JSON.stringify(details)+"; "+err.message);
-  }
-  assert.deepEqual(await page.evaluate(()=>window.__speechRequest),{language:"hi",output:"original"});
-  assert.deepEqual(await page.evaluate(()=>window.__translationRequest),{sourceCode:"hin_Deva",targetCode:"tam_Taml"});
+  await page.locator("#results").waitFor({state:"visible",timeout:13000});
+  assert.equal(await page.evaluate(()=>window.__fastRequests),0,"No remote request without explicit consent");
+  assert.notEqual(await page.evaluate(()=>window.__unexpectedWeightDownload),true,"No background NLLB download");
+  assert.ok(await page.locator("#translation-choice").isVisible(),"Provide fast translation choice after original notes");
+  assert.match(await page.locator("#editor").inputValue(),/Solar panels/);
+  assert.match(await page.locator("#translation-choice-info").innerText(),/original transcript/i);
+  await page.locator("#translation-online-now").click();
+  await page.locator("#translation-choice").waitFor({state:"hidden",timeout:12000});
   assert.ok((await page.locator("#editor").inputValue()).includes("சூரிய"));
   assert.ok(await page.locator("#source-transcript-panel").isVisible());
   await page.locator("#source-transcript-title").click();
-  assert.equal(await page.locator("#source-transcript-panel").evaluate(el=>el.open),true);
-  assert.ok((await page.locator("#source-transcript-text").innerText()).includes("Solar panels"));
+  assert.match(await page.locator("#source-transcript-text").innerText(),/Solar panels/);
+  assert.ok(await page.evaluate(()=>window.__fastRequests)>=1);
+  assert.notEqual(await page.evaluate(()=>window.__unexpectedWeightDownload),true);
   assert.deepEqual(errors,[]);
-  console.log("PASS Chromium multilingual recognition/translation worker contract and original-source retention");
+  console.log("PASS explicit-consent translation: notes finish, no model download, source preserved");
  }finally{await page.close();}
 }
 async function installedBrowserTranslationScenario(browser){
