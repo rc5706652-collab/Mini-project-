@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {quickAnswer,prepareQuestion,sanitizeModelAnswer,CHAT_MODELS} from "../public/companion-core.js";
 const notes={transcript:"Solar panels convert sunlight into electricity. The science students must submit the solar project report by Friday. Renewable energy can lower electricity costs."};
-test("Pip has truthful zero-model onboarding answers",()=>{
- assert.match(quickAnswer("hello"),/Pip/);
+test("Loisel has truthful zero-model onboarding answers",()=>{
+ assert.match(quickAnswer("hello"),/Loisel/);
  assert.match(quickAnswer("what can you do?"),/on-device/);
  assert.equal(quickAnswer("Why is the sky blue?"),null);
 });
