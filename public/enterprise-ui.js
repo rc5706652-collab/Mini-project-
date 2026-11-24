@@ -67,6 +67,7 @@ function buildShell(){
  const items=[
   ["studio","✦","Studio"],
   ["library","▤","Library"],
+  ["quiz-studio","◇","Quiz"],
   ["new","＋","New"]
  ];
  for(const [key,glyph,label] of items){
@@ -135,7 +136,7 @@ function buildShell(){
  document.addEventListener("keydown",event=>{
   if(event.metaKey||event.ctrlKey||event.altKey||dialog.open)return;
   if(event.target?.closest?.("input,textarea,select,[contenteditable]"))return;
-  const keys={s:"studio",n:"new",l:"library",g:"galaxy",q:"quiz",t:"tutor"};
+  const keys={s:"studio",n:"new",l:"library",g:"galaxy",q:"quiz-studio",t:"tutor"};
   const cmd=keys[event.key.toLowerCase()];
   if(cmd){event.preventDefault();execute(cmd);}
  });
@@ -146,6 +147,8 @@ function execute(key){
   $(targetView)?.click();
  }else if(key==="new"){
   $("top-create")?.click();
+ }else if(key==="quiz-studio"){
+  $("nav-quiz")?.click();
  }else if(["galaxy","quiz","tutor"].includes(key)){
   if($("results")?.classList.contains("hidden")||$("main-view")?.classList.contains("hidden")){announce("Open a note in the Studio to use learning tools");return;}
   $(key+"-tab")?.click();
@@ -164,8 +167,9 @@ function announce(message){
 }
 function updateDock(){
  const library=!$("saved-panel")?.classList.contains("hidden");
- lastView=library?"library":"studio";
- for(const target of ["studio","library","new"]){
+ const quiz=!$("quiz-hub-view")?.classList.contains("hidden");
+ lastView=quiz?"quiz-studio":library?"library":"studio";
+ for(const target of ["studio","library","quiz-studio","new"]){
   const item=$("nw-dock-"+target);
   if(!item)continue;
   const current=target===lastView;
