@@ -11,12 +11,13 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./enterprise.css">
+  <link rel="stylesheet" href="./robo.css">
 </head>
 <body>
 <div class="aurora aurora-one" aria-hidden="true"></div><div class="aurora aurora-two" aria-hidden="true"></div>
 <div class="app-shell">
   <aside class="sidebar" aria-label="Navigation">
-    <a class="brand" href="./"><span class="brand-mark">◈</span><span>note<span class="brand-light">wave</span><small>SONIC INTELLIGENCE</small></span></a>
+    <a class="brand" href="./"><span class="brand-mark">◈</span><span>note<span class="brand-light">wave</span><small>NOVI AI STUDIO</small></span></a>
     <div class="nav-kicker">WORKSPACE</div>
     <button class="side-link selected" id="nav-new"><span class="side-icon">✦</span> AI studio <span class="nav-dot"></span></button>
     <button class="side-link" id="nav-saved"><span class="side-icon">▤</span> My library <span id="count" class="count">0</span></button>
@@ -38,21 +39,30 @@
     <div id="main-view">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <span class="hero-kicker"><span class="kicker-mark">✳</span> THE NEXT WAVE OF NOTE-TAKING</span>
-          <h1 id="hero-title">Turn sound into<br><span class="gradient-text">something brilliant.</span></h1>
-          <p>Not just a transcript. Transform every lecture, conversation and recording into answers, insights, flashcards and moments worth remembering.</p>
-          <div class="hero-actions"><a href="#create-panel" class="cta">Start creating <span>↗</span></a><span class="hero-sub">✧ Powered by private, on-device AI</span></div>
+          <span class="hero-kicker"><span class="kicker-mark">✳</span> MEET YOUR AI LEARNING COMPANION</span>
+          <h1 id="hero-title">Meet Novi, your<br><span class="gradient-text">little AI genius.</span></h1>
+          <p>Talk to a friendly little robot, ask questions, and turn every lecture or recording into notes, explanations, quizzes, and lasting knowledge.</p>
+          <div class="hero-actions"><a href="#create-panel" class="cta">Enter AI Studio <span>↗</span></a><button id="robo-open-hero" type="button">✦ Talk to Novi</button><span class="hero-sub">✧ Local-first learning AI</span></div>
           <div class="hero-stats"><div><strong>08<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
         </div>
         <div class="hero-visual">
-          <div id="orb-stage" class="orb-stage" data-mode="idle" aria-label="Animated three-dimensional audio sphere">
+          <div id="orb-stage" class="orb-stage" data-mode="idle" data-robot data-robot-state="idle" aria-label="Novi, the animated three-dimensional AI robot companion">
             <div class="orb-glow"></div>
+            <div class="robo-css-fallback" aria-hidden="true">
+              <div class="robo-css-wrap">
+                <div class="robo-css-antenna"></div><div class="robo-css-ear left"></div><div class="robo-css-ear right"></div>
+                <div class="robo-css-head"><div class="robo-css-face"><i class="robo-css-eye"></i><i class="robo-css-eye"></i><i class="robo-css-smile"></i></div></div>
+                <div class="robo-css-arm left"></div><div class="robo-css-arm right"></div><div class="robo-css-body"></div>
+                <div class="robo-css-foot left"></div><div class="robo-css-foot right"></div>
+              </div>
+            </div>
+            <button id="robo-stage-talk" type="button" aria-label="Open conversation with Novi">✦ SAY HELLO TO NOVI</button>
             <div class="css-orb-fallback"><div class="css-orb-inner"></div></div>
             <canvas id="orb-canvas" aria-hidden="true"></canvas>
             <div class="orb-grain" aria-hidden="true"></div>
-            <div class="float-chip chip-a"><span class="chip-icon">〰</span><span>VOICE <strong>→ MEANING</strong></span></div>
-            <div class="float-chip chip-b"><span class="chip-icon">✧</span><span>INTELLIGENCE <strong>ACTIVE</strong></span></div>
-            <div class="orb-bottom"><div class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><strong id="orb-label">Your ideas, amplified</strong><small>Interactive Sonic Core</small></div></div>
+            <div class="float-chip chip-a"><span class="chip-icon">〰</span><span>VOICE <strong>→ KNOWLEDGE</strong></span></div>
+            <div class="float-chip chip-b"><span class="chip-icon">✧</span><span>YOUR AI <strong>COMPANION</strong></span></div>
+            <div class="orb-bottom"><div class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><strong id="orb-label">Novi is ready to help</strong><small>Expressive 3D AI buddy</small></div></div>
           </div>
         </div>
       </section>
@@ -145,5 +155,6 @@
 </div>
 <script type="module" src="./app.js"></script>
 <script type="module" src="./enterprise-ui.js"></script>
+<script type="module" src="./robo-chat.js"></script>
 </body>
 </html>
