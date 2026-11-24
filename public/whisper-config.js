@@ -1,7 +1,7 @@
 // English keeps the faster .en model; non-English uses multilingual Whisper.
 export const WHISPER_MODEL="Xenova/whisper-tiny.en";
 export const MULTILINGUAL_MODEL="Xenova/whisper-tiny";
-export const LANGUAGES={en:"english",auto:null,hi:"hindi",kn:"kannada",te:"telugu",ta:"tamil",ml:"malayalam"};
+export const LANGUAGES={en:"english",auto:null,hi:"hindi",kn:"kannada",te:"telugu",ta:"tamil",ml:"malayalam",bn:"bengali",mr:"marathi",gu:"gujarati",pa:"punjabi",ur:"urdu",ar:"arabic",es:"spanish",fr:"french",de:"german",pt:"portuguese",ja:"japanese"};
 export function resolveWhisperModel(language="en",output="original"){
  const lang=Object.hasOwn(LANGUAGES,language)?language:"en";
  return lang==="en"?WHISPER_MODEL:MULTILINGUAL_MODEL;
