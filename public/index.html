@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080b19">
   <meta name="description" content="NoteWave Sonic Studio — private on-device transcription, smart notes, semantic Q&A, flashcards, and audio chapters.">
   <title>NoteWave | Sonic AI Learning Studio</title>
@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./enterprise.css">
 </head>
 <body>
 <div class="aurora aurora-one" aria-hidden="true"></div><div class="aurora aurora-two" aria-hidden="true"></div>
@@ -24,7 +25,7 @@
     <div class="side-footer">
       <div class="privacy-indicator"><span class="live-dot"></span> LOCAL-FIRST AI</div>
       <p>Audio stays in your browser.<br>No account or API keys.</p>
-      <div class="side-version">NOTEWAVE / STUDIO 2.0</div>
+      <div class="side-version">NOTEWAVE / EXPERIENCE 4.0</div>
     </div>
   </aside>
 
@@ -41,7 +42,7 @@
           <h1 id="hero-title">Turn sound into<br><span class="gradient-text">something brilliant.</span></h1>
           <p>Not just a transcript. Transform every lecture, conversation and recording into answers, insights, flashcards and moments worth remembering.</p>
           <div class="hero-actions"><a href="#create-panel" class="cta">Start creating <span>↗</span></a><span class="hero-sub">✧ Powered by private, on-device AI</span></div>
-          <div class="hero-stats"><div><strong>03<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
+          <div class="hero-stats"><div><strong>08<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
         </div>
         <div class="hero-visual">
           <div id="orb-stage" class="orb-stage" data-mode="idle" aria-label="Animated three-dimensional audio sphere">
@@ -143,5 +144,6 @@
   </main>
 </div>
 <script type="module" src="./app.js"></script>
+<script type="module" src="./enterprise-ui.js"></script>
 </body>
 </html>

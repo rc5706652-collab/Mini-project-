@@ -123,3 +123,22 @@ CI runs Chromium on Ubuntu 24.04.
 ## Problem statement
 
 Manually listening to lengthy recordings and taking notes is slow and can miss important details. NoteWave combines speech recognition and NLP to provide concise notes, grounded evidence search, active-recall exercises, and recording navigation that help students and professionals learn from audio recordings.
+
+
+## NoteWave 4.0 — Enterprise 3D Experience
+
+The presentation layer uses **web-native ES modules, Three.js/WebGL, responsive CSS design tokens, Web Workers, and IndexedDB**. A framework migration was intentionally avoided for the current free Render static-site deployment: the speech and study modules already operate on-device and an extra server/build step would risk existing workflows. The visual architecture is modular and progressively enhanced instead.
+
+- **Three spatial moments:** Sonic Core hero (scene.js), Particle Alchemy transformation (alchemy.js), and the transcript-grounded CSS 3D Knowledge Galaxy (advanced-ui.js). Existing AI engines remain unchanged.
+- **Presentation layer:** enterprise.css defines design tokens, responsive 12-column notes, glass surfaces and mobile safe-area layout. enterprise-ui.js adds a command palette, mobile dock, motion controls, accessible keyboard tabs, optional 3D card tilt and context-loss fallbacks. experience-core.js contains pure, unit-tested performance and UX policies.
+- **Shortcuts:** Ctrl/Cmd+K opens commands; outside form fields, N starts a session, S resumes Studio, L opens Library, and G/Q/T open the Galaxy, Quiz or Tutor when a note is open. Arrow keys/Home/End navigate accessible tabs.
+- **Responsive:** viewport width scenarios include 320, 375, 390, 430, 768, 1024, 1440, 1920 CSS pixels plus landscape; safe-area dock padding uses env(safe-area-inset-bottom). Mobile form controls use 16px fonts to avoid iOS auto-zoom.
+- **Adaptive performance:** WebGL pixel ratio and frame rate are capped for smaller devices. Hidden pages pause rendering. Reduced motion, low memory and data-saving conditions reduce visual cost; mobile uses a non-blurred glass alternative. The recording and notes UI works without WebGL.
+- **Session safety:** AI Studio navigation resumes current unsaved results. New session explicitly resets the current workspace; save/restore/export controls remain.
+- **Tests:** Node unit tests, existing NLP/Whisper/audio Chromium smoke tests, and a new Chromium + WebKit matrix validating critical actions and layout overflow.
+
+### Device and accessibility release criteria
+
+Automated tests target visual overflow, 44px mobile tap areas, 16px input fonts, reduced-motion operation, command navigation, saved-note recovery, and functioning Quiz/Galaxy controls. Linux WebKit uses Safari's engine but is not identical to physical iPhone/iPad Safari.
+
+Before claiming a universal hardware pass, verify microphone permissions, model downloads, local-storage quota failures, orientation switching, TalkBack/VoiceOver, battery/performance and animation smoothness on real iOS and Android devices. A 60 FPS guarantee across all devices would not be responsible.

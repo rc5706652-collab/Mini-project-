@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import {startStaticServer} from "./static-server.mjs";
 import { chromium } from "playwright";
 
 const port=8765, url="http://127.0.0.1:"+port;
-const server=spawn("python3",["-m","http.server",String(port),"--bind","127.0.0.1","--directory","public"],{stdio:"ignore"});
+const server=await startStaticServer(port);
 let browser;
 const transcript="The class explored renewable energy and solar panels. Students must submit the research report by Friday. The test system produced 25 watts of power in the demonstration. Our key conclusion is that solar panels can reduce electricity costs.";
 async function ready(){
@@ -123,7 +123,7 @@ try{
  assert.equal(await audio.locator("#alchemy-stage").isVisible(),false);
 
  // A second generation must reuse the same canvas without losing its WebGL context.
- await audio.locator("#nav-new").click();
+ await audio.locator("#top-create").click();
  await audio.locator("#text-tab").click();
  await audio.locator("#pasted").fill(transcript);
  await audio.locator("#generate").click();
@@ -132,7 +132,7 @@ try{
  assert.ok((await audio.locator("#editor").inputValue()).includes("renewable energy"));
 
  // Cancellation must terminate processing, release 3D resources and unlock controls.
- await audio.locator("#nav-new").click();
+ await audio.locator("#top-create").click();
  await audio.locator("#upload-tab").click();
  await audio.locator("#file").setInputFiles({name:"cancel.wav",mimeType:"audio/wav",buffer:wavFixture()});
  await audio.locator("#generate").click();
@@ -161,5 +161,5 @@ try{
  console.log("PASS: desktop notes, key details, flashcards, chapters fallback, export, persistence, mobile layout");
 }finally{
  await browser?.close();
- server.kill("SIGTERM");
+ await new Promise(resolve=>server.close(resolve));
 }

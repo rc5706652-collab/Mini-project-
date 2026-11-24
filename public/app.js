@@ -34,7 +34,7 @@ const alchemy=(()=>{
     show("alchemy-stage",true);
     put("alchemy-phase-label","FROM SOUND TO KNOWLEDGE");
     state.orb?.setPaused?.(true);
-    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches || navigator.connection?.saveData){
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion==="reduced" || navigator.connection?.saveData){
       stage.classList.add("alchemy-fallback");return;
     }
     load=import("./alchemy.js").then(module=>{
@@ -386,7 +386,14 @@ function newSession(){
   $("file").value="";$("pasted").value="";show("file-info",false);
   clearAudio();orbMode("idle");$("create-panel").scrollIntoView({behavior:"smooth"});
 }
-$("nav-new").addEventListener("click",newSession);
+function resumeStudio(){
+  if(state.busy||state.recorder?.state==="recording")return;
+  openStudio();
+  show("results",Boolean(state.notes));
+  const destination=state.notes?$("results"):$("create-panel");
+  destination.scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("nav-new").addEventListener("click",resumeStudio);
 $("top-create").addEventListener("click",newSession);
 $("nav-saved").addEventListener("click",()=>{
   if(state.busy||state.recorder?.state==="recording")return;
