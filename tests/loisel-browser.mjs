@@ -51,6 +51,8 @@ async function translatedAudioScenario(browser){
  const page=await browser.newPage({viewport:{width:1280,height:830},reducedMotion:"reduce"});
  const errors=[];page.on("pageerror",e=>errors.push(e.message));
  await page.addInitScript(()=>{
+  // Force this test down the worker route; a separate scenario covers the native translator.
+  globalThis.Translator=undefined;
   globalThis.Worker=class FakeWorker{
    constructor(path){this.path=String(path);this.onmessage=null;this.cancelled=false;}
    postMessage(message){
@@ -79,7 +81,16 @@ async function translatedAudioScenario(browser){
   await page.locator("#audio-output").selectOption("ta");
   await page.locator("#file").setInputFiles({name:"lecture.wav",mimeType:"audio/wav",buffer:wavFixture()});
   await page.locator("#generate").click();
-  await page.locator("#results").waitFor({state:"visible",timeout:12000});
+  try{await page.locator("#results").waitFor({state:"visible",timeout:12000});}
+  catch(err){
+   const details=await page.evaluate(()=>({
+    error:document.querySelector("#error")?.textContent,
+    status:document.querySelector("#working")?.textContent?.slice(0,400),
+    request:globalThis.__translationRequest,
+    speech:globalThis.__speechRequest
+   }));
+   throw Error("Fallback translation test failed: "+JSON.stringify(details)+"; "+err.message);
+  }
   assert.deepEqual(await page.evaluate(()=>window.__speechRequest),{language:"hi",output:"original"});
   assert.deepEqual(await page.evaluate(()=>window.__translationRequest),{sourceCode:"hin_Deva",targetCode:"tam_Taml"});
   assert.ok((await page.locator("#editor").inputValue()).includes("சூரிய"));
