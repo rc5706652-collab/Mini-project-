@@ -17,7 +17,14 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
  const context=await browser.newContext({viewport:{width,height},colorScheme:systemDark?"dark":"light",reducedMotion:"reduce",hasTouch:width<720,isMobile:width<720,deviceScaleFactor:1});
  const page=await context.newPage(),errors=[];
  page.on("pageerror",error=>errors.push(error.message));
- if(saved!==undefined)await page.addInitScript(theme=>{try{localStorage.setItem("notewave-theme-v1",theme)}catch{}},saved);
+ if(saved!==undefined)await page.addInitScript(theme=>{
+  try{
+   if(!sessionStorage.getItem("__nw_theme_seeded")){
+    localStorage.setItem("notewave-theme-v1",theme);
+    sessionStorage.setItem("__nw_theme_seeded","yes");
+   }
+  }catch{}
+ },saved);
  try{
   await page.goto(url,{waitUntil:"domcontentloaded"});
   const chosen=saved||"system",resolved=chosen==="system"?(systemDark?"dark":"light"):chosen;
