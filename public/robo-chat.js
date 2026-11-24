@@ -38,6 +38,14 @@ function open(focus=true){
  if(focus)$("robo-chat-input").focus({preventScroll:true});
 }
 function close(){
+ if(state.listening){
+  state.listening=false;
+  clearTimeout(state.timer);
+  const recorder=state.recorder;
+  if(recorder?.state==="recording")recorder.stop();
+  state.stream?.getTracks().forEach(track=>track.stop());state.stream=null;
+  state.chunks=[];
+ }
  state.open=false;$("robo-chat").hidden=true;document.body.classList.remove("robo-chat-open");
  $("robo-launcher").setAttribute("aria-expanded","false");
  window.speechSynthesis?.cancel();state.speaking=false;
@@ -171,6 +179,7 @@ async function startVoice(){
   recorder.ondataavailable=event=>{if(event.data.size)state.chunks.push(event.data);};
   recorder.onerror=()=>tell("Recording failed. Try typing instead.");
   recorder.onstop=async()=>{
+   if(!state.open){stream.getTracks().forEach(track=>track.stop());return;}
    clearTimeout(state.timer);state.listening=false;
    stream.getTracks().forEach(track=>track.stop());state.stream=null;
    $("robo-mic").textContent="🎤";$("robo-mic").setAttribute("aria-pressed","false");
