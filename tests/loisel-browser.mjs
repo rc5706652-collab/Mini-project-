@@ -91,11 +91,65 @@ async function translatedAudioScenario(browser){
   console.log("PASS Chromium multilingual recognition/translation worker contract and original-source retention");
  }finally{await page.close();}
 }
+async function installedBrowserTranslationScenario(browser){
+ const page=await browser.newPage({viewport:{width:1280,height:820},reducedMotion:"reduce"});
+ const exceptions=[];page.on("pageerror",e=>exceptions.push(e.message));
+ await page.addInitScript(()=>{
+  globalThis.Translator={
+   async availability({sourceLanguage,targetLanguage}){
+    globalThis.__nativeRequested={sourceLanguage,targetLanguage};
+    return "available";
+   },
+   async create(){
+    globalThis.__nativeCreated=true;
+    return {
+     async translate(){
+      return "சூரிய மின்சாரம் சூரிய ஒளியிலிருந்து உருவாகிறது. மின்கலங்கள் மின்சாரத்தை சேமித்து வைக்கின்றன. காற்றாலைகள் நகரும் காற்றிலிருந்து மின்சாரத்தை தயாரிக்கின்றன. இந்த அறிவியல் பாடத்தில் மாணவர்கள் புதுப்பிக்கத்தக்க ஆற்றலை கற்கிறார்கள்.";
+     },
+     destroy(){globalThis.__nativeDisposed=true;}
+    };
+   }
+  };
+  globalThis.Worker=class FakeAudioWorker{
+   constructor(){this.onmessage=null;this.cancelled=false;}
+   postMessage(data){
+    if(data.type==="transcribe"){
+     setTimeout(()=>{
+      if(this.cancelled)return;
+      const text="Solar cells generate electricity from sunlight. Renewable batteries store electricity for later use. A wind turbine produces power using moving air. Scientists study energy conversion to reduce the use of fossil fuels.";
+      this.onmessage?.({data:{type:"complete",text,segments:[{start:0,end:1,text}]}});
+     },50);
+    }
+    if(data.type==="translate"){
+     globalThis.__unexpectedFallback=true;
+     throw Error("A cached browser translator must skip NLLB downloads");
+    }
+   }
+   terminate(){this.cancelled=true;}
+  };
+ });
+ try{
+  await page.goto(url,{waitUntil:"domcontentloaded"});
+  await page.locator("#audio-language").selectOption("hi");
+  await page.locator("#audio-output").selectOption("ta");
+  await page.locator("#file").setInputFiles({name:"lesson.wav",mimeType:"audio/wav",buffer:wavFixture()});
+  await page.locator("#generate").click();
+  await page.locator("#results").waitFor({state:"visible",timeout:12000});
+  assert.deepEqual(await page.evaluate(()=>globalThis.__nativeRequested),{sourceLanguage:"hi",targetLanguage:"ta"});
+  assert.equal(await page.evaluate(()=>globalThis.__nativeCreated),true);
+  assert.equal(await page.evaluate(()=>globalThis.__nativeDisposed),true);
+  assert.notEqual(await page.evaluate(()=>globalThis.__unexpectedFallback),true);
+  assert.match(await page.locator("#editor").inputValue(),/சூரிய/);
+  assert.deepEqual(exceptions,[],"Native translator browser errors");
+  console.log("PASS Chromium installed browser translator skips giant NLLB model download");
+ }finally{await page.close();}
+}
 try{
  chrome=await chromium.launch({headless:true,args:["--no-sandbox"]});
  await quizScenario(chrome,1440,900);
  await quizScenario(chrome,390,844);
  await translatedAudioScenario(chrome);
+ await installedBrowserTranslationScenario(chrome);
  safari=await webkit.launch({headless:true});
  await quizScenario(safari,390,844);
  console.log("PASS Loisel browser integration");
