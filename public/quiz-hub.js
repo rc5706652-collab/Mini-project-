@@ -68,7 +68,7 @@ pdfInput.addEventListener("change",async()=>{
  pdfLecture=null;clearQuiz();
  if(!file){resetPdf();return;}
  try{validateLecturePdf(file);}
- catch(error){pdfInfo.textContent=error.message;notify(error.message);pdfInput.value="";return;}
+ catch(error){pdfReading=false;buildButton.disabled=false;pdfInfo.textContent=error.message;notify(error.message);pdfInput.value="";return;}
  pdfReading=true;buildButton.disabled=true;
  pdfInfo.textContent="Opening "+file.name+"…";notify("Reading PDF locally. No upload is performed.");
  try{
