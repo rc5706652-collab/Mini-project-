@@ -50,7 +50,7 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   await page.locator('[data-theme-choice="system"]').click();
   assert.equal(await page.locator("html").getAttribute("data-theme"),systemDark?"dark":"light");
   await page.emulateMedia({colorScheme:systemDark?"light":"dark"});
-  assert.equal(await page.locator("html").getAttribute("data-theme"),systemDark?"light":"dark","OS color change must be tracked in system mode");
+  await page.waitForFunction(expected=>document.documentElement.dataset.theme===expected,systemDark?"light":"dark",{timeout:5000});
   await page.reload({waitUntil:"domcontentloaded"});
   assert.equal(await page.locator("html").getAttribute("data-theme-preference"),"system");
   await page.locator("#nw-theme-trigger").click();
