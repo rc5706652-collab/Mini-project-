@@ -220,3 +220,16 @@ The former little boxy robot was replaced with **Lumi**, a porcelain pearl-shape
 Tap Lumi and choose **Play hide & seek**. Lumi hides behind a tiny book, changes positions after each time it's found, and celebrates after three finds. The actual click target stays still so keyboard and mobile taps are reliable. **Ask Loisel**, **Quiz Studio**, hide/restore, keyboard controls and opt-in spoken greetings are preserved. Voice is **off by default**. Reduced-motion and low-power settings avoid intense animation; no WebGL or robot downloads are required.
 
 CI covers installed-browser translation, fallback selection, q4 cache configuration, multi-language contracts, and hide-and-seek interactions in desktop Chromium and mobile WebKit.
+
+
+## Translation stall fix — no automatic NLLB downloads (November 2026)
+
+**Why this changed:** Even quantized q4 NLLB needs a very large decoder file and can stall at 8–22% on mobile or slow connections. NoteWave now **does not automatically load NLLB at all** while processing audio.
+
+**New flow:** Speech recognition and notes finish using the existing local Whisper workflow. If the chosen output language requires additional translation and a READY installed browser language pack can complete it quickly, NoteWave uses it. Otherwise, **original-language notes appear immediately**, correctly labelled. Users can optionally click **Translate online (shares text)** beneath their results after reading a clear privacy notice. This calls the free MyMemory service *only after an explicit click*. It receives transcript TEXT (not audio), which the provider may process or retain. Do not choose it for confidential recordings.
+
+**Limits:** MyMemory's anonymous quota is roughly 5,000 characters/day per IP, and every request must stay under 500 bytes. NoteWave caps online translation at 4,200 UTF-8 bytes per recording, splits safely, checks errors/quotas, times out slow requests and never presents partial translation as complete. Longer recordings remain usable in their original language. Remote translation depends on service uptime, supported language pairs, browser connectivity and free quotas. This adds no paid API or hosting secrets.
+
+The previous large translation worker is retained in the repository for compatibility but **is never invoked from the audio processing route**. The product never labels untranslated notes with the requested output language. Audio, Quiz Studio, PDF lessons, saved notes and Loisel stay intact.
+
+**Tests:** New unit tests cover UTF-8 chunk sizes, limits, cancellation, error handling, lack of automatic weights and online consent. Chromium browser tests assert completed source notes without any external request, then online translation only after the user clicks. Actual third-party availability and translation quality depend on the live provider and are not established by the mocked browser tests.
