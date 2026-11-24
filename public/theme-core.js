@@ -1,7 +1,7 @@
 // Pure theme contract: accessible palette, persisted preference, and OS fallback.
 export const THEME_KEY="notewave-theme-v1";
 export const PREFERENCES=Object.freeze(["system","dark","light"]);
-export const THEME_COLORS=Object.freeze({dark:"#0b1021",light:"#f3f6fc"});
+export const THEME_COLORS=Object.freeze({dark:"#171d1b",light:"#f5f4ef"});
 export function normalizePreference(value){
   return PREFERENCES.includes(value)?value:"system";
 }
@@ -24,6 +24,6 @@ export function contrastRatio(foreground,background){
   return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
 }
 export const THEME_PALETTE=Object.freeze({
-  dark:{text:"#f3f5ff",subtext:"#aabbd9",surface:"#151e3b",canvas:"#0b1021",border:"#556487",accent:"#c4b7ff"},
-  light:{text:"#17233f",subtext:"#485c79",surface:"#ffffff",canvas:"#f3f6fc",border:"#bac8df",accent:"#5142ad"}
+  dark:{text:"#f5f4ef",subtext:"#c0c9c0",surface:"#29332f",canvas:"#171d1b",border:"#546357",accent:"#c7befd"},
+  light:{text:"#242c2b",subtext:"#66716a",surface:"#ffffff",canvas:"#f5f4ef",border:"#d9ded3",accent:"#6e62bd"}
 });
