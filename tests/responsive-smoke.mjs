@@ -56,7 +56,7 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
   assert.ok(await page.locator("#quiz-panel").isVisible());
   await page.locator("#galaxy-tab").click();
   assert.ok(await page.locator("#galaxy-panel").isVisible());
-  assert.ok((await page.locator("#galaxy-node").count())>=0);
+  assert.ok((await page.locator(".galaxy-node").count())>=3);
   // Layout must never scroll sideways at any supported width.
   const metrics=await page.evaluate(()=>({
    viewport:document.documentElement.clientWidth,
