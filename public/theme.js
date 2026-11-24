@@ -93,9 +93,9 @@ if(top){
  document.addEventListener("keydown",event=>{
   if(event.key==="Escape"&&!menu.hidden){event.stopPropagation();close(true);}
  });
- os.addEventListener?.("change",()=>{
-  if(preference==="system")sync();
- });
+ const onOSThemeChange=()=>{if(preference==="system")sync();};
+ if(typeof os.addEventListener==="function")os.addEventListener("change",onOSThemeChange);
+ else os.addListener?.(onOSThemeChange);
  control.append(trigger,menu);
  top.insertBefore(control,top.querySelector("#top-create"));
  sync();
