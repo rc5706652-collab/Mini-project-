@@ -203,3 +203,20 @@ PDF.js loads on demand from its official browser distribution via jsDelivr. Init
 **Loisel Buddy:** A new small CSS-rendered character floats above the mobile dock and on desktop. It peeks on navigation across AI Studio, Library and Quiz Studio, displays short contextual greetings, and provides Ask Loisel / Quiz Studio shortcuts. It can be hidden and restored, has a keyboard-accessible panel, and never captures audio. Spoken greetings are *off by default*: enabling them requires clicking Voice on; sound depends on the device's speech synthesis engine. The chatbot remains the existing opt-in AI model with the same limitations. The buddy uses no WebGL, network requests or language-model downloads by itself.
 
 **Validation:** Unit tests cover PDF validation, page evidence, Unicode and OCR errors; Playwright tests cover actual PDF parsing in desktop Chromium and a mocked PDF engine in mobile WebKit, quiz generation/review, and mascot navigation. Passing browser tests do not guarantee every third-party scanned PDF can be decoded.
+
+
+## NoteWave 6.1 — Faster privacy-first translation and Lumi
+
+### Translation performance
+Previous translation used the >1 GB 8-bit NLLB-200-distilled-600M model with a WASM runtime. Now, **when a browser has an already-installed, supported translator language pack**, NoteWave uses it first, entirely on-device, without downloading NLLB. This native route is feature-detected, checks availability, and never silently initiates a new language-pack download. Browser support varies; the browser's installed packs determine which pairs are immediately usable.
+
+For other browser/language pairs, a **4-bit quantized NLLB fallback** is used, with browser model caching, status naming the *individual* downloaded file and progress, and existing Cancel control. The first q4 download is still substantial (hundreds of megabytes, depending on model files) and performance varies by connection, device memory, CPU and language. It is **not** an instant, cloud translation service. Source transcripts are retained when translation fails. On mobile, memory restrictions can still prevent a large translation model from loading. Do not promise universal fast performance; monitor actual transfer size on real devices.
+
+Architecture: \`public/translation-fastpath.js\` is the native optional strategy and \`public/translation-worker.js\` is the 4-bit local fallback. No recording or transcript is sent to Render or a paid translation API.
+
+### Lumi: Loisel's playful pocket companion
+The former little boxy robot was replaced with **Lumi**, a porcelain pearl-shaped, softly glowing mini robot with an LED visor, rounded fins, and a comet antenna. Lumi floats non-obtrusively in Studio, Library and Quiz Studio, changing safe docking positions as learners navigate.
+
+Tap Lumi and choose **Play hide & seek**. Lumi hides behind a tiny book, changes positions after each time it's found, and celebrates after three finds. The actual click target stays still so keyboard and mobile taps are reliable. **Ask Loisel**, **Quiz Studio**, hide/restore, keyboard controls and opt-in spoken greetings are preserved. Voice is **off by default**. Reduced-motion and low-power settings avoid intense animation; no WebGL or robot downloads are required.
+
+CI covers installed-browser translation, fallback selection, q4 cache configuration, multi-language contracts, and hide-and-seek interactions in desktop Chromium and mobile WebKit.

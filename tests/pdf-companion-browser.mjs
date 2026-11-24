@@ -94,6 +94,22 @@ async function testFlow(browser,{mobile=false,mockPDF=false}={}){
   await page.locator(mobile?"#nw-dock-library":"#nav-saved").click();
   assert.ok(await page.locator("#saved-panel").isVisible());
   assert.ok(await buddy.isVisible(),"Mini companion should persist in Library");
+  // The redesigned rounded sprite really hides behind its book and moves spots.
+  assert.ok(await page.locator(".loisel-pocket-shell").isVisible());
+  await buddy.click();
+  await page.locator("#loisel-buddy-game").click();
+  assert.equal(await page.locator("#loisel-buddy").getAttribute("data-game"),"seek");
+  assert.ok(await page.locator(".loisel-pocket-hide-cover").isVisible());
+  let previous=await page.locator("#loisel-buddy").getAttribute("data-spot");
+  for(let round=0;round<3;round++){
+   await buddy.click();
+   const current=await page.locator("#loisel-buddy").getAttribute("data-spot");
+   assert.notEqual(current,previous,"Lumi must find a new hiding spot after being caught");
+   previous=current;
+  }
+  assert.equal(await page.locator("#loisel-buddy").getAttribute("data-game"),"celebrate");
+  assert.match(await page.locator("#loisel-buddy-words").innerText(),/found me three times/i);
+
   await page.locator("#loisel-buddy-quiet").click();
   assert.equal(await page.locator("#loisel-buddy").getAttribute("data-hidden"),"true");
   await page.locator("#loisel-buddy-quiet").click();

@@ -3,6 +3,7 @@ import { createLearningStudio } from "./learning-ui.js";
 import { formatTime } from "./study.js";
 import { createAdvancedStudio } from "./advanced-ui.js";
 import {speechPlan,languageName} from "./speech-languages.js";
+import {translateAlreadyInstalled} from "./translation-fastpath.js";
 
 const $=id=>document.getElementById(id);
 const put=(id,value)=>{$(id).textContent=String(value??"");};
@@ -239,7 +240,16 @@ function recognize(samples,plan){
     worker.postMessage({type:"transcribe",samples,language:plan.source,output:plan.whisperOutput},[samples.buffer]);
   });
 }
-function translateSpeech(text,plan){
+async function translateSpeech(text,plan){
+ const operation=state.operationId;
+ // A ready-to-use built-in browser pack can translate instantly without NLLB download.
+ const native=await translateAlreadyInstalled(text,plan,{
+  onProgress:({index,total})=>status("Translating with your browser","Translating section "+index+" of "+total+" using an installed language pack.",78),
+  isCurrent:()=>operation===state.operationId
+ });
+ if(operation!==state.operationId)throw Error("Translation cancelled.");
+ if(native!==null)return native;
+ status("Preparing compact multilingual translation","Using a smaller 4-bit local model where built-in translation is unavailable.",78);
  return new Promise((resolve,reject)=>{
   state.translationWorker??=new Worker("./translation-worker.js",{type:"module"});
   const worker=state.translationWorker,requestId=state.operationId;
@@ -247,7 +257,7 @@ function translateSpeech(text,plan){
   worker.onmessage=({data})=>{
    if(data.requestId!==requestId)return;
    if(data.type==="stage")status("Translating on your device",data.message,78);
-   if(data.type==="progress")status("Downloading optional translation model",data.progress+"% downloaded",78);
+   if(data.type==="progress")status("Downloading compact translator",data.progress+"% of "+(data.file||"current model file")+" · cached for future use",78);
    if(data.type==="complete"){state.rejectTranslation=null;resolve(data.text);}
    if(data.type==="error"){state.rejectTranslation=null;reject(Error(data.message));}
   };
