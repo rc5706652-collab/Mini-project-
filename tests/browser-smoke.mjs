@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import {startStaticServer} from "./static-server.mjs";
 import { chromium } from "playwright";
 
 const port=8765, url="http://127.0.0.1:"+port;
-const server=spawn("python3",["-m","http.server",String(port),"--bind","127.0.0.1","--directory","public"],{stdio:"ignore"});
+const server=await startStaticServer(port);
 let browser;
 const transcript="The class explored renewable energy and solar panels. Students must submit the research report by Friday. The test system produced 25 watts of power in the demonstration. Our key conclusion is that solar panels can reduce electricity costs.";
 async function ready(){
@@ -161,5 +161,5 @@ try{
  console.log("PASS: desktop notes, key details, flashcards, chapters fallback, export, persistence, mobile layout");
 }finally{
  await browser?.close();
- server.kill("SIGTERM");
+ await new Promise(resolve=>server.close(resolve));
 }
