@@ -43,7 +43,7 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
   assert.ok(await page.locator("#nw-command-palette").isVisible());
   await page.locator("#nw-command-query").fill("library");
   assert.ok((await page.locator("#nw-palette-list button").count())>=1);
-  await page.locator("#nw-palette-close").click();
+  await page.locator(".nw-palette-close").click();
   assert.equal(await page.locator("#nw-command-palette").isVisible(),false);
 
   await page.locator("#text-tab").click();
