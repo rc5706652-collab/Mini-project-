@@ -144,7 +144,7 @@ html[data-theme="light"] {
  .nw-theme-menu{right:0;min-width:min(275px,calc(100vw - 25px))}
 }
 @media(max-width:420px){
- .nw-theme-trigger{width:40px;min-width:40px;height:40px}
+ .nw-theme-trigger{width:44px;min-width:44px;height:44px}
  .nw-theme-icon{font-size:17px}
 }
 @media(prefers-reduced-motion:reduce){
