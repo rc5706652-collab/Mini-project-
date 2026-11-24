@@ -142,3 +142,32 @@ The presentation layer uses **web-native ES modules, Three.js/WebGL, responsive 
 Automated tests target visual overflow, 44px mobile tap areas, 16px input fonts, reduced-motion operation, command navigation, saved-note recovery, and functioning Quiz/Galaxy controls. Linux WebKit uses Safari's engine but is not identical to physical iPhone/iPad Safari.
 
 Before claiming a universal hardware pass, verify microphone permissions, model downloads, local-storage quota failures, orientation switching, TalkBack/VoiceOver, battery/performance and animation smoothness on real iOS and Android devices. A 60 FPS guarantee across all devices would not be responsible.
+
+
+## Novi: expressive 3D robot and voice chatbot
+
+The former Sonic Core hero has been replaced with Novi, a cute original Three.js robot that visually reacts to questions and microphone activity. Existing Particle Alchemy, Liquid Glass, Whisper transcription, quiz, Galaxy, Tutor, memory and export tools remain.
+
+### How it works
+
+- Novi displays listening, thinking, speaking and happy expressions. The 3D renderer has mobile frame-rate limits, a capped device pixel ratio and a CSS fallback for WebGL failures or reduced-motion settings.
+- A responsive floating chatbot answers typed questions. Conversation history is kept temporarily in browser memory, not sent to a custom backend.
+- Tap the microphone to record a short question (up to 20 seconds). The audio is resampled in the browser, transcribed using the existing local Whisper worker and discarded after processing. Closing the panel stops microphone capture. No always-on listening.
+- If the question matches the current recording, the chatbot shows original transcript passages alongside a short explanation. It uses the optional local FLAN-T5-small instruction model for draft explanations; if the model fails, it falls back to verbatim source passages.
+- General questions use the same small on-device model, which is limited and may be wrong. The UI labels those answers as locally model-generated. The first request downloads model assets from external providers.
+- Explicit commands can open Studio, Quiz Arena, Galaxy, Tutor and the notes library.
+- Spoken replies use the browser/OS speech synthesizer and can be disabled. Browser/OS voices may have their own privacy and availability limitations.
+- Opening AI Studio triggers a short 3D-perspective portal scene with skip and reduced-motion support.
+
+### Architecture
+
+The robot scene lives in public/robot-3d.js; the chat controller lives in public/robo-chat.js; pure command/source logic in public/robo-core.js; static interface markup in public/robo-ui.html; styles in public/robo.css. Existing app.js publishes current-note events to the chatbot and reuses the hero canvas rather than creating an extra WebGL renderer.
+
+All user-provided content and generated text are inserted using textContent, not unsanitized HTML. Microphone input requires a direct user gesture and browser permission.
+
+### Limitations and device testing
+
+- Robot voice questions currently use English-only recognition; the main recording workflow still provides multilingual transcription.
+- FLAN-T5-small is not a general-purpose advanced conversational LLM and does not guarantee accurate factual answers. For lecture-backed queries, consult the quoted evidence.
+- Third-party CDN/model downloads require network access. Local inference may be slow or impossible on memory-constrained devices.
+- Browser-based Chromium/WebKit tests cover chat and responsive controls, but true Android/iPhone microphone behaviour and 3D FPS still require physical device testing.
