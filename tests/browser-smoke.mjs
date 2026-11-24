@@ -85,7 +85,7 @@ try{
        window.latestWhisperRequest={language:message.language,output:message.output};
        setTimeout(()=>{if(!this.cancelled)this.onmessage?.({data:{type:"stage",message:"Testing recognition"}});},100);
        setTimeout(()=>{
-         if(this.cancelled)return;
+         if(this.cancelled||window.__holdWhisperTest)return;
          const transcript="Today we studied renewable energy. Students must submit a report by Friday. Our experiment uses 25 solar panels.";
          this.onmessage?.({data:{type:"segment",index:1,total:1,text:transcript,progress:100}});
          this.onmessage?.({data:{type:"complete",text:transcript,segments:[{start:0,end:1,text:transcript}]}});
@@ -134,6 +134,7 @@ try{
  // Cancellation must terminate processing, release 3D resources and unlock controls.
  await audio.locator("#top-create").click();
  await audio.locator("#upload-tab").click();
+ await audio.evaluate(()=>{window.__holdWhisperTest=true;});
  await audio.locator("#file").setInputFiles({name:"cancel.wav",mimeType:"audio/wav",buffer:wavFixture()});
  await audio.locator("#generate").click();
  await audio.locator("#alchemy-stage").waitFor({state:"visible",timeout:4000});
