@@ -34,7 +34,7 @@ const alchemy=(()=>{
     show("alchemy-stage",true);
     put("alchemy-phase-label","FROM SOUND TO KNOWLEDGE");
     state.orb?.setPaused?.(true);
-    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches || navigator.connection?.saveData){
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion==="reduced" || navigator.connection?.saveData){
       stage.classList.add("alchemy-fallback");return;
     }
     load=import("./alchemy.js").then(module=>{
