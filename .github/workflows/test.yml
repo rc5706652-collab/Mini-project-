@@ -19,6 +19,9 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check public/app.js
+          node --check public/robot-3d.js
+          node --check public/robo-chat.js
+          node --check public/robo-core.js
           node --check public/enterprise-ui.js
           node --check public/experience-core.js
           node --check public/notes.js
@@ -41,6 +44,11 @@ jobs:
       - name: Verify static assets
         run: |
           test -s public/index.html
+          test -s public/robo.css
+          test -s public/robo-ui.html
+          test -s public/robot-3d.js
+          test -s public/robo-chat.js
+          test -s public/robo-core.js
           test -s public/enterprise.css
           test -s public/enterprise-ui.js
           test -s public/experience-core.js
@@ -58,3 +66,5 @@ jobs:
         run: node tests/browser-smoke.mjs
       - name: Cross-browser enterprise UI responsive matrix
         run: node tests/responsive-smoke.mjs
+      - name: Novi robot voice and chatbot browser smoke
+        run: node tests/robo-browser.mjs
