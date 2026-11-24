@@ -173,6 +173,18 @@
 
       <section id="results" class="results hidden" aria-labelledby="result-title">
         <div class="section-header"><div><span class="mini-kicker">✧ YOUR AUDIO, DECODED</span><h2 id="result-title">Your intelligence brief</h2><small id="metadata"></small></div><div class="buttons"><button id="copy">⧉ Copy</button><button id="save">♡ Save</button><button id="export">↓ .md</button><button id="print">↗ PDF</button></div></div>
+        <section id="translation-choice" class="translation-choice hidden glass" aria-label="Optional transcript translation" aria-live="polite">
+          <div class="translation-choice-copy">
+            <strong id="translation-choice-title">Your original-language notes are ready</strong>
+            <p id="translation-choice-info">An offline translation pack is not installed. We no longer download a large AI model automatically.</p>
+            <p class="translation-privacy">For faster translation, choose the optional third-party MyMemory service. Clicking Translate shares the transcript <strong>text</strong> (not your audio) with MyMemory, which may process or retain it. Free service limits apply; do not use it for private or confidential recordings.</p>
+          </div>
+          <div class="translation-choice-actions">
+            <button type="button" id="translation-online-now" class="cta">Translate online (shares text)</button>
+            <button type="button" id="translation-dismiss" class="soft-button">Keep original notes</button>
+          </div>
+          <p id="translation-choice-status" role="status" aria-live="polite"></p>
+        </section>
         <div class="notes-grid">
           <article class="note glass summary"><div class="note-label"><span class="note-icon purple">✧</span> THE ESSENTIAL SUMMARY</div><p id="summary"></p></article>
           <article class="note glass"><div class="note-label"><span class="note-icon cyan">≡</span> KEY TAKEAWAYS</div><ul id="points"></ul></article>
