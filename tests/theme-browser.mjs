@@ -73,9 +73,9 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
     assert.ok(await page.locator("#quiz-panel").isVisible());
     await page.locator("#tutor-tab").click();
     assert.ok(await page.locator("#tutor-panel").isVisible());
-    await page.locator("#nav-saved").click({force:true});
+    await page.locator(width<720?"#nw-dock-library":"#nav-saved").click();
     assert.ok(await page.locator("#saved-panel").isVisible());
-    await page.locator("#nav-new").click({force:true});
+    await page.locator(width<720?"#nw-dock-studio":"#nav-new").click();
     assert.ok(await page.locator("#results").isVisible(),"resume studio must preserve results");
     assert.equal(await page.locator("html").getAttribute("data-theme"),"light");
     const chatbot=page.locator("#pip-chat");
