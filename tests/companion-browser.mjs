@@ -55,7 +55,8 @@ try{
   const {page,pageErrors}=await open(chrome,{width:1440,height:900,reduced:true});
   assert.ok(await page.locator("#orb-stage").isVisible());
   assert.ok((await page.locator("#pip-chat-title").innerText()).includes("Talk to Loisel"));
-  assert.ok(await page.locator(".loisel-hero-photo").isVisible());
+  assert.ok(await page.locator(".loisel-letter-mark svg").isVisible());
+  assert.ok(await page.locator("#loisel-buddy-toggle").isVisible());
   await page.locator("#pip-question").fill("hello");
   await page.locator("#pip-send").click();
   assert.ok((await page.locator("#pip-messages").innerText()).includes("Loisel"));

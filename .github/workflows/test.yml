@@ -37,6 +37,8 @@ jobs:
           node --check public/translation-worker.js
           node --check public/lecture-quiz-core.js
           node --check public/quiz-hub.js
+          node --check public/pdf-lecture.js
+          node --check public/loisel-companion.js
           node --check public/companion-worker.js
           node --check public/alchemy.js
           node --check public/alchemy-shapes.js
@@ -65,6 +67,9 @@ jobs:
           test -s public/translation-worker.js
           test -s public/lecture-quiz-core.js
           test -s public/quiz-hub.js
+          test -s public/pdf-lecture.js
+          test -s public/loisel-companion.js
+          test -s public/loisel-experience.css
           test -s public/loisel.css
           test -s public/loisel-portrait.jpg
           test -s public/enterprise-ui.js
@@ -87,5 +92,7 @@ jobs:
         run: node tests/companion-browser.mjs
       - name: Loisel multilingual translation and Quiz Studio browser smoke
         run: node tests/loisel-browser.mjs
+      - name: Lecture PDF extraction and persistent Loisel companion browser matrix
+        run: node tests/pdf-companion-browser.mjs
       - name: Enterprise dark/light/system theme browser matrix
         run: node tests/theme-browser.mjs

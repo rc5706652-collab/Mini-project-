@@ -21,10 +21,11 @@ async function quizScenario(browser,width,height){
   assert.match(await page.locator("#hero-title").innerText(),/Loisel/);
   await page.locator("#pip-chat-title").waitFor({state:"visible",timeout:8000});
   assert.match(await page.locator("#pip-chat-title").innerText(),/Loisel/);
-  const img=page.locator(".loisel-hero-photo");
-  assert.ok(await img.isVisible());
-  assert.ok(await img.evaluate(el=>el.complete&&el.naturalWidth>=200),"Loisel portrait missing or invalid");
-  assert.equal(await page.locator(".pip-css").count(),0,"old generated robot still rendered");
+  const logo=page.locator(".loisel-letter-mark svg");
+  assert.ok(await logo.isVisible(),"Cinematic L hero mark is missing");
+  assert.equal(await page.locator(".loisel-hero-photo").count(),0,"Old full-size android image must not render");
+  assert.equal(await page.locator(".pip-css").count(),0,"Old full-size generated robot must not render");
+  assert.ok(await page.locator("#loisel-buddy-toggle").isVisible(),"Mini Loisel must appear in every section");
   if(width<700){await page.locator("#nw-dock-quiz-studio").click();}
   else{await page.locator("#nav-quiz").click();}
   assert.ok(await page.locator("#quiz-hub-view").isVisible());
@@ -43,7 +44,7 @@ async function quizScenario(browser,width,height){
   const w=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
   assert.ok(w.scroll<=w.viewport+3,"Horizontal overflow: "+JSON.stringify(w));
   assert.deepEqual(errors,[],"Unexpected errors "+errors.join("; "));
-  console.log("PASS",browser===safari?"WebKit":"Chromium",width+"x"+height,"Loisel portrait, quiz, weak-topic and videos");
+  console.log("PASS",browser===safari?"WebKit":"Chromium",width+"x"+height,"Loisel L emblem, mini companion, quiz, weak-topic and videos");
  }finally{await page.close();}
 }
 async function translatedAudioScenario(browser){
