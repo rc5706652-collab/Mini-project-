@@ -4,7 +4,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.m
 export function createRobotCompanion(host){
  const canvas=host?.querySelector("canvas");
  const noop={setMode(mode){if(host)host.dataset.mode=mode;},setEnergy(){},setPaused(){},destroy(){}};
- if(!canvas || matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion==="reduced"){
+ if(!canvas || matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion==="reduced" || (Number(navigator.deviceMemory)||4)<=2 || Boolean(navigator.connection?.saveData)){
   host?.classList.add("orb-fallback");return noop;
  }
  let renderer;
