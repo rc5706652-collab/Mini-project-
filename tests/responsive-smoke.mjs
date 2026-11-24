@@ -29,7 +29,7 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
   assert.ok(await panel.isVisible());
 
   // Navigation: bottom dock on touch screens, command palette everywhere.
-  if(width<=760&&!landscape){
+  if(width<=760||landscape){
    const dock=page.locator("#nw-dock");
    assert.ok(await dock.isVisible(),"Mobile dock not visible: "+width);
    const size=await page.locator("#nw-dock-library").boundingBox();
