@@ -337,3 +337,39 @@ html[data-motion="reduced"] .loisel-pocket-hide-cover{
  animation:none!important;transition:none!important;
 }
 @media print{.loisel-buddy{display:none!important}}
+
+
+/* Translation stays optional: always show finished source notes first. */
+.nw-enterprise .translation-choice{
+ margin:14px 0 22px;
+ padding:clamp(15px,2vw,24px);
+ border:1px solid var(--nw-hairline,#71816e);
+ border-radius:18px;
+ background:var(--nw-card,#29352d);
+ color:var(--nw-foreground,#f5f4ef);
+ box-shadow:0 12px 29px #171e1940;
+}
+.nw-enterprise .translation-choice.hidden{display:none!important}
+.nw-enterprise .translation-choice-copy strong{
+ color:var(--nw-foreground,#f5f4ef);font:800 16px/1.45 "Outfit",system-ui,sans-serif;
+}
+.nw-enterprise .translation-choice-copy p,
+.nw-enterprise #translation-choice-status{
+ font:500 12px/1.7 "DM Sans",system-ui,sans-serif;
+ color:var(--nw-subdued,#c0c9c0);
+ margin:9px 0;
+}
+.nw-enterprise .translation-privacy{
+ padding:10px 13px;border-left:3px solid var(--nw-brand-ink,#bfb4f4);
+ background:color-mix(in srgb,var(--nw-brand-ink,#bfb4f4) 10%,var(--nw-card,#29352d));
+ border-radius:5px 11px 11px 5px;
+}
+.nw-enterprise .translation-privacy strong{font-weight:800;color:var(--nw-foreground,#f5f4ef)}
+.nw-enterprise .translation-choice-actions{
+ display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:13px 0;
+}
+.nw-enterprise .translation-choice-actions button{
+ min-height:44px;padding:10px 15px;border-radius:12px;
+}
+.nw-enterprise .translation-choice-actions button:disabled{cursor:not-allowed;opacity:.64}
+.nw-enterprise #translation-choice-status:not(:empty){font-weight:650;overflow-wrap:anywhere}
