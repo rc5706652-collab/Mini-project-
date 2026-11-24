@@ -33,6 +33,10 @@ jobs:
           node --check public/robot.js
           node --check public/robot-chat.js
           node --check public/companion-core.js
+          node --check public/speech-languages.js
+          node --check public/translation-worker.js
+          node --check public/lecture-quiz-core.js
+          node --check public/quiz-hub.js
           node --check public/companion-worker.js
           node --check public/alchemy.js
           node --check public/alchemy-shapes.js
@@ -57,6 +61,12 @@ jobs:
           test -s public/robot-chat.js
           test -s public/companion-core.js
           test -s public/companion-worker.js
+          test -s public/speech-languages.js
+          test -s public/translation-worker.js
+          test -s public/lecture-quiz-core.js
+          test -s public/quiz-hub.js
+          test -s public/loisel.css
+          test -s public/loisel-portrait.jpg
           test -s public/enterprise-ui.js
           test -s public/experience-core.js
           test -s public/style.css
@@ -73,7 +83,9 @@ jobs:
         run: node tests/browser-smoke.mjs
       - name: Cross-browser enterprise UI responsive matrix
         run: node tests/responsive-smoke.mjs
-      - name: Pip AI chatbot and voice browser verification
+      - name: Loisel AI chatbot and voice browser verification
         run: node tests/companion-browser.mjs
+      - name: Loisel multilingual translation and Quiz Studio browser smoke
+        run: node tests/loisel-browser.mjs
       - name: Enterprise dark/light/system theme browser matrix
         run: node tests/theme-browser.mjs
