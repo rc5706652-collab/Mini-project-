@@ -58,9 +58,10 @@ function cancelGeneration(){
 }
 function runLocalModel(input){
  return new Promise((resolve,reject)=>{
+  const expected=++requestId;
   try{chatWorker??=new Worker("./companion-worker.js",{type:"module"});}
   catch(e){reject(e);return;}
-  const worker=chatWorker,expected=++requestId;
+  const worker=chatWorker;
   worker.onmessage=({data})=>{
    if(data.requestId!==expected)return;
    if(data.type==="stage")setStatus(data.message);
