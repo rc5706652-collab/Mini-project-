@@ -247,4 +247,11 @@ html[data-motion="reduced"] .loisel-logo-spark,
 html[data-motion="reduced"] .loisel-buddy-toggle,
 html[data-motion="reduced"] .loisel-buddy-eye,
 html[data-motion="reduced"] .loisel-buddy-arm.right{animation:none!important}
+/* Keep the interactive button's click rectangle stable; animate only its face. */
+.loisel-buddy-toggle{animation:none}
+.loisel-buddy-head{animation:loisel-buddy-bob 3.8s ease-in-out infinite;transform-origin:center bottom}
+.loisel-buddy[data-peek="true"] .loisel-buddy-toggle{animation:none}
+.loisel-buddy[data-peek="true"] .loisel-buddy-head{animation:loisel-buddy-peek 1.5s ease-in-out 1}
+@media(prefers-reduced-motion:reduce){.loisel-buddy-head{animation:none!important}}
+html[data-motion="reduced"] .loisel-buddy-head{animation:none!important}
 @media print{.loisel-buddy{display:none!important}}
