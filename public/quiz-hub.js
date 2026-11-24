@@ -3,9 +3,11 @@
 // concepts are derived from the actual lecture content only.
 import {buildLectureQuiz,diagnoseQuiz,lessonSearchUrl} from "./lecture-quiz-core.js";
 import {LANGUAGE_LABELS} from "./speech-languages.js";
+import {extractLecturePdf,pageForEvidence,validateLecturePdf} from "./pdf-lecture.js";
 const $=id=>document.getElementById(id);
 const create=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x;};
-let current=null,quiz=[],answers={},quizNotes=null,sourceTitle="",quizLanguage="en";
+let current=null,quiz=[],answers={},quizNotes=null,sourceTitle="",quizLanguage="en",quizPages=[];
+let pdfLecture=null,pdfReadToken=0,pdfReading=false;
 function notify(text){$("quiz-hub-status").textContent=text;}
 function toggleView(showQuiz){
  $("quiz-hub-view").classList.toggle("hidden",!showQuiz);
@@ -41,19 +43,60 @@ function refreshLectures(){
   dropdown.add(new Option("Saved · "+String(item.notes.title||item.source).slice(0,48),"saved:"+item.id));
  }
  dropdown.add(new Option("Paste my own lecture text","paste"));
+ dropdown.add(new Option("Upload a lecture PDF","pdf"));
  if([...dropdown.options].some(x=>x.value===old))dropdown.value=old;
  else dropdown.value=current?.transcript?"current":"paste";
  updateSourceMode();
 }
 function updateSourceMode(){
- const pasted=$("quiz-lecture").value==="paste";
- $("quiz-paste-group").classList.toggle("hidden",!pasted);
+ const value=$("quiz-lecture").value;
+ $("quiz-paste-group").classList.toggle("hidden",value!=="paste");
+ $("quiz-pdf-group").classList.toggle("hidden",value!=="pdf");
 }
 $("quiz-lecture").addEventListener("change",updateSourceMode);
+const pdfInput=$("quiz-pdf-file"),pdfInfo=$("quiz-pdf-info"),buildButton=$("quiz-build");
+function resetPdf(){
+ pdfReadToken++;pdfLecture=null;pdfReading=false;
+ pdfInput.value="";pdfInfo.textContent="Your PDF stays in this browser and is used only to create this quiz.";
+ buildButton.disabled=false;
+}
+$("quiz-pdf-clear").addEventListener("click",()=>{
+ resetPdf();clearQuiz();notify("PDF cleared. Choose a new lecture PDF to continue.");
+});
+pdfInput.addEventListener("change",async()=>{
+ const file=pdfInput.files?.[0],token=++pdfReadToken;
+ pdfLecture=null;clearQuiz();
+ if(!file){resetPdf();return;}
+ try{validateLecturePdf(file);}
+ catch(error){pdfInfo.textContent=error.message;notify(error.message);pdfInput.value="";return;}
+ pdfReading=true;buildButton.disabled=true;
+ pdfInfo.textContent="Opening "+file.name+"…";notify("Reading PDF locally. No upload is performed.");
+ try{
+  const result=await extractLecturePdf(file,{onProgress:progress=>{
+   if(token!==pdfReadToken)return;
+   pdfInfo.textContent="Reading page "+progress.page+" / "+progress.total+" · "+progress.characters.toLocaleString()+" characters";
+  }});
+  if(token!==pdfReadToken)return;
+  pdfLecture=result;
+  pdfInfo.textContent="✓ "+result.title+" · "+result.pageCount+" page"+(result.pageCount===1?"":"s")+" · "+result.characters.toLocaleString()+" characters extracted locally";
+  notify("Lecture PDF ready! Select a topic or generate questions from the whole document.");
+ }catch(error){
+  if(token===pdfReadToken){
+   pdfLecture=null;
+   pdfInfo.textContent=error.message||"This PDF couldn't be read.";
+   notify(pdfInfo.textContent);
+  }
+ }finally{
+  if(token===pdfReadToken){pdfReading=false;buildButton.disabled=false;}
+ }
+});
 function lecture(){
  const value=$("quiz-lecture").value;
  if(value==="paste"){
-  return {text:$("quiz-lecture-text").value.trim(),title:"Pasted lecture",language:"en"};
+  return {text:$("quiz-lecture-text").value.trim(),title:"Pasted lecture",language:"en",pages:[]};
+ }
+ if(value==="pdf"){
+  return {text:pdfLecture?.text||"",title:pdfLecture?.title||"Lecture PDF",language:"en",pages:pdfLecture?.pages||[]};
  }
  if(value==="current"&&current?.transcript){
   return {text:current.transcript,title:current.title,language:current.outputLanguage||"en"};
@@ -78,9 +121,11 @@ function clearQuiz(){
 }
 $("quiz-form").addEventListener("submit",event=>{
  event.preventDefault();clearQuiz();
+ if(pdfReading){notify("The PDF is still being read. Wait until the pages are ready.");return;}
+ if($("quiz-lecture").value==="pdf"&&!pdfLecture){notify("Choose a searchable PDF and wait for the lecture text to be extracted.");return;}
  const chosen=lecture();
  if(chosen.text.length<80){notify("Choose a lecture with at least a short paragraph of information. A topic name alone is not a reliable source for a quiz.");return;}
- sourceTitle=chosen.title;quizLanguage=chosen.language;
+ sourceTitle=chosen.title;quizLanguage=chosen.language;quizPages=chosen.pages||[];
  const focus=$("quiz-topic").value.trim();
  const attempt=buildLectureQuiz(chosen.text,{topic:focus,count:Number($("quiz-count").value)});
  if(attempt.error){notify(attempt.error);return;}
@@ -128,6 +173,10 @@ $("quiz-submit").addEventListener("click",()=>{
   item.append(create("strong","",result.correct?"✓ Understood: "+question.answer:"Review: "+question.answer));
   item.append(create("p","","Correct answer: "+question.answer+". Your answer: "+(result.selected||"Not answered")+"."));
   item.append(create("blockquote","",question.evidence));
+  if(quizPages.length){
+   const page=pageForEvidence(quizPages,question.evidence);
+   item.append(create("small","quiz-pdf-citation",page?"📄 "+sourceTitle+" · Page "+page:"📄 Extracted from "+sourceTitle));
+  }
   if(!result.correct){
    const why=create("p","quiz-hub-explain","Loisel's simple explanation: The lecture states that “"+question.evidence+"”. "+question.answer+" is the missing key concept. Reread that passage, then attempt the question again.");
    item.append(why);
