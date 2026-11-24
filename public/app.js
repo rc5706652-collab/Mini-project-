@@ -4,6 +4,7 @@ import { formatTime } from "./study.js";
 import { createAdvancedStudio } from "./advanced-ui.js";
 import {speechPlan,languageName} from "./speech-languages.js";
 import {translateAlreadyInstalled} from "./translation-fastpath.js";
+import {translateOnlineWithConsent,validateFastTranslation} from "./translation-online.js";
 
 const $=id=>document.getElementById(id);
 const put=(id,value)=>{$(id).textContent=String(value??"");};
@@ -11,7 +12,8 @@ const show=(id,visible)=>$(id).classList.toggle("hidden",!visible);
 const state={
   inputMode:"upload",file:null,source:"",notes:null,segments:[],audioURL:null,
   worker:null,rejectTranscription:null,translationWorker:null,rejectTranslation:null,busy:false,recorder:null,stream:null,
-  chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null,operationId:0
+  chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null,operationId:0,
+  pendingTranslation:null,onlineAbort:null
 };
 const lab=createLearningStudio();
 
@@ -240,34 +242,79 @@ function recognize(samples,plan){
     worker.postMessage({type:"transcribe",samples,language:plan.source,output:plan.whisperOutput},[samples.buffer]);
   });
 }
+// Never automatically fetch the multi-hundred-megabyte NLLB decoder.
+// A preinstalled browser translator gets a bounded attempt. If unavailable,
+// finish the user's notes and ask for explicit consent to fast ONLINE translation.
 async function translateSpeech(text,plan){
  const operation=state.operationId;
- // A ready-to-use built-in browser pack can translate instantly without NLLB download.
- const native=await translateAlreadyInstalled(text,plan,{
-  onProgress:({index,total})=>status("Translating with your browser","Translating section "+index+" of "+total+" using an installed language pack.",78),
-  isCurrent:()=>operation===state.operationId
- });
- if(operation!==state.operationId)throw Error("Translation cancelled.");
- if(native!==null)return native;
- status("Preparing compact multilingual translation","Using a smaller 4-bit local model where built-in translation is unavailable.",78);
- return new Promise((resolve,reject)=>{
-  state.translationWorker??=new Worker("./translation-worker.js",{type:"module"});
-  const worker=state.translationWorker,requestId=state.operationId;
-  state.rejectTranslation=reject;
-  worker.onmessage=({data})=>{
-   if(data.requestId!==requestId)return;
-   if(data.type==="stage")status("Translating on your device",data.message,78);
-   if(data.type==="progress")status("Downloading compact translator",data.progress+"% of "+(data.file||"current model file")+" · cached for future use",78);
-   if(data.type==="complete"){state.rejectTranslation=null;resolve(data.text);}
-   if(data.type==="error"){state.rejectTranslation=null;reject(Error(data.message));}
-  };
-  worker.onerror=()=>{state.rejectTranslation=null;worker.terminate();state.translationWorker=null;reject(Error("Translation model failed to load on this device."));};
-  worker.postMessage({type:"translate",requestId,text,sourceCode:plan.sourceCode,targetCode:plan.targetCode});
- });
+ let active=true,timer;
+ try{
+  const result=await Promise.race([
+   translateAlreadyInstalled(text,plan,{
+    onProgress:({index,total})=>{if(active)status("Using installed translator","Section "+index+" of "+total,78);},
+    isCurrent:()=>operation===state.operationId
+   }),
+   new Promise(resolve=>{timer=setTimeout(()=>resolve(null),4500);})
+  ]);
+  if(operation!==state.operationId)throw Error("Translation cancelled.");
+  return result;
+ }catch(error){
+  if(operation!==state.operationId)throw error;
+  return null;
+ }finally{active=false;clearTimeout(timer);}
 }
+function translationPrompt(pending){
+ show("translation-choice",Boolean(pending));
+ if(!pending)return;
+ put("translation-choice-title","Notes ready · "+languageName(pending.plan.target)+" translation available");
+ put("translation-choice-info","Your original transcript and notes are ready. No large AI model is downloading. Optional fast online translation can convert this transcript to "+languageName(pending.plan.target)+".");
+ put("translation-choice-status","");
+ const button=$("translation-online-now");
+ button.disabled=false;button.textContent="Translate online (shares text)";
+ try{validateFastTranslation(pending.text,pending.plan);}
+ catch(error){button.disabled=true;button.textContent="Free service limit";put("translation-choice-status",error.message);}
+}
+function cancelOnlineTranslation(){
+ state.onlineAbort?.abort();state.onlineAbort=null;
+ state.pendingTranslation=null;show("translation-choice",false);
+}
+$("translation-dismiss").addEventListener("click",cancelOnlineTranslation);
+$("translation-online-now").addEventListener("click",async()=>{
+ const pending=state.pendingTranslation;
+ if(!pending||state.onlineAbort)return;
+ // This explicit click authorizes sending transcript TEXT to MyMemory.
+ const controller=new AbortController();state.onlineAbort=controller;
+ const button=$("translation-online-now");button.disabled=true;
+ put("translation-choice-status","Contacting the third-party translation service…");
+ try{
+  const translated=await translateOnlineWithConsent(pending.text,pending.plan,{
+   signal:controller.signal,
+   onProgress:({index,total})=>{
+    if(state.pendingTranslation===pending)
+     put("translation-choice-status","Translating section "+index+" / "+total+" online…");
+   }
+  });
+  if(controller.signal.aborted||state.pendingTranslation!==pending)return;
+  const translatedNotes=createNotes(translated);
+  if(!translatedNotes)throw Error("Translation returned insufficient content for notes.");
+  translatedNotes.sourceTranscript=pending.text;
+  translatedNotes.sourceIsBridge=pending.plan.originalIsBridge;
+  translatedNotes.sourceLanguage=pending.plan.source;
+  translatedNotes.outputLanguage=pending.plan.target;
+  state.pendingTranslation=null;state.onlineAbort=null;
+  renderNotes(translatedNotes,pending.source,pending.segments,pending.audioFile);
+ }catch(error){
+  if(!controller.signal.aborted&&state.pendingTranslation===pending)
+   put("translation-choice-status","Translation unavailable: "+(error?.message||"Try again later.")+" Your original notes are unchanged.");
+ }finally{
+  if(state.onlineAbort===controller)state.onlineAbort=null;
+  if(state.pendingTranslation===pending)button.disabled=false;
+ }
+});
 $("cancel").addEventListener("click",()=>{
   if(!state.busy)return;
   state.operationId++;
+  cancelOnlineTranslation();
   state.worker?.terminate();state.worker=null;
   state.translationWorker?.terminate();state.translationWorker=null;
   state.rejectTranslation?.(Error("Translation cancelled."));state.rejectTranslation=null;
@@ -289,6 +336,7 @@ function renderBullets(id,items,placeholder){
 }
 function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
   if(!note){error("We couldn't find enough words to create notes.");return;}
+  show("translation-choice",false);
   state.notes=note;state.source=source;state.segments=segments;
   clearAudio();
   if(audioFile){
@@ -324,6 +372,7 @@ function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
 $("generate").addEventListener("click",async()=>{
   if(state.busy)return;
   clearError();
+  cancelOnlineTranslation();
   if(state.inputMode==="text"){
     const value=$("pasted").value.trim();
     if(!value){error("Paste a transcript to begin.");return;}
@@ -354,23 +403,24 @@ $("generate").addEventListener("click",async()=>{
     const result=await recognize(pcm,plan);
     if(operation!==state.operationId)throw Error("Processing cancelled.");
     if(!result.transcript?.trim())throw Error("No speech detected. Check the recording language and microphone quality.");
-    let finalTranscript=result.transcript,translationError="";
-    if(plan.translate){
-     try{finalTranscript=await translateSpeech(result.transcript,plan);}
-     catch(err){translationError=err.message||"Translation unavailable";}
-    }
+    let translated=null;
+    if(plan.translate)translated=await translateSpeech(result.transcript,plan);
     if(operation!==state.operationId)throw Error("Processing cancelled.");
-    const notes=createNotes(finalTranscript);
+    const notes=createNotes(translated||result.transcript);
     if(notes){
      notes.sourceTranscript=result.transcript;
      notes.sourceIsBridge=plan.originalIsBridge;
      notes.sourceLanguage=plan.source;
-     notes.outputLanguage=translationError?plan.originalIsBridge?"en":plan.source:plan.target==="original"?plan.source:plan.target;
+     // Never label un-translated text as though the target language was produced.
+     notes.outputLanguage=translated?plan.target:(plan.originalIsBridge?"en":plan.source);
     }
-    if(translationError)error("Translation unavailable: "+translationError+". Source recognition was kept; choose Original or a smaller source language to continue.");
     await alchemy.complete();
     if(operation!==state.operationId)throw Error("Processing cancelled.");
     renderNotes(notes,audioFile.name,result.segments,audioFile,true);
+    if(plan.translate&&!translated){
+     state.pendingTranslation={text:result.transcript,plan,source:audioFile.name,segments:result.segments,audioFile,operation};
+     translationPrompt(state.pendingTranslation);
+    }
   }catch(err){
     orbMode("ready");
     error(err.name==="EncodingError"?"Unsupported audio codec. Convert to WAV or MP3 and retry.":err.message||"Audio processing failed.");
@@ -430,6 +480,7 @@ function openStudio(){
 function newSession(){
   if(state.busy||state.recorder?.state==="recording")return;
   alchemy.reset();
+  cancelOnlineTranslation();
   openStudio();show("results",false);clearError();
   state.file=null;state.segments=[];state.notes=null;
   document.dispatchEvent(new CustomEvent("notewave:notes-reset"));
