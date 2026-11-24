@@ -177,3 +177,16 @@ NoteWave now supports a full enterprise-grade color scheme across the studio, Pi
 - **Validation:** tests/theme-core.test.mjs and tests/theme-browser.mjs cover keyboard controls, persistence, automatic OS changes, responsive overflow, generation and study tool navigation in Chromium and WebKit. Automated checks are not the same as a visual/accessibility audit on every real iPhone and Android model.
 
 The theme toggle changes appearance only, never the recording, transcription, generated notes, chatbot model or stored sessions.
+
+
+## Loisel — multilingual lecture learning & Quiz Studio
+
+The former Pip model is replaced by the user's uploaded futuristic silver/android portrait, displayed as a static image in the hero, chat avatar and existing Studio transition. The 3D Knowledge Galaxy and Particle Alchemy workflows remain intact.
+
+**Multilingual recording:** choose the spoken language (including Auto, English, Hindi, Kannada, Telugu, Tamil, Malayalam, Bengali, Marathi, Gujarati, Punjabi, Urdu, Arabic, Spanish, French, German, Portuguese and Japanese). On-device Whisper transcribes the recording. Choose to keep the spoken language, translate to English, or choose a supported output language. Source recognition is preserved when a second translation is used and added to Markdown exports. Auto + non-English target uses an English translation bridge, not guaranteed verbatim original-language text. Accent and code-mixed speech recognition may be inaccurate. Review transcripts.
+
+**Model sizing and privacy:** no paid API or account. First use needs network access to download AI models. Optional NLLB 600M translation is substantial (often 1 GB+ download and significant memory) and may be slow or unavailable on phones. If it fails, the source text is retained instead of inventing a translation. Loisel general chatbot still runs a small local model and is not guaranteed to reason accurately in every output language.
+
+**Independent Quiz Studio:** sidebar/mobile dock links to separate lecture quizzes. Choose the current transcript, a previously saved lecture or paste a lecture. Optional focus must match a topic in that source. Four-choice questions use the existing source-grounded quiz engine. After submission, see accuracy, mistaken concepts, exact source passage, a simple explanation, and links to YouTube search pages for related lesson videos. The videos are search results, not individually curated or verified. The learning report reflects one quiz attempt, not a formal diagnosis of student ability. The Ask Loisel action pre-fills a source-grounded explanation question in the chat.
+
+**Tests:** existing audio, NLP, companion and responsive suites remain. tests/loisel-learning.test.mjs validates speech planning, chunking, quiz grounding and score logic. tests/loisel-browser.mjs covers the portrait, lecture quiz, video search links and mocked multilingual workers in Chromium and WebKit. Real ASR/translator model inference and physical device performance require hands-on verification.
