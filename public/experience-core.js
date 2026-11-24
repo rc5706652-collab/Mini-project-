@@ -31,6 +31,7 @@ export const paletteCommands=Object.freeze([
  {id:"studio",label:"AI Studio",description:"Go to your recording workspace",shortcut:"S"},
  {id:"new",label:"New session",description:"Start a fresh recording or transcript",shortcut:"N"},
  {id:"library",label:"Library · Knowledge Memory",description:"Search saved notes and recordings",shortcut:"L"},
+ {id:"quiz-studio",label:"Quiz Studio",description:"Choose lectures and review weak concepts with video lessons",shortcut:"Q"},
  {id:"galaxy",label:"Knowledge Galaxy",description:"Explore your generated concept map",shortcut:"G",requiresNotes:true},
  {id:"quiz",label:"Quiz Arena",description:"Practice with source-grounded questions",shortcut:"Q",requiresNotes:true},
  {id:"tutor",label:"Personal Tutor",description:"Ask about the current recording",shortcut:"T",requiresNotes:true},
