@@ -153,7 +153,8 @@ export function createRobotCompanion(host){
   for(const eye of eyes)eye.scale.y=.175*blinkScale;
   rightArm.rotation.z=lively?Math.sin(t*4.0)*.38-.23:Math.sin(t*.9)*.075;
   leftArm.rotation.z=mode==="speaking"?Math.sin(t*4.6)*.3+.12:-Math.sin(t*.85)*.075;
-  heart.scale.setScalar(1+Math.min(.34,current*.28+Math.sin(t*4.8)*.05));
+  const beat=1+Math.min(.34,current*.28+Math.sin(t*4.8)*.05);
+  heart.scale.set(.145*beat,.145*beat,.045*beat);
   for(const jet of jets)jet.scale.y=.12*(1+.35*Math.sin(t*6));
   orbit.rotation.y=t*.2;stars.rotation.y=t*.026;
   platform.rotation.z=t*.17;
