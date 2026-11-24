@@ -4,7 +4,7 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.m
 
 export function createSonicCore(host) {
   const canvas = host.querySelector("canvas");
-  if (!canvas || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (!canvas || window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion === "reduced") {
     return { setMode() {}, setEnergy() {}, setPaused() {}, destroy() {} };
   }
   let renderer;
@@ -12,13 +12,14 @@ export function createSonicCore(host) {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "low-power" });
   } catch {
     host.classList.add("orb-fallback");
-    return { setMode() {}, setEnergy() {}, destroy() {} };
+    return { setMode() {}, setEnergy() {}, setPaused() {}, destroy() {} };
   }
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, .1, 100);
   camera.position.z = 7.5;
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, innerWidth < 700 ? 1.15 : 1.55));
+  const maxDpr = () => Number(document.documentElement.style.getPropertyValue("--nw-max-dpr")) || (innerWidth < 700 ? 1.15 : 1.5);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr()));
   const group = new THREE.Group();
   scene.add(group);
   const uniform = { uTime: { value: 0 }, uEnergy: { value: 0.12 }, uMode: { value: 0 } };
@@ -85,12 +86,14 @@ export function createSonicCore(host) {
     new THREE.PointsMaterial({ color: 0x9acfff, size: .027, transparent:true, opacity:.75, sizeAttenuation:true }));
   group.add(particles);
 
-  let mode="idle", energy=.12, current=.12, active=true, visible=true, paused=false, raf=0, pointerX=0, pointerY=0;
+  let mode="idle", energy=.12, current=.12, active=true, visible=true, paused=false, motionPaused=false, raf=0, pointerX=0, pointerY=0, lastFrame=0;
+  let idleFps=innerWidth<700?24:40,activeFps=innerWidth<700?30:60;
   const clock = new THREE.Clock();
   function resize() {
     const w=Math.max(1,host.clientWidth), h=Math.max(1,host.clientHeight);
     camera.aspect=w/h;
     camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,maxDpr()));
     renderer.setSize(w,h,false);
   }
   const observer=new ResizeObserver(resize);
@@ -106,10 +109,23 @@ export function createSonicCore(host) {
   };
   host.addEventListener("pointermove",onPointer,{passive:true});
   document.addEventListener("visibilitychange",onVisibility);
-  function request(){if(active && visible && !paused && !document.hidden && !raf)raf=requestAnimationFrame(frame);}
-  function frame(){
+  const onMotionChange = event => {
+    const settings=event.detail||{};
+    motionPaused=Boolean(settings.reduced);
+    if(Number.isFinite(settings.idleFps))idleFps=settings.idleFps;
+    if(Number.isFinite(settings.activeFps))activeFps=settings.activeFps;
+    if(motionPaused){cancelAnimationFrame(raf);raf=0;}
+    else request();
+  };
+  document.addEventListener("notewave:motion-change",onMotionChange);
+  function request(){if(active && visible && !paused && !motionPaused && !document.hidden && !raf)raf=requestAnimationFrame(frame);}
+  function frame(timestamp){
     raf=0;
-    if(!active || !visible || paused || document.hidden)return;
+    if(!active || !visible || paused || motionPaused || document.hidden)return;
+    const engaged=mode==="listening"||mode==="processing";
+    const fps=engaged?activeFps:idleFps;
+    if(lastFrame && timestamp-lastFrame<1000/Math.max(8,fps)){request();return;}
+    lastFrame=timestamp;
     const t=clock.getElapsedTime();
     const baseline=mode==="processing"?.55:mode==="listening"?.27:mode==="complete"?.42:.12;
     current+=(Math.max(energy,baseline)-current)*.07;
@@ -134,6 +150,7 @@ export function createSonicCore(host) {
       active=false;cancelAnimationFrame(raf);observer.disconnect();intersection.disconnect();
       host.removeEventListener("pointermove",onPointer);
       document.removeEventListener("visibilitychange",onVisibility);
+      document.removeEventListener("notewave:motion-change",onMotionChange);
       sphere.geometry.dispose();shader.dispose();wire.geometry.dispose();wire.material.dispose();halo.geometry.dispose();halo.material.dispose();
       rings.forEach(r=>{r.geometry.dispose();r.material.dispose();});particles.geometry.dispose();particles.material.dispose();renderer.dispose();
     }
