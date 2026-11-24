@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import {spawn} from "node:child_process";
+import {startStaticServer} from "./static-server.mjs";
 import {chromium,webkit} from "playwright";
 
 // Responsive UI regression suite. WebKit approximates Safari rendering on CI;
 // actual iPhone and Android hardware performance must still be tested separately.
 const PORT=8766,root="http://127.0.0.1:"+PORT;
-const server=spawn("python3",["-m","http.server",String(PORT),"--bind","127.0.0.1","--directory","public"],{stdio:"ignore"});
+const server=await startStaticServer(PORT);
 const sample="Renewable energy uses solar panels and wind turbines to generate electricity. The engineering class studied the energy conversion process and battery storage. Students must submit the solar energy research report by Friday. The teacher explained that solar panels convert sunlight into electrical energy. The prototype demonstration measured twenty five watts during the experiment. Battery storage allows students to compare power output over several sessions.";
 let chromiumBrowser,webkitBrowser;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -94,5 +94,5 @@ try{
 }finally{
  await chromiumBrowser?.close();
  await webkitBrowser?.close();
- server.kill("SIGTERM");
+ await new Promise(resolve=>server.close(resolve));
 }
