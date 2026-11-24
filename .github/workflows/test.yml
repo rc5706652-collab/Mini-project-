@@ -28,6 +28,10 @@ jobs:
           node --check public/learning-ui.js
           node --check public/semantic-worker.js
           node --check public/scene.js
+          node --check public/robot.js
+          node --check public/robot-chat.js
+          node --check public/companion-core.js
+          node --check public/companion-worker.js
           node --check public/alchemy.js
           node --check public/alchemy-shapes.js
           node --check public/advanced-ui.js
@@ -42,6 +46,11 @@ jobs:
         run: |
           test -s public/index.html
           test -s public/enterprise.css
+          test -s public/robot-chat.css
+          test -s public/robot.js
+          test -s public/robot-chat.js
+          test -s public/companion-core.js
+          test -s public/companion-worker.js
           test -s public/enterprise-ui.js
           test -s public/experience-core.js
           test -s public/style.css
@@ -58,3 +67,5 @@ jobs:
         run: node tests/browser-smoke.mjs
       - name: Cross-browser enterprise UI responsive matrix
         run: node tests/responsive-smoke.mjs
+      - name: Pip AI chatbot and voice browser verification
+        run: node tests/companion-browser.mjs
