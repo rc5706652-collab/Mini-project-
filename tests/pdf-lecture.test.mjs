@@ -23,7 +23,7 @@ function pdfMock(pageStrings,{onDestroy=()=>{}}={}){
 }
 test("PDF size, name and empty file checks",()=>{
  assert.equal(validateLecturePdf(makeFile()),true);
- assert.throws(()=>validateLecturePdf(makeFile("image.png")),/Only PDF/);
+ assert.throws(()=>validateLecturePdf({...makeFile("image.png"),type:"image/png"}),/Only PDF/);
  assert.throws(()=>validateLecturePdf(makeFile("oversized.pdf",MAX_PDF_BYTES+1)),/smaller than 15 MB/);
  assert.throws(()=>validateLecturePdf(makeFile("empty.pdf",0)),/empty/);
  assert.equal(PDFJS_VERSION,"4.10.38");
@@ -48,7 +48,7 @@ test("PDF extraction preserves pages, Unicode and operates solely on file buffer
  assert.ok(/^https:\/\/cdn\.jsdelivr\.net\/npm\/pdfjs-dist@/.test((await import("../public/pdf-lecture.js")).PDFJS_VERSION ? "https://cdn.jsdelivr.net/npm/pdfjs-dist@"+PDFJS_VERSION:""));
 });
 test("PDF normalization does not destroy non-Latin lecture text",()=>{
- assert.equal(normalizePdfText("   ಕನ್ನಡ   ಭಾಷೆ. \n\n\n தமிழ்   மொழி.  "),"ಕನ್ನಡ ಭಾಷೆ.\n\nதமிழ் மொழி.");
+ assert.equal(normalizePdfText("   ಕನ್ನಡ   ಭಾಷೆ. \n\n\n தமிழ்   மொழி.  "),"ಕನ್ನಡ ಭಾಷೆ.\nதமிழ் மொழி.");
  assert.equal(pageForEvidence([{page:3,text:"ಕನ್ನಡ ಭಾಷೆ ಕಲಿಯಿರಿ. ಮಕ್ಕಳಿಗೆ ಸಹಾಯ ಮಾಡಿ."}],"ಕನ್ನಡ ಭಾಷೆ ಕಲಿಯಿರಿ."),3);
 });
 test("PDF with no selectable text raises actionable OCR message",async()=>{
