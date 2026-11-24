@@ -31,7 +31,7 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   assert.equal(await page.locator("html").getAttribute("data-theme"),resolved,"theme before first paint");
   await page.locator("#nw-theme-trigger").waitFor({state:"visible",timeout:9000});
   assert.equal(await page.locator("html").getAttribute("data-theme-preference"),chosen);
-  assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"),resolved==="light"?"#f3f6fc":"#0b1021");
+  assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"),resolved==="light"?"#f5f4ef":"#171d1b");
   assert.equal(await page.locator("#nw-theme-trigger").getAttribute("aria-expanded"),"false");
   assert.ok(await page.locator("#pip-chat").isVisible());
   const trigger=page.locator("#nw-theme-trigger"),bounds=await trigger.boundingBox();
