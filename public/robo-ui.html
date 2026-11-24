@@ -1,0 +1,43 @@
+<!-- Static, audited UI template: transcript and chatbot output are always inserted with textContent. -->
+<button id="robo-launcher" class="robo-launcher" type="button" aria-label="Chat with Novi, your robot companion" aria-expanded="false">
+  <span class="robo-launcher-face" aria-hidden="true"><i></i><i></i></span>
+  <span class="robo-launcher-label"><strong>Ask Novi</strong><small>Your AI buddy</small></span>
+</button>
+<section id="robo-chat" class="robo-chat" role="region" aria-label="Novi AI chatbot" hidden>
+  <header class="robo-chat-header">
+    <div class="robo-chat-avatar" aria-hidden="true"><span class="mini-robot-eye"></span><span class="mini-robot-eye"></span></div>
+    <div><h2>Novi <span>✦</span></h2><p><i></i><span id="robo-state-label">Here to help</span></p></div>
+    <button id="robo-close" type="button" aria-label="Close Novi chatbot">✕</button>
+  </header>
+  <div class="robo-chat-topline"><span>LOCAL-FIRST AI COMPANION</span><span>VOICE + CHAT</span></div>
+  <div id="robo-messages" class="robo-messages" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Conversation with Novi"></div>
+  <div id="robo-status" class="robo-status" role="status">Ask about your notes, or a general question.</div>
+  <div class="robo-controls">
+    <label for="robo-answer-mode" class="robo-mode-control">Answer using
+      <select id="robo-answer-mode">
+        <option value="auto">Smart selection</option>
+        <option value="notes">My recording only</option>
+        <option value="general">General local AI</option>
+      </select>
+    </label>
+    <label class="robo-speak-control"><input type="checkbox" id="robo-speak" checked> Speak answers</label>
+  </div>
+  <form id="robo-chat-form" class="robo-chat-form">
+    <label class="sr-only" for="robo-chat-input">Ask Novi a question</label>
+    <textarea id="robo-chat-input" rows="1" maxlength="450" enterkeyhint="send" placeholder="Ask Novi anything…"></textarea>
+    <div class="robo-chat-actions">
+      <button id="robo-mic" type="button" aria-label="Start microphone recording" aria-pressed="false" title="Ask with on-device Whisper transcription">🎤</button>
+      <button id="robo-send" type="submit" aria-label="Send question">➤</button>
+    </div>
+  </form>
+  <p class="robo-privacy">Microphone activates only when tapped, for up to 20 seconds. Audio uses local Whisper speech recognition. General AI uses a downloadable small model; check important facts.</p>
+</section>
+<div id="robo-cinematic" class="robo-cinematic" aria-label="Entering AI Studio" hidden>
+  <div class="robo-cinematic-space" aria-hidden="true">
+    <span class="robo-portal-ring r1"></span><span class="robo-portal-ring r2"></span><span class="robo-portal-ring r3"></span>
+    <span class="robo-portal-core"><span class="cinematic-face"><i></i><i></i><b></b></span></span>
+    <span class="robo-portal-beam"></span>
+  </div>
+  <div class="robo-cinematic-title">WELCOME TO <strong>AI STUDIO</strong><small>WHERE IDEAS BECOME INTELLIGENCE</small></div>
+  <button id="robo-skip-cinematic" type="button">Skip animation</button>
+</div>
