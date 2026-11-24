@@ -4,19 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080b19">
-  <meta name="description" content="NoteWave Sonic Studio — private on-device transcription, smart notes, semantic Q&A, flashcards, and audio chapters.">
-  <title>NoteWave | Sonic AI Learning Studio</title>
+  <meta name="description" content="NoteWave AI Studio: learn with Pip, your interactive 3D robot and local AI study chatbot. Transform audio into grounded notes, quizzes and knowledge.">
+  <title>NoteWave | Meet Pip, Your 3D AI Study Companion</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./enterprise.css">
+  <link rel="stylesheet" href="./robot-chat.css">
 </head>
 <body>
 <div class="aurora aurora-one" aria-hidden="true"></div><div class="aurora aurora-two" aria-hidden="true"></div>
 <div class="app-shell">
   <aside class="sidebar" aria-label="Navigation">
-    <a class="brand" href="./"><span class="brand-mark">◈</span><span>note<span class="brand-light">wave</span><small>SONIC INTELLIGENCE</small></span></a>
+    <a class="brand" href="./"><span class="brand-mark">◈</span><span>note<span class="brand-light">wave</span><small>AI COMPANION STUDIO</small></span></a>
     <div class="nav-kicker">WORKSPACE</div>
     <button class="side-link selected" id="nav-new"><span class="side-icon">✦</span> AI studio <span class="nav-dot"></span></button>
     <button class="side-link" id="nav-saved"><span class="side-icon">▤</span> My library <span id="count" class="count">0</span></button>
@@ -38,23 +39,58 @@
     <div id="main-view">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <span class="hero-kicker"><span class="kicker-mark">✳</span> THE NEXT WAVE OF NOTE-TAKING</span>
-          <h1 id="hero-title">Turn sound into<br><span class="gradient-text">something brilliant.</span></h1>
-          <p>Not just a transcript. Transform every lecture, conversation and recording into answers, insights, flashcards and moments worth remembering.</p>
+          <span class="hero-kicker"><span class="kicker-mark">✳</span> MEET YOUR NEW AI COMPANION</span>
+          <h1 id="hero-title">Meet Pip.<br><span class="gradient-text">Make ideas come alive.</span></h1>
+          <p>An adorable 3D AI companion that listens when you ask, helps answer questions and turns recordings into notes worth remembering.</p>
           <div class="hero-actions"><a href="#create-panel" class="cta">Start creating <span>↗</span></a><span class="hero-sub">✧ Powered by private, on-device AI</span></div>
           <div class="hero-stats"><div><strong>08<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
         </div>
         <div class="hero-visual">
-          <div id="orb-stage" class="orb-stage" data-mode="idle" aria-label="Animated three-dimensional audio sphere">
+          <div id="orb-stage" class="orb-stage robot-stage" data-mode="idle" aria-label="Pip, an expressive three-dimensional AI robot">
             <div class="orb-glow"></div>
-            <div class="css-orb-fallback"><div class="css-orb-inner"></div></div>
+            <div class="pip-css" aria-hidden="true">
+              <div class="pip-css-antenna"></div>
+              <div class="pip-css-head"><div class="pip-css-face"><i class="pip-css-eye"></i><i class="pip-css-eye"></i><b class="pip-css-smile"></b></div></div>
+              <div class="pip-css-body"><span class="pip-css-heart">✦</span><i class="pip-css-arm pip-css-left"></i><i class="pip-css-arm pip-css-right"></i></div>
+              <div class="pip-css-feet"></div>
+            </div>
             <canvas id="orb-canvas" aria-hidden="true"></canvas>
             <div class="orb-grain" aria-hidden="true"></div>
-            <div class="float-chip chip-a"><span class="chip-icon">〰</span><span>VOICE <strong>→ MEANING</strong></span></div>
-            <div class="float-chip chip-b"><span class="chip-icon">✧</span><span>INTELLIGENCE <strong>ACTIVE</strong></span></div>
-            <div class="orb-bottom"><div class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><strong id="orb-label">Your ideas, amplified</strong><small>Interactive Sonic Core</small></div></div>
+            <div class="float-chip chip-a"><span class="chip-icon">✦</span><span>MEET PIP <strong>YOUR AI BUDDY</strong></span></div>
+            <div class="float-chip chip-b"><span class="chip-icon">♥</span><span>VOICE CHAT <strong>ON REQUEST</strong></span></div>
+            <div class="orb-bottom"><div class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><strong id="orb-label">Pip is ready to help</strong><small>3D interactive AI companion</small></div></div>
           </div>
         </div>
+      </section>
+
+
+      <section id="pip-chat" class="pip-chat glass" aria-labelledby="pip-chat-title">
+        <div class="pip-chat-intro">
+          <div class="pip-chat-avatar" aria-hidden="true"><span>◕ ◕</span><i>⌣</i></div>
+          <div><span class="mini-kicker">✦ YOUR AI COMPANION</span><h2 id="pip-chat-title">Talk to Pip.</h2><p>Ask a question, speak a short voice prompt, or explore your lecture. The AI runs locally on your device.</p></div>
+          <span class="pip-chat-online"><span class="live-dot"></span> LOCAL FIRST</span>
+        </div>
+        <div class="pip-chat-tools">
+          <label for="pip-mode">Ask about <select id="pip-mode"><option value="general">Any topic</option><option value="notes">My recording</option></select></label>
+          <label for="pip-model">AI engine <select id="pip-model"><option value="fast">Fast local · smaller model</option><option value="enhanced">Enhanced · WebGPU required</option></select></label>
+          <label class="pip-voice-toggle"><input type="checkbox" id="pip-speak"> Read replies aloud</label>
+        </div>
+        <div id="pip-messages" class="pip-messages" role="log" aria-live="polite" aria-label="AI chatbot conversation">
+          <div class="pip-message pip-assistant"><span class="pip-speaker">PIP ✦</span><p>Hi! I'm Pip, your tiny study sidekick. Ask me anything, or let me help with your next recording. Try the microphone to talk to me!</p></div>
+        </div>
+        <div class="pip-quick-prompts" aria-label="Suggested questions">
+          <button type="button" data-pip-prompt="What can you do?">✧ What can you do?</button>
+          <button type="button" data-pip-prompt="Explain artificial intelligence simply">✧ Explain AI</button>
+          <button type="button" data-pip-prompt="Summarize my recording">✧ Summarize recording</button>
+        </div>
+        <form id="pip-form" class="pip-compose">
+          <label for="pip-question" class="sr-only">Your message to Pip</label>
+          <input id="pip-question" type="text" maxlength="450" autocomplete="off" placeholder="Ask Pip anything…">
+          <button type="button" id="pip-mic" class="pip-mic" aria-pressed="false" aria-label="Start voice question recording" title="Voice question, max 12 seconds">🎙</button>
+          <button type="submit" id="pip-send" class="pip-send" aria-label="Send question">Send <span aria-hidden="true">↗</span></button>
+        </form>
+        <div class="pip-chat-footer"><span id="pip-status" role="status">AI models download on first use; replies may be imperfect. Audio input is optional.</span><button type="button" id="pip-clear" class="pip-clear">Clear chat</button></div>
+        <p class="pip-disclaimer">Pip uses a small local language model, not a cloud chatbot. It can't browse live information. Voice input uses browser microphone permission and local Whisper transcription; speech playback uses your device's speech synthesis service. Double-check important answers.</p>
       </section>
 
       <div class="flow-line" aria-label="Workflow"><div><span>01</span> CAPTURE</div><i></i><div><span>02</span> UNDERSTAND</div><i></i><div><span>03</span> LEARN</div></div>
@@ -143,7 +179,15 @@
     <footer><span>◈ NOTEWAVE</span><span>MADE FOR THE WAY YOU THINK · LOCAL-FIRST AI</span></footer>
   </main>
 </div>
+
+<div id="studio-cinematic" class="studio-cinematic" aria-hidden="true" data-active="false">
+  <div class="cinematic-lights"></div><div class="cinematic-orbit orbit-one"></div><div class="cinematic-orbit orbit-two"></div>
+  <div class="cinematic-robot"><div class="cinematic-head"><div class="cinematic-visor"><i></i><i></i><b></b></div></div><div class="cinematic-body"><span>✦</span></div></div>
+  <div class="cinematic-title">WELCOME TO <strong>AI STUDIO</strong><small>YOUR IDEAS, REIMAGINED</small></div>
+</div>
+
 <script type="module" src="./app.js"></script>
+<script type="module" src="./robot-chat.js"></script>
 <script type="module" src="./enterprise-ui.js"></script>
 </body>
 </html>

@@ -142,3 +142,22 @@ The presentation layer uses **web-native ES modules, Three.js/WebGL, responsive 
 Automated tests target visual overflow, 44px mobile tap areas, 16px input fonts, reduced-motion operation, command navigation, saved-note recovery, and functioning Quiz/Galaxy controls. Linux WebKit uses Safari's engine but is not identical to physical iPhone/iPad Safari.
 
 Before claiming a universal hardware pass, verify microphone permissions, model downloads, local-storage quota failures, orientation switching, TalkBack/VoiceOver, battery/performance and animation smoothness on real iOS and Android devices. A 60 FPS guarantee across all devices would not be responsible.
+
+
+## Pip — 3D robot and local AI chatbot
+
+NoteWave's previous animated sphere has been replaced by **Pip**, a small responsive Three.js robot with expressive eyes, a glowing heart, head turns, waving arms and distinct idle, listening, processing, thinking, speaking, and complete states. Existing audio/Whisper/Particle Alchemy and study tools remain unchanged. A CSS-only fallback renders Pip if WebGL is unavailable or reduced motion is enabled.
+
+The **Pip Chat** panel is available even before recording:
+
+- **Any topic:** short answers from an on-demand local model. Fast local uses Xenova/flan-t5-small on CPU; Enhanced uses onnx-community/Qwen2.5-0.5B-Instruct quantized on WebGPU, selected explicitly on a compatible device.
+- **My recording:** questions use original transcript evidence, with supporting passages displayed beneath generated replies. Summary requests use the existing extractive notes. Unsupported questions never produce fake citations.
+- **Voice questions:** tap the microphone to record an optional short voice question (maximum 12 seconds), then tap stop. Audio is decoded into 16 kHz PCM and transcribed by the existing English Whisper model in a separate Web Worker. This is not an always-on microphone or wake-word listener. Type a question if the microphone or decoder is unavailable.
+- **Voice replies:** optional (off by default) through browser/device Speech Synthesis. Browser voices vary and may use OS/provider services.
+- **Cinematic Studio entrance:** opening AI Studio or starting a session triggers a short 3D CSS portal scene. It never blocks input and is disabled for reduced motion.
+- **Privacy:** prompts and voice audio are not sent to a NoteWave server. Scripts and AI models are downloaded from external hosts, including Hugging Face. Voice playback may use browser/OS services. Chat history is held only in the current tab's memory and is not saved to IndexedDB.
+- **Performance:** model downloads and CPU/WebGPU requirements differ by hardware. Fast local is the mobile-friendly default; Enhanced requires WebGPU and substantially more memory. Pip's short voice-question recognition is English-only. AI Studio's existing multilingual recording mode is unchanged.
+- **Accuracy:** local models can make mistakes, and Fast local is much smaller than cloud chat models. The source evidence is authoritative only for what the transcript actually contains; speech transcription itself can have errors.
+- **Tests:** companion-core.test.mjs checks grounded prompts; companion-browser.mjs verifies mocked model/voice UI, notes citations and Chromium/WebKit layout. Actual voice recognition and real-model answer quality require separate device verification.
+
+Files: public/robot.js, public/robot-chat.js, public/robot-chat.css, public/companion-core.js, public/companion-worker.js. No paid API or server database is introduced.

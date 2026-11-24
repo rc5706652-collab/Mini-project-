@@ -91,10 +91,10 @@ function status(title,detail,percent){
 function orbMode(mode){
   $("orb-stage").dataset.mode=mode;
   state.orb?.setMode(mode);
-  put("orb-label",({idle:"Your ideas, amplified",ready:"Ready to understand",listening:"Listening to your voice",processing:"Turning sound into insight",complete:"Intelligence unlocked"})[mode]||"Your ideas, amplified");
+  put("orb-label",({idle:"Pip is ready to help",ready:"Pip is ready to learn",listening:"Pip is listening",processing:"Pip is decoding your recording",complete:"Pip learned something new"})[mode]||"Pip is ready");
 }
-import("./scene.js").then(m=>{
-  state.orb=m.createSonicCore($("orb-stage"));
+import("./robot.js").then(m=>{
+  state.orb=m.createRobotCompanion($("orb-stage"));
   state.orb.setMode($("orb-stage").dataset.mode||"idle");
   if(!$("alchemy-stage").classList.contains("hidden"))state.orb.setPaused?.(true);
 }).catch(()=>$("orb-stage").classList.add("orb-fallback"));
@@ -283,6 +283,7 @@ function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
   $("nav-new").classList.add("selected");$("nav-saved").classList.remove("selected");
   put("save","♡ Save");
   lab.update(note,segments,state.audioURL);
+  document.dispatchEvent(new CustomEvent("notewave:notes-ready",{detail:{notes:note,source}}));
   advancedPromise.then(suite=>suite?.update(note));
   orbMode("complete");$("results").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -383,6 +384,7 @@ function newSession(){
   alchemy.reset();
   openStudio();show("results",false);clearError();
   state.file=null;state.segments=[];state.notes=null;
+  document.dispatchEvent(new CustomEvent("notewave:notes-reset"));
   $("file").value="";$("pasted").value="";show("file-info",false);
   clearAudio();orbMode("idle");$("create-panel").scrollIntoView({behavior:"smooth"});
 }
