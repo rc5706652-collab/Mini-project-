@@ -20,6 +20,8 @@ jobs:
         run: |
           node --check public/app.js
           node --check public/enterprise-ui.js
+          node --check public/theme-core.js
+          node --check public/theme.js
           node --check public/experience-core.js
           node --check public/notes.js
           node --check public/worker.js
@@ -46,6 +48,9 @@ jobs:
         run: |
           test -s public/index.html
           test -s public/enterprise.css
+          test -s public/enterprise-themes.css
+          test -s public/theme.js
+          test -s public/theme-core.js
           test -s public/robot-chat.css
           test -s public/robot.js
           test -s public/robot-chat.js
@@ -69,3 +74,5 @@ jobs:
         run: node tests/responsive-smoke.mjs
       - name: Pip AI chatbot and voice browser verification
         run: node tests/companion-browser.mjs
+      - name: Enterprise dark/light/system theme browser matrix
+        run: node tests/theme-browser.mjs
