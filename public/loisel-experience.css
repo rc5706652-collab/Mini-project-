@@ -236,8 +236,8 @@
 .loisel-pocket-foot.left{left:16px;transform:rotate(-10deg)}
 .loisel-pocket-foot.right{right:16px;transform:rotate(10deg)}
 .loisel-pocket-hide-cover{
- display:none;position:absolute;z-index:4;bottom:6px;left:4px;
- width:66px;height:81px;pointer-events:none;
+ display:none;position:absolute;z-index:4;bottom:6px;left:1px;
+ width:54px;height:81px;pointer-events:none;
  background:linear-gradient(120deg,#dccfea 0%,#faf3e7 46%,#bcd9cf 100%);
  border:2px solid #f7eee3;border-radius:7px 16px 10px 7px;
  box-shadow:8px 5px 14px #101b183b,inset 3px 3px 8px #ffffffb8;
@@ -249,8 +249,9 @@
  width:3px;background:#796bae38;border-radius:6px;
 }
 .loisel-buddy[data-game="seek"] .loisel-pocket-hide-cover{display:block;animation:lumi-cover 1s ease-in-out}
-.loisel-buddy[data-game="seek"] .loisel-pocket-sprite{transform:translateX(19px) rotate(7deg)}
+.loisel-buddy[data-game="seek"] .loisel-pocket-sprite{animation:none;transform:translateX(24px) rotate(7deg)}
 .loisel-buddy[data-game="seek"] .loisel-pocket-visor{box-shadow:0 0 12px #a7f2d9,inset 0 4px 9px #060c139b}
+.loisel-buddy[data-game="seek"] .loisel-pocket-eye.right{box-shadow:0 0 12px 4px #86ffd2,0 0 3px #fff}
 .loisel-buddy[data-game="celebrate"] .loisel-pocket-sprite{animation:lumi-celebrate .65s ease-in-out 3}
 .loisel-buddy[data-peek="true"]:not([data-game="seek"]) .loisel-pocket-sprite{animation:lumi-peek 1.3s ease-in-out 1}
 .loisel-buddy-panel{
