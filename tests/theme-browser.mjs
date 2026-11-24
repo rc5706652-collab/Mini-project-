@@ -44,6 +44,10 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   assert.equal(await page.locator("html").getAttribute("data-theme-preference"),"light");
   assert.equal(await page.evaluate(()=>localStorage.getItem("notewave-theme-v1")),"light");
   assert.equal(await page.locator("#nw-theme-menu").isVisible(),false);
+  const lightCanvas=await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue("--nw-canvas").trim().toLowerCase());
+  assert.equal(lightCanvas,"#f5f4ef","reference cream must be active");
+  const lightChat=await page.locator(".pip-message.pip-assistant").first().evaluate(e=>getComputedStyle(e).backgroundColor);
+  assert.equal(lightChat,"rgb(231, 224, 240)","reference lavender must color Pip's light chat");
   const lightColor=await page.locator(".pip-message.pip-assistant p").first().evaluate(e=>getComputedStyle(e).color);
   assert.ok(lum(numericColor(lightColor))<.2,"Chat answer should use dark ink in light theme: "+lightColor);
   const heroColor=await page.locator(".hero h1").evaluate(e=>getComputedStyle(e).color);
@@ -51,6 +55,8 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   await trigger.click();
   await page.locator('[data-theme-choice="dark"]').click();
   assert.equal(await page.locator("html").getAttribute("data-theme"),"dark");
+  const darkCanvas=await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue("--nw-canvas").trim().toLowerCase());
+  assert.equal(darkCanvas,"#171d1b","dark theme must use coordinated charcoal");
   const darkColor=await page.locator(".pip-message.pip-assistant p").first().evaluate(e=>getComputedStyle(e).color);
   assert.ok(lum(numericColor(darkColor))>.65,"Chat answer should have pale foreground in dark mode: "+darkColor);
   await trigger.click();
