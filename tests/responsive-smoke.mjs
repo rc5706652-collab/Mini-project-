@@ -57,6 +57,14 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
   await page.locator("#galaxy-tab").click();
   assert.ok(await page.locator("#galaxy-panel").isVisible());
   assert.ok((await page.locator(".galaxy-node").count())>=3);
+  // Studio navigation must preserve an unsaved active note; only "New" clears it.
+  if(width<=760&&!landscape){
+   await page.locator("#nw-dock-library").click();
+   assert.ok(await page.locator("#saved-panel").isVisible());
+   await page.locator("#nw-dock-studio").click();
+   assert.ok(await page.locator("#results").isVisible());
+   assert.ok((await page.locator("#editor").inputValue()).includes("Renewable energy"));
+  }
   // Layout must never scroll sideways at any supported width.
   const metrics=await page.evaluate(()=>({
    viewport:document.documentElement.clientWidth,
