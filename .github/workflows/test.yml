@@ -14,6 +14,8 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check public/app.js
+          node --check public/enterprise-ui.js
+          node --check public/experience-core.js
           node --check public/notes.js
           node --check public/worker.js
           node --check public/whisper-config.js
@@ -34,6 +36,9 @@ jobs:
       - name: Verify static assets
         run: |
           test -s public/index.html
+          test -s public/enterprise.css
+          test -s public/enterprise-ui.js
+          test -s public/experience-core.js
           test -s public/style.css
           test -s public/app.js
           test -s public/worker.js
@@ -45,6 +50,8 @@ jobs:
       - name: Install browser smoke test dependencies
         run: |
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
       - name: Smoke test desktop and mobile
         run: node tests/browser-smoke.mjs
+      - name: Cross-browser enterprise UI responsive matrix
+        run: node tests/responsive-smoke.mjs
