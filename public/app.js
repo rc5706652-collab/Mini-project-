@@ -12,6 +12,9 @@ const state={
   chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null,operationId:0
 };
 const lab=createLearningStudio();
+document.addEventListener("notewave:robot-state",event=>{
+  state.orb?.setMode(event.detail?.state||"idle");
+});
 
 /* Particle Alchemy is presentation-only; failure to load WebGL never blocks transcription. */
 const alchemy=(()=>{
@@ -91,13 +94,13 @@ function status(title,detail,percent){
 function orbMode(mode){
   $("orb-stage").dataset.mode=mode;
   state.orb?.setMode(mode);
-  put("orb-label",({idle:"Your ideas, amplified",ready:"Ready to understand",listening:"Listening to your voice",processing:"Turning sound into insight",complete:"Intelligence unlocked"})[mode]||"Your ideas, amplified");
+  put("orb-label",({idle:"Novi is ready to help",ready:"Novi is curious",listening:"Novi is listening",processing:"Novi is thinking",complete:"Novi is impressed!"})[mode]||"Novi is ready to help");
 }
-import("./scene.js").then(m=>{
-  state.orb=m.createSonicCore($("orb-stage"));
+import("./robot-3d.js").then(m=>{
+  state.orb=m.createRobot($("orb-stage"));
   state.orb.setMode($("orb-stage").dataset.mode||"idle");
   if(!$("alchemy-stage").classList.contains("hidden"))state.orb.setPaused?.(true);
-}).catch(()=>$("orb-stage").classList.add("orb-fallback"));
+}).catch(()=>$("orb-stage").classList.add("robo-fallback"));
 function switchMode(mode){
   if(state.busy||state.recorder?.state==="recording")return;
   state.inputMode=mode;
@@ -263,6 +266,7 @@ function renderBullets(id,items,placeholder){
 function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
   if(!note){error("We couldn't find enough words to create notes.");return;}
   state.notes=note;state.source=source;state.segments=segments;
+  document.dispatchEvent(new CustomEvent("notewave:notes-updated",{detail:{notes:note,source}}));
   clearAudio();
   if(audioFile){
     state.file=audioFile;
@@ -383,6 +387,7 @@ function newSession(){
   alchemy.reset();
   openStudio();show("results",false);clearError();
   state.file=null;state.segments=[];state.notes=null;
+  document.dispatchEvent(new Event("notewave:session-reset"));
   $("file").value="";$("pasted").value="";show("file-info",false);
   clearAudio();orbMode("idle");$("create-panel").scrollIntoView({behavior:"smooth"});
 }
