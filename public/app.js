@@ -386,7 +386,14 @@ function newSession(){
   $("file").value="";$("pasted").value="";show("file-info",false);
   clearAudio();orbMode("idle");$("create-panel").scrollIntoView({behavior:"smooth"});
 }
-$("nav-new").addEventListener("click",newSession);
+function resumeStudio(){
+  if(state.busy||state.recorder?.state==="recording")return;
+  openStudio();
+  show("results",Boolean(state.notes));
+  const destination=state.notes?$("results"):$("create-panel");
+  destination.scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("nav-new").addEventListener("click",resumeStudio);
 $("top-create").addEventListener("click",newSession);
 $("nav-saved").addEventListener("click",()=>{
   if(state.busy||state.recorder?.state==="recording")return;
