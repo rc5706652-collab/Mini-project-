@@ -112,7 +112,7 @@ function buildShell(){
  input.addEventListener("input",renderPalette);
  dialog.addEventListener("close",()=>{input.value="";});
  function renderPalette(){
-  const available=filterCommands(input.value,!$("results")?.classList.contains("hidden"));
+  const available=filterCommands(input.value,!$("results")?.classList.contains("hidden")&&!$("main-view")?.classList.contains("hidden"));
   list.replaceChildren();
   if(!available.length)list.append(make("p","nw-palette-empty","No matching commands. Generate notes to unlock study actions."));
   for(const command of available){
@@ -147,10 +147,7 @@ function execute(key){
  }else if(key==="new"){
   $("top-create")?.click();
  }else if(["galaxy","quiz","tutor"].includes(key)){
-  if($("results")?.classList.contains("hidden")){announce("Generate notes before opening learning tools");return;}
-  $("nav-new")?.click();
-  // nav-new starts a new session, so do not navigate through it here.
-  // The requested study tab remains in the current results panel when already shown.
+  if($("results")?.classList.contains("hidden")||$("main-view")?.classList.contains("hidden")){announce("Open a note in the Studio to use learning tools");return;}
   $(key+"-tab")?.click();
   $(key+"-panel")?.scrollIntoView({block:"nearest",behavior:state?.useMotion?"smooth":"auto"});
  }else if(key==="export"){
@@ -197,7 +194,7 @@ function keyboardTabs(){
 function responsive() {
  let pending=0;
  const update=()=>{
-  pending=0;setBudget();updateDock();
+  pending=0;setBudget();updateDock();glassTilt();
   document.documentElement.style.setProperty("--nw-screen-height",String(window.visualViewport?.height||window.innerHeight)+"px");
  };
  const schedule=()=>{if(!pending)pending=requestAnimationFrame(update);};
