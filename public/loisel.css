@@ -1,0 +1,75 @@
+/* Loisel identity image, user's uploaded portrait, and separate lecture quiz view.
+   Preserves NoteWave's existing themes, breakpoints and other 3D experiences. */
+.nw-enterprise .loisel-stage{isolation:isolate;overflow:hidden;background:linear-gradient(130deg,#071013,#152021);border-radius:24px;box-shadow:0 26px 65px #0008,0 0 40px #eeb15c12}
+.nw-enterprise .loisel-stage::before,.nw-enterprise .loisel-stage::after{pointer-events:none}
+.nw-enterprise .loisel-stage .loisel-hero-photo{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center center;z-index:1;filter:none}
+.nw-enterprise .loisel-stage .orb-grain{pointer-events:none;z-index:2}
+.nw-enterprise .loisel-stage .orb-glow{background:radial-gradient(circle at 80% 25%,#ff9d003b,transparent 60%);z-index:2;pointer-events:none}
+.nw-enterprise .loisel-stage .float-chip,.nw-enterprise .loisel-stage .orb-bottom{z-index:3}
+.nw-enterprise .loisel-stage .equalizer i{background:#ffae4d}
+.nw-enterprise .loisel-stage[data-mode="listening"] .orb-glow{background:radial-gradient(circle at 80% 26%,#ffb24075,transparent 65%)}
+.nw-enterprise .loisel-stage[data-mode="processing"] .orb-glow{background:radial-gradient(circle at 78% 28%,#e5a45967,transparent 68%)}
+.nw-enterprise .loisel-stage[data-mode="complete"] .orb-glow{background:radial-gradient(circle at 80% 28%,#d9ae69a6,transparent 66%)}
+.nw-enterprise .loisel-avatar{overflow:hidden;background:#0b1517;border-color:#787d80}
+.nw-enterprise .loisel-avatar img{width:100%;height:100%;object-fit:cover;object-position:78% 20%;display:block}
+.loisel-cinematic{width:min(70vw,460px);height:min(50vh,310px);overflow:hidden;border:2px solid #fca43e70;border-radius:22px;box-shadow:0 0 72px #ffae482f;filter:drop-shadow(0 18px 30px #d59a4470)}
+.loisel-cinematic img{width:100%;height:100%;object-fit:cover;object-position:center}
+.nw-enterprise .source-transcript{margin:18px 0;padding:18px}
+.nw-enterprise .source-transcript summary{cursor:pointer;font-weight:750;color:var(--nw-foreground,#f5f4ef)}
+.nw-enterprise .source-transcript pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;color:var(--nw-subdued,#c5cfca);line-height:1.8;max-height:260px;overflow:auto}
+.nw-enterprise .quiz-hub{min-height:70vh;max-width:1120px;margin:0 auto;padding:32px 0 88px}
+.nw-enterprise .quiz-hub-setup{padding:clamp(17px,3vw,32px);margin:21px 0 22px}
+.nw-enterprise .quiz-hub-setup h3{margin:0 0 16px;color:var(--nw-foreground);font-size:22px}
+.nw-enterprise .quiz-hub-controls{display:grid;grid-template-columns:1.3fr 1.2fr .65fr;gap:16px}
+.nw-enterprise .quiz-hub-controls label,.nw-enterprise .quiz-paste-group label{display:flex;flex-direction:column;gap:8px;color:var(--nw-foreground);font-weight:700;font-size:12px}
+.nw-enterprise .quiz-hub-controls input,.nw-enterprise .quiz-hub-controls select,.nw-enterprise .quiz-paste-group textarea{
+ color:var(--nw-foreground);background:var(--nw-card);border:1px solid var(--nw-hairline);border-radius:12px;
+ padding:12px 14px;font:500 14px "DM Sans",system-ui,sans-serif;max-width:100%;min-width:0;outline-offset:2px;
+}
+.nw-enterprise .quiz-hub-controls input:focus-visible,.nw-enterprise .quiz-hub-controls select:focus-visible,.nw-enterprise .quiz-paste-group textarea:focus-visible{outline:3px solid var(--nw-brand-ink)}
+.nw-enterprise .quiz-hub-controls input::placeholder,.nw-enterprise .quiz-paste-group textarea::placeholder{color:var(--nw-subdued)}
+.nw-enterprise .quiz-paste-group{margin:17px 0}
+.nw-enterprise .quiz-paste-group textarea{width:100%;resize:vertical;line-height:1.7}
+.nw-enterprise .quiz-hub-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.nw-enterprise #quiz-hub-status{color:var(--nw-subdued);font-size:13px;line-height:1.7}
+.nw-enterprise .quiz-hub-questions{display:grid;gap:16px}
+.nw-enterprise .quiz-hub-question{border:1px solid var(--nw-hairline);border-radius:18px;background:var(--nw-card);box-shadow:var(--nw-shadow);padding:18px 18px 16px;min-width:0}
+.nw-enterprise .quiz-hub-question legend{color:var(--nw-foreground);font-weight:800;font-size:15px;line-height:1.65;padding:0 8px}
+.nw-enterprise .quiz-hub-option{display:flex;gap:12px;align-items:center;border:1px solid var(--nw-hairline);border-radius:12px;margin:9px 0 0;padding:13px 14px;cursor:pointer;min-height:47px;color:var(--nw-foreground);background:var(--nw-surface);line-height:1.5;font-size:14px}
+.nw-enterprise .quiz-hub-option:has(input:checked){background:color-mix(in srgb,var(--nw-brand-ink) 14%,var(--nw-card));border-color:var(--nw-brand-ink)}
+.nw-enterprise .quiz-hub-option input{width:18px;height:18px;accent-color:var(--nw-brand-ink);flex:0 0 18px}
+.nw-enterprise .quiz-hub-results{margin:22px 0;padding:clamp(18px,3vw,30px);scroll-margin-top:90px}
+.nw-enterprise .quiz-hub-results h3{color:var(--nw-foreground);font-size:24px;margin:0 0 8px}
+.nw-enterprise .quiz-hub-results>p{color:var(--nw-subdued)}
+.nw-enterprise .quiz-hub-review{margin:15px 0;padding:16px;border:1px solid var(--nw-hairline);border-radius:14px;background:var(--nw-card-strong);color:var(--nw-foreground)}
+.nw-enterprise .quiz-hub-review strong{display:block;margin:0 0 8px}
+.nw-enterprise .quiz-hub-review p{color:var(--nw-subdued);font-size:13px;line-height:1.75}
+.nw-enterprise .quiz-hub-review blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--nw-brand-ink);background:var(--nw-surface);border-radius:0 9px 9px 0;color:var(--nw-foreground);line-height:1.7;font-size:13px}
+.nw-enterprise .quiz-hub-review.review-correct{border-color:#65a77a}
+.nw-enterprise .quiz-hub-review.review-weak{border-color:#c98971}
+.nw-enterprise .quiz-hub-review-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px;align-items:center}
+.nw-enterprise .quiz-video-link{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;min-height:44px;border:1px solid var(--nw-brand-ink);border-radius:12px;color:var(--nw-foreground);background:color-mix(in srgb,var(--nw-brand-ink) 15%,var(--nw-card));font-weight:800;font-size:12px;text-decoration:none}
+.nw-enterprise .quiz-video-link:hover{filter:brightness(1.12)}
+.nw-enterprise .quiz-hub-success{padding:14px;background:#b9c9ae33;border-radius:12px}
+@media(max-width:780px){
+ .nw-enterprise .quiz-hub-controls{grid-template-columns:1fr 1fr}
+ .nw-enterprise .quiz-hub-controls label:last-child{grid-column:span 2}
+ .nw-enterprise .quiz-hub{padding:18px 0 100px}
+ .nw-enterprise .quiz-hub-setup{padding:18px}
+ .nw-enterprise .quiz-hub-controls input,.nw-enterprise .quiz-hub-controls select,.nw-enterprise .quiz-paste-group textarea{font-size:16px;min-height:44px}
+}
+@media(max-width:480px){
+ .nw-enterprise .quiz-hub-controls{grid-template-columns:1fr}
+ .nw-enterprise .quiz-hub-controls label:last-child{grid-column:auto}
+ .nw-enterprise .quiz-hub-setup{padding:16px}
+ .nw-enterprise .quiz-hub-question{padding:15px 12px}
+ .nw-enterprise .quiz-hub-results{padding:16px}
+ .nw-enterprise .loisel-stage .loisel-hero-photo{object-position:62% center}
+ .nw-enterprise .loisel-avatar{flex-basis:56px}
+}
+@media(prefers-reduced-motion:reduce){
+ .loisel-cinematic img{animation:none!important}
+}
+@media print{
+ .nw-enterprise .quiz-hub-actions,.nw-enterprise .quiz-hub-setup,.loisel-cinematic{display:none!important}
+}

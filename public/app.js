@@ -2,13 +2,14 @@ import { createNotes, toMarkdown } from "./notes.js";
 import { createLearningStudio } from "./learning-ui.js";
 import { formatTime } from "./study.js";
 import { createAdvancedStudio } from "./advanced-ui.js";
+import {speechPlan,languageName} from "./speech-languages.js";
 
 const $=id=>document.getElementById(id);
 const put=(id,value)=>{$(id).textContent=String(value??"");};
 const show=(id,visible)=>$(id).classList.toggle("hidden",!visible);
 const state={
   inputMode:"upload",file:null,source:"",notes:null,segments:[],audioURL:null,
-  worker:null,rejectTranscription:null,busy:false,recorder:null,stream:null,
+  worker:null,rejectTranscription:null,translationWorker:null,rejectTranslation:null,busy:false,recorder:null,stream:null,
   chunks:[],recordTimer:null,elapsed:0,micContext:null,micSource:null,analyser:null,levelFrame:0,orb:null,operationId:0
 };
 const lab=createLearningStudio();
@@ -91,13 +92,11 @@ function status(title,detail,percent){
 function orbMode(mode){
   $("orb-stage").dataset.mode=mode;
   state.orb?.setMode(mode);
-  put("orb-label",({idle:"Pip is ready to help",ready:"Pip is ready to learn",listening:"Pip is listening",processing:"Pip is decoding your recording",complete:"Pip learned something new"})[mode]||"Pip is ready");
+  put("orb-label",({idle:"Loisel is ready to help",ready:"Loisel is ready to learn",listening:"Loisel is listening",processing:"Loisel is decoding your recording",complete:"Loisel has new insights"})[mode]||"Loisel is ready");
 }
-import("./robot.js").then(m=>{
-  state.orb=m.createRobotCompanion($("orb-stage"));
-  state.orb.setMode($("orb-stage").dataset.mode||"idle");
-  if(!$("alchemy-stage").classList.contains("hidden"))state.orb.setPaused?.(true);
-}).catch(()=>$("orb-stage").classList.add("orb-fallback"));
+// Loisel is the user-supplied still portrait, not a rendered character.
+// Keep the existing audio state attribute for the background aura/equalizer.
+state.orb={setMode(){},setPaused(){},setEnergy(){},destroy(){}};
 function switchMode(mode){
   if(state.busy||state.recorder?.state==="recording")return;
   state.inputMode=mode;
@@ -221,7 +220,7 @@ async function decodeAudio(file){
     return pcm;
   }finally{await context.close();}
 }
-function recognize(samples){
+function recognize(samples,plan){
   return new Promise((resolve,reject)=>{
     state.worker??=new Worker("./worker.js",{type:"module"});
     const worker=state.worker;state.rejectTranscription=reject;
@@ -237,13 +236,31 @@ function recognize(samples){
       state.rejectTranscription=null;worker.terminate();state.worker=null;
       reject(Error("Whisper model failed to load. Check internet access and browser memory."));
     };
-    worker.postMessage({type:"transcribe",samples,language:$("audio-language")?.value||"en",output:$("audio-output")?.value||"original"},[samples.buffer]);
+    worker.postMessage({type:"transcribe",samples,language:plan.source,output:plan.whisperOutput},[samples.buffer]);
   });
+}
+function translateSpeech(text,plan){
+ return new Promise((resolve,reject)=>{
+  state.translationWorker??=new Worker("./translation-worker.js",{type:"module"});
+  const worker=state.translationWorker,requestId=state.operationId;
+  state.rejectTranslation=reject;
+  worker.onmessage=({data})=>{
+   if(data.requestId!==requestId)return;
+   if(data.type==="stage")status("Translating on your device",data.message,78);
+   if(data.type==="progress")status("Downloading optional translation model",data.progress+"% downloaded",78);
+   if(data.type==="complete"){state.rejectTranslation=null;resolve(data.text);}
+   if(data.type==="error"){state.rejectTranslation=null;reject(Error(data.message));}
+  };
+  worker.onerror=()=>{state.rejectTranslation=null;worker.terminate();state.translationWorker=null;reject(Error("Translation model failed to load on this device."));};
+  worker.postMessage({type:"translate",requestId,text,sourceCode:plan.sourceCode,targetCode:plan.targetCode});
+ });
 }
 $("cancel").addEventListener("click",()=>{
   if(!state.busy)return;
   state.operationId++;
   state.worker?.terminate();state.worker=null;
+  state.translationWorker?.terminate();state.translationWorker=null;
+  state.rejectTranslation?.(Error("Translation cancelled."));state.rejectTranslation=null;
   state.rejectTranscription?.(Error("Processing cancelled."));
   state.rejectTranscription=null;
   alchemy.reset();
@@ -269,7 +286,14 @@ function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
     state.audioURL=URL.createObjectURL(audioFile);
     $("preview-audio").src=state.audioURL;show("preview-audio",true);
   }
-  put("result-title",note.title);put("metadata",note.wordCount+" words · "+source);
+  put("result-title",note.title);put("metadata",note.wordCount+" words · "+source+
+   (note.outputLanguage?" · Transcript: "+languageName(note.outputLanguage):""));
+  const original=note.sourceTranscript&&note.sourceTranscript!==note.transcript;
+  show("source-transcript-panel",Boolean(original));
+  if(original){
+   put("source-transcript-title",note.sourceIsBridge?"Show English recognition bridge":"Show original speech transcript");
+   put("source-transcript-text",note.sourceTranscript);
+  }
   put("summary",note.summary);
   renderBullets("points",note.points,"No key points detected.");
   renderBullets("actions",note.actions,"No explicit action items detected.");
@@ -316,10 +340,24 @@ $("generate").addEventListener("click",async()=>{
   try{
     const pcm=await decodeAudio(audioFile);
     if(operation!==state.operationId)throw Error("Processing cancelled.");
-    const result=await recognize(pcm);
+    const plan=speechPlan($("audio-language")?.value||"en",$("audio-output")?.value||"original");
+    const result=await recognize(pcm,plan);
     if(operation!==state.operationId)throw Error("Processing cancelled.");
-    if(!result.transcript?.trim())throw Error("No speech detected. Use clear English audio or paste the transcript.");
-    const notes=createNotes(result.transcript);
+    if(!result.transcript?.trim())throw Error("No speech detected. Check the recording language and microphone quality.");
+    let finalTranscript=result.transcript,translationError="";
+    if(plan.translate){
+     try{finalTranscript=await translateSpeech(result.transcript,plan);}
+     catch(err){translationError=err.message||"Translation unavailable";}
+    }
+    if(operation!==state.operationId)throw Error("Processing cancelled.");
+    const notes=createNotes(finalTranscript);
+    if(notes){
+     notes.sourceTranscript=result.transcript;
+     notes.sourceIsBridge=plan.originalIsBridge;
+     notes.sourceLanguage=plan.source;
+     notes.outputLanguage=translationError?plan.originalIsBridge?"en":plan.source:plan.target==="original"?plan.source:plan.target;
+    }
+    if(translationError)error("Translation unavailable: "+translationError+". Source recognition was kept; choose Original or a smaller source language to continue.");
     await alchemy.complete();
     if(operation!==state.operationId)throw Error("Processing cancelled.");
     renderNotes(notes,audioFile.name,result.segments,audioFile,true);

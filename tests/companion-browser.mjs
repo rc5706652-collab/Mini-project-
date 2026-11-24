@@ -54,11 +54,11 @@ try{
  {
   const {page,pageErrors}=await open(chrome,{width:1440,height:900,reduced:true});
   assert.ok(await page.locator("#orb-stage").isVisible());
-  assert.ok((await page.locator("#pip-chat-title").innerText()).includes("Talk to Pip"));
-  assert.ok(await page.locator(".pip-css").isVisible());
+  assert.ok((await page.locator("#pip-chat-title").innerText()).includes("Talk to Loisel"));
+  assert.ok(await page.locator(".loisel-hero-photo").isVisible());
   await page.locator("#pip-question").fill("hello");
   await page.locator("#pip-send").click();
-  assert.ok((await page.locator("#pip-messages").innerText()).includes("study sidekick") || (await page.locator("#pip-messages").innerText()).includes("your NoteWave study companion"));
+  assert.ok((await page.locator("#pip-messages").innerText()).includes("Loisel"));
   await page.locator("#pip-question").fill("What is artificial intelligence?");
   await page.locator("#pip-send").click();
   await page.getByText("AI means computers learning patterns from data.").waitFor({timeout:6000});

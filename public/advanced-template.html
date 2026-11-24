@@ -31,11 +31,25 @@
 <option value="en">English · fast</option><option value="auto">Automatic detection</option>
 <option value="hi">Hindi · हिन्दी</option><option value="kn">Kannada · ಕನ್ನಡ</option>
 <option value="te">Telugu · తెలుగు</option><option value="ta">Tamil · தமிழ்</option>
-<option value="ml">Malayalam · മലയാളം</option>
+<option value="ml">Malayalam · മലയാളം</option><option value="bn">Bengali · বাংলা</option>
+<option value="mr">Marathi · मराठी</option><option value="gu">Gujarati · ગુજરાતી</option>
+<option value="pa">Punjabi · ਪੰਜਾਬੀ</option><option value="ur">Urdu · اردو</option>
+<option value="ar">Arabic · العربية</option><option value="es">Spanish · Español</option>
+<option value="fr">French · Français</option><option value="de">German · Deutsch</option>
+<option value="pt">Portuguese · Português</option><option value="ja">Japanese · 日本語</option>
 </select></label>
-<label for="audio-output">Speech output
-<select id="audio-output"><option value="original">Keep spoken language</option><option value="english">Translate speech to English</option></select></label>
-<p class="tiny muted">The multilingual model is larger and may be inaccurate for some languages or accents. Review every transcript.</p>
+<label for="audio-output">Transcript language
+<select id="audio-output">
+<option value="original">Keep spoken language</option><option value="english">English translation</option>
+<option value="hi">Hindi · हिन्दी</option><option value="kn">Kannada · ಕನ್ನಡ</option>
+<option value="te">Telugu · తెలుగు</option><option value="ta">Tamil · தமிழ்</option>
+<option value="ml">Malayalam · മലയാളം</option><option value="bn">Bengali · বাংলা</option>
+<option value="mr">Marathi · मराठी</option><option value="gu">Gujarati · ગુજરાતી</option>
+<option value="ur">Urdu · اردو</option><option value="es">Spanish · Español</option>
+<option value="fr">French · Français</option><option value="de">German · Deutsch</option>
+<option value="ar">Arabic · العربية</option><option value="pt">Portuguese · Português</option>
+</select></label>
+<p class="tiny muted">Multilingual speech recognition runs locally. Translating into additional languages requires an optional large NLLB model (about 1 GB or more) and may be too demanding for some phones. Choosing the spoken language improves accuracy. Always review AI transcripts and translations.</p>
 </div>
 <!-- MEMORY -->
 <div class="memory-module">

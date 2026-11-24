@@ -20,8 +20,8 @@
       document.querySelector('meta[name="theme-color"]').content=resolved==="light"?"#f5f4ef":"#171d1b";
     })();
   </script>
-  <meta name="description" content="NoteWave AI Studio: learn with Pip, your interactive 3D robot and local AI study chatbot. Transform audio into grounded notes, quizzes and knowledge.">
-  <title>NoteWave | Meet Pip, Your 3D AI Study Companion</title>
+  <meta name="description" content="NoteWave AI Studio: learn with Loisel, your multilingual AI study assistant. Transform audio into translated notes and source-grounded quizzes.">
+  <title>NoteWave | Loisel — Multilingual AI Study Companion</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="./robot-chat.css">
   <link rel="stylesheet" href="./enterprise-themes.css">
   <link rel="stylesheet" href="./reference-palette.css">
+  <link rel="stylesheet" href="./loisel.css">
 </head>
 <body>
 <div class="aurora aurora-one" aria-hidden="true"></div><div class="aurora aurora-two" aria-hidden="true"></div>
@@ -39,6 +40,7 @@
     <div class="nav-kicker">WORKSPACE</div>
     <button class="side-link selected" id="nav-new"><span class="side-icon">✦</span> AI studio <span class="nav-dot"></span></button>
     <button class="side-link" id="nav-saved"><span class="side-icon">▤</span> My library <span id="count" class="count">0</span></button>
+    <button class="side-link" id="nav-quiz"><span class="side-icon">◇</span> Quiz studio</button>
     <div class="nav-kicker nav-gap">RECENT SESSIONS</div>
     <div id="recent" class="recent-list"><p class="muted tiny">Your saved notes appear here.</p></div>
     <div class="side-footer">
@@ -58,25 +60,19 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <span class="hero-kicker"><span class="kicker-mark">✳</span> MEET YOUR NEW AI COMPANION</span>
-          <h1 id="hero-title">Meet Pip.<br><span class="gradient-text">Make ideas come alive.</span></h1>
-          <p>An adorable 3D AI companion that listens when you ask, helps answer questions and turns recordings into notes worth remembering.</p>
+          <h1 id="hero-title">Meet Loisel.<br><span class="gradient-text">Learn in your language.</span></h1>
+          <p>Loisel is your multilingual AI learning companion. Turn lectures into notes, ask questions, and discover what to practise next.</p>
           <div class="hero-actions"><a href="#create-panel" class="cta">Start creating <span>↗</span></a><span class="hero-sub">✧ Powered by private, on-device AI</span></div>
           <div class="hero-stats"><div><strong>08<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
         </div>
         <div class="hero-visual">
-          <div id="orb-stage" class="orb-stage robot-stage" data-mode="idle" aria-label="Pip, an expressive three-dimensional AI robot">
+          <div id="orb-stage" class="orb-stage loisel-stage" data-mode="idle" aria-label="Loisel AI companion portrait">
             <div class="orb-glow"></div>
-            <div class="pip-css" aria-hidden="true">
-              <div class="pip-css-antenna"></div>
-              <div class="pip-css-head"><div class="pip-css-face"><i class="pip-css-eye"></i><i class="pip-css-eye"></i><b class="pip-css-smile"></b></div></div>
-              <div class="pip-css-body"><span class="pip-css-heart">✦</span><i class="pip-css-arm pip-css-left"></i><i class="pip-css-arm pip-css-right"></i></div>
-              <div class="pip-css-feet"></div>
-            </div>
-            <canvas id="orb-canvas" aria-hidden="true"></canvas>
+            <img class="loisel-hero-photo" src="./loisel-portrait.jpg" alt="Futuristic silver AI android with an illuminated orange eye, representing Loisel" loading="eager" decoding="async">
             <div class="orb-grain" aria-hidden="true"></div>
-            <div class="float-chip chip-a"><span class="chip-icon">✦</span><span>MEET PIP <strong>YOUR AI BUDDY</strong></span></div>
+            <div class="float-chip chip-a"><span class="chip-icon">✦</span><span>MEET LOISEL <strong>YOUR LEARNING GUIDE</strong></span></div>
             <div class="float-chip chip-b"><span class="chip-icon">♥</span><span>VOICE CHAT <strong>ON REQUEST</strong></span></div>
-            <div class="orb-bottom"><div class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><strong id="orb-label">Pip is ready to help</strong><small>3D interactive AI companion</small></div></div>
+            <div class="orb-bottom"><div class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div><strong id="orb-label">Loisel is ready to help</strong><small>Multilingual learning companion</small></div></div>
           </div>
         </div>
       </section>
@@ -84,8 +80,8 @@
 
       <section id="pip-chat" class="pip-chat glass" aria-labelledby="pip-chat-title">
         <div class="pip-chat-intro">
-          <div class="pip-chat-avatar" aria-hidden="true"><span>◕ ◕</span><i>⌣</i></div>
-          <div><span class="mini-kicker">✦ YOUR AI COMPANION</span><h2 id="pip-chat-title">Talk to Pip.</h2><p>Ask a question, speak a short voice prompt, or explore your lecture. The AI runs locally on your device.</p></div>
+          <div class="pip-chat-avatar loisel-avatar" aria-hidden="true"><img src="./loisel-portrait.jpg" alt=""></div>
+          <div><span class="mini-kicker">✦ YOUR AI COMPANION</span><h2 id="pip-chat-title">Talk to Loisel.</h2><p>Ask a question, speak a short voice prompt, or explore your lecture. The AI runs locally on your device.</p></div>
           <span class="pip-chat-online"><span class="live-dot"></span> LOCAL FIRST</span>
         </div>
         <div class="pip-chat-tools">
@@ -94,7 +90,7 @@
           <label class="pip-voice-toggle"><input type="checkbox" id="pip-speak"> Read replies aloud</label>
         </div>
         <div id="pip-messages" class="pip-messages" role="log" aria-live="polite" aria-label="AI chatbot conversation">
-          <div class="pip-message pip-assistant"><span class="pip-speaker">PIP ✦</span><p>Hi! I'm Pip, your tiny study sidekick. Ask me anything, or let me help with your next recording. Try the microphone to talk to me!</p></div>
+          <div class="pip-message pip-assistant"><span class="pip-speaker">LOISEL ✦</span><p>Hello! I'm Loisel. Share a lecture, ask a question, or practise what you learned. Tap the microphone to speak.</p></div>
         </div>
         <div class="pip-quick-prompts" aria-label="Suggested questions">
           <button type="button" data-pip-prompt="What can you do?">✧ What can you do?</button>
@@ -102,13 +98,13 @@
           <button type="button" data-pip-prompt="Summarize my recording">✧ Summarize recording</button>
         </div>
         <form id="pip-form" class="pip-compose">
-          <label for="pip-question" class="sr-only">Your message to Pip</label>
-          <input id="pip-question" type="text" maxlength="450" autocomplete="off" placeholder="Ask Pip anything…">
+          <label for="pip-question" class="sr-only">Your message to Loisel</label>
+          <input id="pip-question" type="text" maxlength="450" autocomplete="off" placeholder="Ask Loisel a question…">
           <button type="button" id="pip-mic" class="pip-mic" aria-pressed="false" aria-label="Start voice question recording" title="Voice question, max 12 seconds">🎙</button>
           <button type="submit" id="pip-send" class="pip-send" aria-label="Send question">Send <span aria-hidden="true">↗</span></button>
         </form>
         <div class="pip-chat-footer"><span id="pip-status" role="status">AI models download on first use; replies may be imperfect. Audio input is optional.</span><button type="button" id="pip-clear" class="pip-clear">Clear chat</button></div>
-        <p class="pip-disclaimer">Pip uses a small local language model, not a cloud chatbot. It can't browse live information. Voice input uses browser microphone permission and local Whisper transcription; speech playback uses your device's speech synthesis service. Double-check important answers.</p>
+        <p class="pip-disclaimer">Loisel uses a small local language model, not a cloud chatbot. It can't browse live information. Voice input uses browser microphone permission and local Whisper transcription; speech playback uses your device's speech synthesis service. Double-check important answers.</p>
       </section>
 
       <div class="flow-line" aria-label="Workflow"><div><span>01</span> CAPTURE</div><i></i><div><span>02</span> UNDERSTAND</div><i></i><div><span>03</span> LEARN</div></div>
@@ -189,9 +185,45 @@
           </div>
         </section>
 
+        <details id="source-transcript-panel" class="note glass source-transcript hidden">
+          <summary id="source-transcript-title">Show source recognition</summary>
+          <p class="muted tiny">Compare the original speech recognition with the translated transcript. With automatic language detection, the intermediate transcript may be English.</p>
+          <pre id="source-transcript-text"></pre>
+        </details>
         <article class="note glass transcript"><div class="transcript-heading"><div><span class="mini-kicker">FULL RECORD</span><h3>Editable transcript</h3><p>Review speech-recognition mistakes, then regenerate all notes and study materials.</p></div><button class="soft-button" id="regenerate">↻ Regenerate</button></div><textarea rows="12" id="editor" aria-label="Editable transcript"></textarea></article>
       </section>
     </div>
+
+    
+    <section id="quiz-hub-view" class="quiz-hub hidden" aria-labelledby="quiz-hub-title">
+      <div class="studio-heading">
+        <div><span class="mini-kicker">◇ LOISEL · PERSONALIZED LEARNING</span><h2 id="quiz-hub-title">Quiz Studio</h2><p>Select a lecture, practise concepts, and review what needs more attention.</p></div>
+        <span class="model-label">SOURCE-GROUNDED</span>
+      </div>
+      <section class="glass quiz-hub-setup" aria-labelledby="quiz-setup-title">
+        <h3 id="quiz-setup-title">Build a lecture quiz</h3>
+        <form id="quiz-form">
+          <div class="quiz-hub-controls">
+            <label>Lecture <select id="quiz-lecture" required><option value="paste">Paste my own lecture text</option></select></label>
+            <label>Topic focus (optional) <input id="quiz-topic" type="text" placeholder="e.g., solar inverter" maxlength="90"></label>
+            <label>Maximum questions <select id="quiz-count"><option value="5">5</option><option value="8" selected>8</option><option value="12">12</option></select></label>
+          </div>
+          <div id="quiz-paste-group" class="quiz-paste-group">
+            <label for="quiz-lecture-text">Paste the lecture you want to practise</label>
+            <textarea id="quiz-lecture-text" rows="8" placeholder="Paste at least a paragraph from your lecture. Quiz questions will use this source."></textarea>
+          </div>
+          <p class="muted tiny">Questions use only information in your selected lecture. A topic must appear in the lecture for a topic-focused quiz. This assessment reflects one practice attempt, not a diagnosis of ability.</p>
+          <div class="quiz-hub-actions"><button type="submit" id="quiz-build" class="cta">◇ Generate lecture quiz ↗</button><button type="button" id="quiz-go-studio" class="soft-button">← Back to Studio</button></div>
+        </form>
+        <p id="quiz-hub-status" role="status" aria-live="polite">Choose a lecture or paste your own notes to begin.</p>
+      </section>
+      <section id="quiz-hub-questions" class="quiz-hub-questions" aria-label="Lecture quiz questions"></section>
+      <div class="quiz-hub-actions">
+        <button id="quiz-submit" class="cta hidden" type="button">Check my answers</button>
+        <button id="quiz-retry" class="soft-button hidden" type="button">↻ Try again</button>
+      </div>
+      <section id="quiz-hub-results" class="glass quiz-hub-results hidden" aria-label="Quiz results and concept review" aria-live="polite"></section>
+    </section>
 
     <section class="saved-view hidden" id="saved-panel"><div class="mini-kicker">YOUR PRIVATE LIBRARY</div><h2>Memories worth keeping.</h2><p class="muted">Saved transcripts stay in this browser. Raw audio is not stored or synced.</p><div id="saved-list" class="saved-list"></div><button class="soft-button" id="clear">Delete all saved notes</button></section>
     <footer><span>◈ NOTEWAVE</span><span>MADE FOR THE WAY YOU THINK · LOCAL-FIRST AI</span></footer>
@@ -200,12 +232,13 @@
 
 <div id="studio-cinematic" class="studio-cinematic" aria-hidden="true" data-active="false">
   <div class="cinematic-lights"></div><div class="cinematic-orbit orbit-one"></div><div class="cinematic-orbit orbit-two"></div>
-  <div class="cinematic-robot"><div class="cinematic-head"><div class="cinematic-visor"><i></i><i></i><b></b></div></div><div class="cinematic-body"><span>✦</span></div></div>
+  <div class="cinematic-robot loisel-cinematic"><img src="./loisel-portrait.jpg" alt=""></div>
   <div class="cinematic-title">WELCOME TO <strong>AI STUDIO</strong><small>YOUR IDEAS, REIMAGINED</small></div>
 </div>
 
 <script type="module" src="./app.js"></script>
 <script type="module" src="./robot-chat.js"></script>
+<script type="module" src="./quiz-hub.js"></script>
 <script type="module" src="./enterprise-ui.js"></script>
 <script type="module" src="./theme.js"></script>
 </body>

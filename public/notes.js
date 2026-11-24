@@ -67,5 +67,6 @@ export function toMarkdown(notes, name = "Recording") {
     section("Action Items", notes.actions, "No explicit action items detected.") +
     section("Important Details", notes.details, "No dates or numerical details detected.") +
     "## Keywords\n\n" + notes.keywords.join(", ") + "\n\n" +
-    "## Full Transcript\n\n" + notes.transcript + "\n";
+    "## Full Transcript\n\n" + notes.transcript + "\n" +
+    (notes.sourceTranscript && notes.sourceTranscript!==notes.transcript?"\n## Source Recognition"+(notes.sourceIsBridge?" (English bridge)":"")+"\n\n"+notes.sourceTranscript+"\n":"");
 }
