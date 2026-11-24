@@ -83,6 +83,8 @@ async function translatedAudioScenario(browser){
   assert.deepEqual(await page.evaluate(()=>window.__translationRequest),{sourceCode:"hin_Deva",targetCode:"tam_Taml"});
   assert.ok((await page.locator("#editor").inputValue()).includes("சூரிய"));
   assert.ok(await page.locator("#source-transcript-panel").isVisible());
+  await page.locator("#source-transcript-title").click();
+  assert.equal(await page.locator("#source-transcript-panel").evaluate(el=>el.open),true);
   assert.ok((await page.locator("#source-transcript-text").innerText()).includes("Solar panels"));
   assert.deepEqual(errors,[]);
   console.log("PASS Chromium multilingual recognition/translation worker contract and original-source retention");
