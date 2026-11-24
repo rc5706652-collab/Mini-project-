@@ -123,7 +123,7 @@ try{
  assert.equal(await audio.locator("#alchemy-stage").isVisible(),false);
 
  // A second generation must reuse the same canvas without losing its WebGL context.
- await audio.locator("#nav-new").click();
+ await audio.locator("#top-create").click();
  await audio.locator("#text-tab").click();
  await audio.locator("#pasted").fill(transcript);
  await audio.locator("#generate").click();
@@ -132,7 +132,7 @@ try{
  assert.ok((await audio.locator("#editor").inputValue()).includes("renewable energy"));
 
  // Cancellation must terminate processing, release 3D resources and unlock controls.
- await audio.locator("#nav-new").click();
+ await audio.locator("#top-create").click();
  await audio.locator("#upload-tab").click();
  await audio.locator("#file").setInputFiles({name:"cancel.wav",mimeType:"audio/wav",buffer:wavFixture()});
  await audio.locator("#generate").click();
