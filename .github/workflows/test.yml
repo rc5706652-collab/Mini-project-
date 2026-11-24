@@ -9,6 +9,8 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,10 +52,8 @@ jobs:
           test -s public/advanced-ui.js
           test -s public/advanced-template.html
           test -s render.yaml
-      - name: Install browser smoke test dependencies
-        run: |
-          npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium webkit
+      - name: Install test package (browsers provided by container)
+        run: npm install --no-save playwright@1.56.1
       - name: Smoke test desktop and mobile
         run: node tests/browser-smoke.mjs
       - name: Cross-browser enterprise UI responsive matrix
