@@ -161,3 +161,19 @@ The **Pip Chat** panel is available even before recording:
 - **Tests:** companion-core.test.mjs checks grounded prompts; companion-browser.mjs verifies mocked model/voice UI, notes citations and Chromium/WebKit layout. Actual voice recognition and real-model answer quality require separate device verification.
 
 Files: public/robot.js, public/robot-chat.js, public/robot-chat.css, public/companion-core.js, public/companion-worker.js. No paid API or server database is introduced.
+
+
+## Enterprise Appearance — Dark, Light and System
+
+NoteWave now supports a full enterprise-grade color scheme across the studio, Pip chatbot, audio workflow, note cards, flashcards, tutor, Galaxy controls, library, mobile dock, command palette and dialogs. Existing AI processing, WebGL scenes and audio recording behavior are unchanged.
+
+- **Light:** soft porcelain canvas, navy primary text, indigo-to-blue accents, accessible controls, layered white cards and restrained shadows. The 3D Galaxy remains a deliberate dark starfield, with accessible source panels outside it.
+- **Dark:** the current midnight liquid-glass aesthetic, with indigo highlights and glowing 3D companions retained.
+- **System:** the default. Follows the browser/device dark-mode setting, including changes while the page is open.
+- **Persistence:** selections are stored only in this browser using the localStorage key notewave-theme-v1. Nothing is transmitted to a backend. Private mode or clearing browser data may reset the preference.
+- **No theme flash:** a tiny inline script resolves the saved or OS mode before the first stylesheet paints. The theme controller only updates the theme attributes, meta theme-color, and accessible menu labels.
+- **Keyboard and mobile:** Appearance opens an accessible menu with pointer, Enter, Arrow, Home/End, and Escape controls. The switcher remains available in the top toolbar at small widths, including iOS and Android, with a 44px minimum touch target.
+- **Architecture:** public/theme-core.js contains pure theme resolution and contrast helpers, public/theme.js manages the preference and menu, and public/enterprise-themes.css is a final cascading theme layer that overrides hard-coded legacy colors without touching the AI modules. Dark/light text and secondary text colors are tested against WCAG AA contrast targets for solid enterprise surfaces.
+- **Validation:** tests/theme-core.test.mjs and tests/theme-browser.mjs cover keyboard controls, persistence, automatic OS changes, responsive overflow, generation and study tool navigation in Chromium and WebKit. Automated checks are not the same as a visual/accessibility audit on every real iPhone and Android model.
+
+The theme toggle changes appearance only, never the recording, transcription, generated notes, chatbot model or stored sessions.
