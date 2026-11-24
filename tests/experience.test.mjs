@@ -25,5 +25,6 @@ test("tilt math is stable and clamped",()=>{
 test("command palette hides note-only actions until notes exist",()=>{
  assert.equal(filterCommands("galaxy",false).length,0);
  assert.equal(filterCommands("galaxy",true)[0].id,"galaxy");
+ assert.equal(filterCommands("library")[0].id,"library");
  assert.equal(filterCommands("").length>=3,true);
 });
