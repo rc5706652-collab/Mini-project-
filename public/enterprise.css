@@ -369,6 +369,14 @@ html[data-motion="full"] .nw-enterprise [data-nw-reveal="true"].nw-in-view{anima
  .nw-enterprise .advanced-tabs .studio-tab{font-size:10px}
 }
 @media(max-height:510px) and (orientation:landscape) and (max-width:940px){
+ .nw-enterprise .app-shell{display:block}
+ .nw-enterprise .sidebar{width:100%;height:auto;min-height:0;position:relative;display:flex;flex-direction:row;align-items:center;border-right:0;border-bottom:1px solid #7887b535}
+ .nw-enterprise .brand{padding:0;font-size:22px}
+ .nw-enterprise .brand-mark{width:35px;height:35px;font-size:24px}
+ .nw-enterprise .sidebar .side-link,.nw-enterprise .sidebar .nav-kicker,.nw-enterprise .sidebar .recent-list,.nw-enterprise .sidebar .side-footer{display:none}
+ .nw-enterprise .main{width:100%;max-width:none;padding-inline:18px;padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))}
+ .nw-dock{display:flex}
+ 
  .nw-enterprise .hero{grid-template-columns:1fr 1fr;gap:15px}
  .nw-enterprise .hero-visual{align-self:center}
  .nw-enterprise .orb-stage{height:265px;min-height:265px}
