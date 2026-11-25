@@ -21,6 +21,7 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
  const crashes=[];
  page.on("pageerror",err=>crashes.push(err.message));
  try{
+  if(width>=730)await page.mouse.move(Math.floor(width/2),Math.floor(height/2));
   await page.goto(root,{waitUntil:"domcontentloaded"});
   await page.locator("#nw-command-open").waitFor({state:"visible",timeout:9000});
   assert.equal(await page.locator("html").getAttribute("data-motion"),"reduced");
