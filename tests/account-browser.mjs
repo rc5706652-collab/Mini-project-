@@ -11,11 +11,11 @@ async function run(browser,viewport,scheme){const context=await browser.newConte
 
  assert.equal(await page.locator(".account-ribbons").count(),0);
  const glass=await page.locator(".account-glass").evaluate(el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return {radius:s.borderTopLeftRadius,w:r.width,h:r.height};});
- if(viewport.width>660){assert.equal(glass.radius,"50%");assert.ok(Math.abs(glass.w-glass.h)<3,"Circular desktop glass panel");}
+ assert.equal(glass.radius,"50%");assert.ok(Math.abs(glass.w-glass.h)<1,"Circular glass panel at every viewport: "+JSON.stringify(glass));
  assert.equal(await page.locator(".account-sphere").first().evaluate(el=>getComputedStyle(el).animationName),"none");
 
  await page.goto(root+"/#quiz-studio");await page.waitForURL("**/account.html");
- await page.locator("#account-switch").click();await page.locator("#confirm-password").waitFor();await page.locator("#username").fill("Student");await page.locator("#password").fill("sample-passphrase-42");await page.locator("#confirm-password").fill("sample-passphrase-42");await page.locator("#account-submit").click();
+ await page.locator("#account-switch").click();await page.locator("#confirm-password").waitFor();const signupGlass=await page.locator(".account-glass").evaluate(el=>{const r=el.getBoundingClientRect();return {w:r.width,h:r.height,radius:getComputedStyle(el).borderTopLeftRadius};});assert.equal(signupGlass.radius,"50%");assert.ok(Math.abs(signupGlass.w-signupGlass.h)<1,"Circular signup panel");await page.locator("#username").fill("Student");await page.locator("#password").fill("sample-passphrase-42");await page.locator("#confirm-password").fill("sample-passphrase-42");await page.locator("#account-submit").click();
  await page.waitForURL(root+"/");await page.locator("#home-view").waitFor();await page.waitForFunction(()=>document.getElementById("account-link")?.textContent==="Account");
  assert.equal(await page.evaluate(()=>JSON.stringify(localStorage).includes("sample-passphrase-42")),false);
  await page.reload();await page.locator("#home-view").waitFor();
@@ -36,4 +36,4 @@ async function verifyEntrance(browser){
   assert.equal(await page.locator("#account-entrance").isVisible(),false,"Signup must not replay entrance");
  }finally{await context.close();}
 }
-let c,w;try{c=await chromium.launch({headless:true,args:["--no-sandbox"]});await verifyEntrance(c);await run(c,{width:1440,height:900},"dark");await run(c,{width:390,height:844},"light");w=await webkit.launch();await run(w,{width:390,height:844},"dark");console.log("PASS login-first entry, direct link redirect, registration, wrong password, sign-in/out, refresh and theme");}finally{await c?.close();await w?.close();await new Promise(r=>server.close(r));}
+let c,w;try{c=await chromium.launch({headless:true,args:["--no-sandbox"]});await verifyEntrance(c);await run(c,{width:1440,height:900},"dark");await run(c,{width:1366,height:625},"light");await run(c,{width:320,height:640},"dark");await run(c,{width:390,height:844},"light");w=await webkit.launch();await run(w,{width:390,height:844},"dark");console.log("PASS login-first entry, direct link redirect, registration, wrong password, sign-in/out, refresh and theme");}finally{await c?.close();await w?.close();await new Promise(r=>server.close(r));}
