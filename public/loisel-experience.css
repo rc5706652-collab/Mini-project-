@@ -407,3 +407,106 @@ html[data-motion="reduced"] .loisel-pocket-hide-cover{
 @keyframes knowledge-satellite{50%{translate:0 -10px}}
 @media(prefers-reduced-motion:reduce){.loisel-knowledge-scene *{animation:none!important}}
 :root[data-motion="reduced"] .loisel-knowledge-scene *{animation:none!important}
+
+/* The centerpiece belongs to the workspace, not a separate right-hand card.
+   One centered composition with restrained, sculptural motion. */
+.nw-enterprise .hero.hero--centered{
+ display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;
+ gap:0;justify-items:center;align-items:center;text-align:center;
+ width:100%;min-height:0;padding:clamp(28px,4vw,60px) 0 28px;
+ isolation:isolate;
+}
+.nw-enterprise .hero.hero--centered::before{
+ content:none;
+}
+.nw-enterprise .hero--centered .hero-copy{
+ width:100%;min-width:0;padding:0;max-width:920px;z-index:3;
+}
+.nw-enterprise .hero--centered .hero-kicker{
+ font-size:10px;letter-spacing:1.6px;line-height:1.4;
+ padding:7px 13px;box-shadow:none;
+}
+.nw-enterprise .hero--centered h1{
+ font-size:clamp(38px,5vw,72px);font-weight:800;
+ line-height:1.04;letter-spacing:-.06em;margin:19px auto 0;
+ max-width:950px;text-wrap:balance;
+}
+.nw-enterprise .hero--centered h1 .gradient-text{display:block;filter:none}
+.nw-enterprise .hero--centered .hero-visual{
+ position:relative;width:100%;max-width:none;min-width:0;margin:0 auto;
+ z-index:1;justify-self:center;align-self:center;
+}
+.nw-enterprise .hero--centered #orb-stage{
+ width:100%;height:clamp(265px,30vw,420px);min-height:0;
+ margin:0 auto;background:transparent;border:0;border-radius:0;
+ box-shadow:none;overflow:visible;isolation:isolate;
+}
+.nw-enterprise .hero--centered #orb-stage::before,
+.nw-enterprise .hero--centered #orb-stage::after{content:none}
+html[data-theme] .nw-enterprise .hero--centered #orb-stage .orb-glow{
+ inset:5% 5%;filter:blur(18px);
+ background:radial-gradient(ellipse at center,#9c8cda3a 0%,#b5a0e91c 31%,#eac27b12 48%,transparent 72%);
+}
+html[data-theme="dark"] .nw-enterprise .hero--centered #orb-stage .orb-glow{
+ background:radial-gradient(ellipse at center,#8270cf55 0%,#446b8840 28%,#d4a04410 49%,transparent 72%);
+}
+.nw-enterprise .hero--centered .loisel-knowledge-scene{
+ overflow:hidden;perspective:1050px;isolation:isolate;
+}
+.nw-enterprise .hero--centered .knowledge-assembly{
+ width:min(64%,340px);max-width:100%;aspect-ratio:1;
+ animation:knowledge-center-float 10s ease-in-out infinite;
+}
+.nw-enterprise .hero--centered .knowledge-core{
+ width:59%;transform:translateZ(6px);
+ background:radial-gradient(ellipse at 25% 15%,#f6ffff 0%,#b4e6ef 10%,#7977b9 27%,#25334d 49%,#a793c4 65%,#1d2b45 86%);
+ box-shadow:inset -13px -18px 30px #0c1424bd,inset 5px 4px 15px #e7f9ffa6,0 20px 35px #31364f38,0 0 25px #8e82ff5c;
+}
+.nw-enterprise .hero--centered .knowledge-orbit-gold{
+ border-width:clamp(6px,1vw,12px);
+ box-shadow:0 0 5px #fff6c8,inset 0 0 8px #fff2a8,0 0 18px #d99b3c75,inset 0 0 14px #b881324a;
+}
+.nw-enterprise .hero--centered .knowledge-orbit-blue,
+.nw-enterprise .hero--centered .knowledge-orbit-violet{
+ border-width:1px;opacity:.75;box-shadow:0 0 5px #9ac8dc70;
+}
+.nw-enterprise .hero--centered .knowledge-satellite{width:11%}
+.nw-enterprise .hero--centered .satellite-b{width:7%}
+.nw-enterprise .hero--centered .knowledge-stars{inset:12% 20%;opacity:.5}
+.nw-enterprise .hero--centered .knowledge-stars i{width:3px;height:3px}
+.nw-enterprise .hero--centered .hero-scene-status{
+ display:flex;justify-content:center;align-items:center;gap:8px;
+ margin:-5px auto 13px;font-size:11px;font-weight:600;color:var(--nw-subdued);
+ letter-spacing:.02em;min-height:20px;
+}
+.nw-enterprise .hero--centered .hero-details>p{
+ max-width:590px;margin:0 auto;line-height:1.7;font-size:15px;
+}
+.nw-enterprise .hero--centered .hero-actions{
+ justify-content:center;align-items:center;gap:14px;margin:21px 0 25px;
+}
+.nw-enterprise .hero--centered .hero-stats{
+ display:flex;justify-content:center;gap:clamp(20px,5vw,55px);
+ max-width:540px;margin:0 auto;padding-top:17px;
+}
+.nw-enterprise .hero--centered .hero-stats strong{font-size:25px}
+.nw-enterprise .hero--centered .hero-stats small{font-size:9px}
+@keyframes knowledge-center-float{
+ 0%,100%{transform:translateY(-2%) rotateY(-9deg)}
+ 50%{transform:translateY(2%) rotateY(10deg)}
+}
+@media(max-width:670px){
+ .nw-enterprise .hero.hero--centered{padding:26px 0 24px}
+ .nw-enterprise .hero--centered h1{font-size:clamp(33px,8.8vw,48px);margin-top:15px}
+ .nw-enterprise .hero--centered #orb-stage{height:clamp(205px,67vw,310px)}
+ .nw-enterprise .hero--centered .knowledge-assembly{width:min(77%,270px)}
+ .nw-enterprise .hero--centered .hero-details>p{font-size:13px}
+ .nw-enterprise .hero--centered .hero-actions{gap:10px;margin:17px 0 21px}
+ .nw-enterprise .hero--centered .hero-stats{gap:clamp(11px,4vw,28px)}
+ .nw-enterprise .hero--centered .hero-stats small{font-size:8px;letter-spacing:.65px}
+ .nw-enterprise .hero--centered .hero-stats strong{font-size:22px}
+}
+@media(prefers-reduced-motion:reduce){
+ .nw-enterprise .hero--centered .knowledge-assembly{animation:none!important}
+}
+:root[data-motion="reduced"] .nw-enterprise .hero--centered .knowledge-assembly{animation:none!important}
