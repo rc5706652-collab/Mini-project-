@@ -1,3 +1,3 @@
 import {readProfile,sessionName} from "./account-core.js";
 function refresh(){if(!sessionName(readProfile())){document.documentElement.dataset.entry="signed-out";location.replace("./account.html");return;}const link=document.getElementById("account-link");if(link)link.textContent="Account";}
-refresh();window.addEventListener("pageshow",refresh);document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh();});window.addEventListener("storage",refresh);
+refresh();window.addEventListener("pageshow",event=>{if(event.persisted){try{sessionStorage.removeItem("notewave-device-session-v1");sessionStorage.removeItem("notewave-workspace-entry-v1");sessionStorage.setItem("notewave-entry-animation","pending");}catch{}document.documentElement.dataset.entry="signed-out";location.replace("./account.html");return;}refresh();});document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh();});window.addEventListener("storage",refresh);

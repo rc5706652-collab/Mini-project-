@@ -18,7 +18,9 @@ async function run(browser,viewport,scheme){const context=await browser.newConte
  await page.locator("#account-switch").click();await page.locator("#confirm-password").waitFor();const signupGlass=await page.locator(".account-glass").evaluate(el=>{const r=el.getBoundingClientRect();return {w:r.width,h:r.height,radius:getComputedStyle(el).borderTopLeftRadius};});assert.equal(signupGlass.radius,"50%");assert.ok(Math.abs(signupGlass.w-signupGlass.h)<1,"Circular signup panel");await page.locator("#username").fill("Student");await page.locator("#password").fill("sample-passphrase-42");await page.locator("#confirm-password").fill("sample-passphrase-42");await page.locator("#account-submit").click();
  await page.waitForURL(root+"/");await page.locator("#home-view").waitFor();await page.waitForFunction(()=>document.getElementById("account-link")?.textContent==="Account");
  assert.equal(await page.evaluate(()=>JSON.stringify(localStorage).includes("sample-passphrase-42")),false);
- await page.reload();await page.locator("#home-view").waitFor();
+ await page.reload();await page.waitForURL("**/account.html");await page.locator("#account-form").waitFor();assert.equal(await page.locator("#account-title").innerText(),"Sign in");
+ await page.locator("#username").fill("Student");await page.locator("#password").fill("sample-passphrase-42");await page.locator("#account-submit").click();await page.waitForURL(root+"/");await page.locator("#home-view").waitFor();
+ await page.locator("#account-link").click();await page.locator("#account-signed-in").waitFor();await page.locator("#account-back").click();await page.waitForURL(root+"/");await page.locator("#home-view").waitFor();
  await page.locator("#account-link").click();await page.locator("#account-signed-in").waitFor();await page.locator("#account-signout").click();await page.locator("#account-form").waitFor();
  await page.goto(root);await page.waitForURL("**/account.html");
  await page.locator("#account-switch").click();await page.locator("#confirm-password").waitFor();
