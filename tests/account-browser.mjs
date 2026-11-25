@@ -20,6 +20,11 @@ async function run(browser,viewport,scheme){const context=await browser.newConte
  assert.equal(await page.evaluate(()=>JSON.stringify(localStorage).includes("sample-passphrase-42")),false);
  await page.reload();await page.locator("#home-view").waitFor();
  await page.locator("#account-link").click();await page.locator("#account-signed-in").waitFor();await page.locator("#account-signout").click();await page.locator("#account-form").waitFor();
+ await page.goto(root);await page.waitForURL("**/account.html");
+ await page.locator("#account-switch").click();await page.locator("#confirm-password").waitFor();
+ await page.locator("#username").fill("SecondStudent");await page.locator("#password").fill("short");await page.locator("#confirm-password").fill("short");await page.locator("#account-submit").click();await page.getByText(/at least 8 characters/).waitFor();
+ await page.locator("#password").fill("student-2");await page.locator("#confirm-password").fill("student-2");await page.locator("#account-submit").click();await page.waitForURL(root+"/");await page.locator("#home-view").waitFor();
+ await page.locator("#account-link").click();await page.locator("#account-signed-in").waitFor();await page.locator("#account-signout").click();await page.locator("#account-form").waitFor();
  await page.goto(root);await page.waitForURL("**/account.html");await page.locator("#username").fill("student");await page.locator("#password").fill("wrong-password");await page.locator("#account-submit").click();await page.getByText(/Incorrect username or password/).waitFor();
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
  await page.locator("#password").fill("sample-passphrase-42");await page.locator("#account-submit").click();await page.waitForURL(root+"/");await page.locator("#home-view").waitFor();assert.deepEqual(errors,[]);
