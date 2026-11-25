@@ -7,7 +7,7 @@
   <style>html[data-entry="signed-out"] body{visibility:hidden!important}</style>
   <script>
     // Browser-local profile navigation, not server authorization.
-    (function(){var valid=false;try{var p=JSON.parse(localStorage.getItem("notewave-device-profile-v1"));valid=!!(p&&p.version===1&&typeof p.name==="string"&&sessionStorage.getItem("notewave-device-session-v1")===p.name);}catch(e){}if(!valid){document.documentElement.dataset.entry="signed-out";try{sessionStorage.setItem("notewave-entry-animation","pending");}catch(e){}location.replace("./account.html");}})();
+    (function(){var valid=false;try{var name=sessionStorage.getItem("notewave-device-session-v1");var p=name&&JSON.parse(localStorage.getItem("notewave-profile-v2:"+name)||localStorage.getItem("notewave-device-profile-v1")||"null");valid=!!(p&&p.version===1&&typeof name==="string"&&p.name===name&&/^[0-9a-f]{32}$/i.test(p.salt)&&/^[0-9a-f]{64}$/.test(p.verifier));}catch(e){}if(!valid){document.documentElement.dataset.entry="signed-out";try{sessionStorage.setItem("notewave-entry-animation","pending");}catch(e){}location.replace("./account.html");}})();
   </script>
   <script>
     // Prevent a white/dark flash: select the saved or OS preference before CSS paints.
