@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {chromium,webkit} from "playwright";
 import {startStaticServer} from "./static-server.mjs";
+import {seedProfile} from "./profile-fixture.mjs";
 const PORT=8776,root="http://127.0.0.1:"+PORT;
 const server=await startStaticServer(PORT);
 const lecture=[
@@ -63,7 +64,8 @@ async function testFlow(browser,{mobile=false,mockPDF=false}={}){
   }));
  }
  try{
-  await page.goto(root,{waitUntil:"domcontentloaded"});
+  await seedProfile(page);
+ await page.goto(root,{waitUntil:"domcontentloaded"});
   const logo=page.locator(".loisel-knowledge-scene"),buddy=page.locator("#loisel-buddy-toggle");
   assert.ok(await logo.isVisible(),"Missing animated knowledge core");
   assert.equal(await page.locator(".loisel-hero-photo").count(),0);

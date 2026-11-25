@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#171d1b">
+  <style>html[data-entry="signed-out"] body{visibility:hidden!important}</style>
+  <script>
+    // Browser-local profile navigation, not server authorization.
+    (function(){var valid=false;try{var p=JSON.parse(localStorage.getItem("notewave-device-profile-v1"));valid=!!(p&&p.version===1&&typeof p.name==="string"&&sessionStorage.getItem("notewave-device-session-v1")===p.name);}catch(e){}if(!valid){document.documentElement.dataset.entry="signed-out";location.replace("./account.html");}})();
+  </script>
   <script>
     // Prevent a white/dark flash: select the saved or OS preference before CSS paints.
     (function(){
@@ -51,7 +56,7 @@
     <div id="recent" class="recent-list"><p class="muted tiny">Your saved notes appear here.</p></div>
     <div class="side-footer">
       <div class="privacy-indicator"><span class="live-dot"></span> LOCAL-FIRST AI</div>
-      <p>Audio stays in your browser.<br>No account required for study tools.</p>
+      <p>Audio stays in your browser.<br>Your profile stays on this browser.</p>
       <div class="side-version">NOTEWAVE / EXPERIENCE 4.0</div>
     </div>
   </aside>
@@ -59,7 +64,7 @@
   <main class="main">
     <header class="topbar">
       <div class="crumb"><button id="workspace-menu" type="button" aria-label="Open workspace menu" aria-controls="workspace-sidebar" aria-expanded="false"><span aria-hidden="true">☰</span></button><span class="crumb-muted">Workspace</span><span class="slash">/</span><strong id="breadcrumb">Home</strong></div>
-      <div class="top-actions"><a id="account-link" class="workspace-account-link" href="./account.html">Sign in</a><span class="online"><span class="live-dot"></span> Private processing</span><button class="top-create" id="top-create">＋ New session</button></div>
+      <div class="top-actions"><a id="account-link" class="workspace-account-link" href="./account.html">Account</a><span class="online"><span class="live-dot"></span> Private processing</span><button class="top-create" id="top-create">＋ New session</button></div>
     </header>
 
     <div id="home-view">

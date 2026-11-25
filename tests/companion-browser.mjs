@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {chromium,webkit} from "playwright";
 import {startStaticServer} from "./static-server.mjs";
+import {seedProfile} from "./profile-fixture.mjs";
 const PORT=8771,root="http://127.0.0.1:"+PORT;
 const server=await startStaticServer(PORT);
 const sample="Solar panels convert sunlight into electricity. Engineers tested a working solar panel prototype during the demonstration. Students must submit the research report by Friday. Renewable energy can reduce dependence on fossil fuels.";
@@ -44,6 +45,7 @@ async function open(browser,{width=1280,height=850,reduced=false,voice=false}={}
    };
   }
  },{fakeVoice:voice});
+ await seedProfile(page);
  await page.goto(root,{waitUntil:"domcontentloaded"});
  assert.ok(await page.locator("#orb-stage").isVisible());
  assert.equal(await page.locator("#pip-chat").isVisible(),false);

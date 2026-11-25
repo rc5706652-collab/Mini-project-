@@ -216,7 +216,8 @@ function workspaceNavigation(){
   sidebar.inert=false;sidebar.dataset.open="true";
   menu.setAttribute("aria-expanded","true");menu.setAttribute("aria-label","Close workspace menu");
  };
- edge.addEventListener("pointermove",event=>{if(desktop()&&event.pointerType!=="touch"&&sidebar.dataset.open!=="true"&&(event.movementX||event.movementY))open();});
+ let lastX=null,lastY=null;
+ document.addEventListener("pointermove",event=>{const moved=lastX!==null&&(lastX!==event.clientX||lastY!==event.clientY);lastX=event.clientX;lastY=event.clientY;if(desktop()&&event.pointerType!=="touch"&&sidebar.dataset.open!=="true"&&event.clientX<=10&&(moved||event.movementX||event.movementY))open();},{passive:true});
  edge.addEventListener("pointerleave",()=>{if(!openedByClick)closeTimer=setTimeout(()=>{if(!inside)close();},240);});
  sidebar.addEventListener("pointerenter",()=>{inside=true;clearTimeout(closeTimer);});
  sidebar.addEventListener("pointerleave",event=>{
