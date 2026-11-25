@@ -25,6 +25,18 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
   await page.locator("#nw-command-open").waitFor({state:"visible",timeout:9000});
   assert.equal(await page.locator("html").getAttribute("data-motion"),"reduced");
   assert.ok(await page.locator("#hero-title").isVisible());
+  const centerpiece=await page.evaluate(()=>{
+   const hero=document.querySelector(".hero"),stage=document.querySelector("#orb-stage"),core=document.querySelector(".knowledge-assembly");
+   const h=hero.getBoundingClientRect(),s=stage.getBoundingClientRect(),c=core.getBoundingClientRect();
+   return {heroCenter:h.x+h.width/2,coreCenter:c.x+c.width/2,stageWidth:s.width,heroWidth:h.width,stageHeight:s.height,coreHeight:c.height,background:getComputedStyle(stage).backgroundColor,shadows:getComputedStyle(stage).boxShadow,chips:stage.querySelectorAll(".float-chip").length,animation:getComputedStyle(core).animationName};
+  });
+  assert.ok(Math.abs(centerpiece.coreCenter-centerpiece.heroCenter)<3,"Sculpture must be horizontally centered");
+  assert.ok(centerpiece.stageWidth>=centerpiece.heroWidth-3,"Scene must span the hero width");
+  assert.ok(centerpiece.coreHeight<=centerpiece.stageHeight+3,"Sculpture must fit its scene");
+  assert.equal(centerpiece.background,"rgba(0, 0, 0, 0)");
+  assert.equal(centerpiece.shadows,"none");
+  assert.equal(centerpiece.chips,0);
+  assert.equal(centerpiece.animation,"none");
   const panel=page.locator("#create-panel");
   assert.ok(await panel.isVisible());
 
