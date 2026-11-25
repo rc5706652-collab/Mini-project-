@@ -45,6 +45,9 @@ async function open(browser,{width=1280,height=850,reduced=false,voice=false}={}
   }
  },{fakeVoice:voice});
  await page.goto(root,{waitUntil:"domcontentloaded"});
+ assert.ok(await page.locator("#orb-stage").isVisible());
+ assert.equal(await page.locator("#pip-chat").isVisible(),false);
+ await page.locator("#home-chat").click();
  await page.locator("#pip-chat").waitFor({state:"visible",timeout:10000});
  return {page,pageErrors};
 }
@@ -53,9 +56,9 @@ try{
  chrome=await chromium.launch({headless:true,args:["--no-sandbox"]});
  {
   const {page,pageErrors}=await open(chrome,{width:1440,height:900,reduced:true});
-  assert.ok(await page.locator("#orb-stage").isVisible());
+  assert.equal(await page.locator("#orb-stage").isVisible(),false);
   assert.ok((await page.locator("#pip-chat-title").innerText()).includes("Talk to Loisel"));
-  assert.ok(await page.locator(".loisel-knowledge-scene").isVisible());
+  assert.equal(await page.locator(".loisel-knowledge-scene").isVisible(),false);
   assert.equal(await page.locator("#loisel-buddy-toggle").count(),0);
   await page.locator("#pip-question").fill("hello");
   await page.locator("#pip-send").click();
@@ -64,11 +67,13 @@ try{
   await page.locator("#pip-send").click();
   await page.getByText("AI means computers learning patterns from data.").waitFor({timeout:6000});
   assert.equal((await page.locator("#pip-model").inputValue()),"fast");
+  await page.locator("#workspace-menu").click();await page.locator("#nav-new").click();
   await page.locator("#text-tab").click();
   await page.locator("#pasted").fill(sample);
   await page.locator("#generate").click();
   await page.locator("#results").waitFor({state:"visible",timeout:10000});
   assert.equal(await page.locator("#pip-mode").inputValue(),"notes");
+  await page.locator("#workspace-menu").click();await page.locator("#nav-chat").click();
   await page.locator("#pip-question").fill("What do solar panels convert?");
   await page.locator("#pip-send").click();
   await page.locator(".pip-citation").first().waitFor({timeout:7000});

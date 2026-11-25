@@ -38,7 +38,22 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
   assert.equal(centerpiece.chips,0);
   assert.equal(centerpiece.animation,"none");
   const panel=page.locator("#create-panel");
-  assert.ok(await panel.isVisible());
+  assert.equal(await panel.isVisible(),false);
+  assert.equal(await page.locator("#pip-chat").isVisible(),false);
+  assert.equal(await page.locator("#workspace-sidebar").getAttribute("data-open"),"false");
+  if(width>940){
+   await page.mouse.move(1,120);
+   await page.waitForFunction(()=>document.getElementById("workspace-sidebar").dataset.open==="true");
+   await page.mouse.move(120,120);await page.mouse.move(width-20,120);
+   await page.waitForFunction(()=>document.getElementById("workspace-sidebar").dataset.open==="false");
+  }
+  await page.locator("#home-start").click();assert.ok(await panel.isVisible());
+  assert.equal(await page.locator("#home-view").isVisible(),false);
+  await page.locator("#workspace-menu").click();await page.locator("#nav-chat").click();
+  assert.ok(await page.locator("#pip-chat").isVisible());assert.equal(await panel.isVisible(),false);
+  await page.goBack();await panel.waitFor({state:"visible"});
+  await page.goForward();await page.locator("#pip-chat").waitFor({state:"visible"});
+  await page.goBack();await panel.waitFor({state:"visible"});
 
   // Navigation: bottom dock on touch screens, command palette everywhere.
   if(width<=760||landscape){

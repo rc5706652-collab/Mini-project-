@@ -24,9 +24,7 @@ function toggleView(showQuiz){
  }
 }
 $("nav-quiz").addEventListener("click",()=>toggleView(true));
-$("nav-new").addEventListener("click",()=>toggleView(false));
-$("nav-saved").addEventListener("click",()=>toggleView(false));
-$("top-create").addEventListener("click",()=>toggleView(false));
+// The workspace router hides quiz after successful navigation.
 $("quiz-go-studio").addEventListener("click",()=>{toggleView(false);$("nav-new").click();});
 document.addEventListener("notewave:notes-ready",event=>{
  current=event.detail?.notes||null;
@@ -63,7 +61,7 @@ function publishPdf(source){
  option.disabled=!source;option.toggleAttribute("disabled",!source);
  document.dispatchEvent(new CustomEvent("notewave:pdf-source",{detail:{source}}));
 }
-askPdf.addEventListener("click",()=>{if(!pdfLecture)return;toggleView(false);$("nav-new").click();$("pip-mode").value="pdf";$("pip-chat").scrollIntoView({block:"start"});$("pip-question").focus({preventScroll:true});});
+askPdf.addEventListener("click",()=>{if(!pdfLecture)return;$("nav-chat").click();$("pip-mode").value="pdf";$("pip-chat").scrollIntoView({block:"start"});$("pip-question").focus({preventScroll:true});});
 function resetPdf(){
  pdfReadToken++;pdfLecture=null;pdfReading=false;publishPdf(null);
  pdfInput.value="";pdfInfo.textContent="Your PDF stays in this browser for quizzes and Loisel questions.";
@@ -203,7 +201,7 @@ $("quiz-submit").addEventListener("click",()=>{
      question:"Please explain "+question.answer+" in simple steps using this lecture: "+question.evidence,
      notes:excerpt,pdf:quizPages.length?pdfLecture:null
     }}));
-    toggleView(false);$("nav-new").click();
+    $("nav-chat").click();
     $("pip-chat").scrollIntoView({behavior:"smooth",block:"start"});
    });
    row.append(videos,ask);item.append(row);

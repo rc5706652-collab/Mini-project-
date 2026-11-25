@@ -33,7 +33,7 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   assert.equal(await page.locator("html").getAttribute("data-theme-preference"),chosen);
   assert.equal(await page.locator('meta[name="theme-color"]').getAttribute("content"),resolved==="light"?"#f5f4ef":"#171d1b");
   assert.equal(await page.locator("#nw-theme-trigger").getAttribute("aria-expanded"),"false");
-  assert.ok(await page.locator("#pip-chat").isVisible());
+  assert.equal(await page.locator("#pip-chat").isVisible(),false);
   const trigger=page.locator("#nw-theme-trigger"),bounds=await trigger.boundingBox();
   assert.ok(bounds.height>=40&&bounds.width>=40,"appearance control must be touch sized");
   await trigger.click();
@@ -75,6 +75,7 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   await page.keyboard.press("Escape");
   assert.equal(await page.locator("#nw-theme-menu").isVisible(),false,"Escape should close appearance popup");
   if(exercise){
+    await page.locator("#home-start").click();
     await page.locator("#text-tab").click();
     await page.locator("#pasted").fill(transcript);
     await page.locator("#generate").click();
@@ -86,12 +87,16 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
     assert.ok(await page.locator("#quiz-panel").isVisible());
     await page.locator("#tutor-tab").click();
     assert.ok(await page.locator("#tutor-panel").isVisible());
+    if(width>=720)await page.locator("#workspace-menu").click();
     await page.locator(width<720?"#nw-dock-library":"#nav-saved").click();
     assert.ok(await page.locator("#saved-panel").isVisible());
+    if(width>=720)await page.locator("#workspace-menu").click();
     await page.locator(width<720?"#nw-dock-studio":"#nav-new").click();
     assert.ok(await page.locator("#results").isVisible(),"resume studio must preserve results");
     assert.equal(await page.locator("html").getAttribute("data-theme"),"light");
     const chatbot=page.locator("#pip-chat");
+    assert.equal(await chatbot.isVisible(),false);
+    await page.locator("#workspace-menu").click();await page.locator("#nav-chat").click();
     assert.ok(await chatbot.isVisible());
   }
   const metrics=await page.evaluate(()=>({

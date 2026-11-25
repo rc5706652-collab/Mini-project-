@@ -363,6 +363,7 @@ function renderNotes(note,source,segments=[],audioFile=null,fromAlchemy=false){
   show("main-view",true);show("saved-panel",false);show("results",true);
   put("breadcrumb","AI studio");
   $("nav-new").classList.add("selected");$("nav-saved").classList.remove("selected");
+  document.dispatchEvent(new CustomEvent("notewave:workspace-view",{detail:{view:"studio"}}));
   put("save","♡ Save");
   lab.update(note,segments,state.audioURL);
   document.dispatchEvent(new CustomEvent("notewave:notes-ready",{detail:{notes:note,source}}));
@@ -476,6 +477,7 @@ function renderSaved(){
 function openStudio(){
   show("main-view",true);show("saved-panel",false);put("breadcrumb","AI studio");
   $("nav-new").classList.add("selected");$("nav-saved").classList.remove("selected");
+  document.dispatchEvent(new CustomEvent("notewave:workspace-view",{detail:{view:"studio"}}));
 }
 function newSession(){
   if(state.busy||state.recorder?.state==="recording")return;
@@ -500,6 +502,7 @@ $("nav-saved").addEventListener("click",()=>{
   if(state.busy||state.recorder?.state==="recording")return;
   renderSaved();show("main-view",false);show("saved-panel",true);
   put("breadcrumb","My library");$("nav-new").classList.remove("selected");$("nav-saved").classList.add("selected");
+  document.dispatchEvent(new CustomEvent("notewave:workspace-view",{detail:{view:"library"}}));
   window.scrollTo({top:0,behavior:"smooth"});
 });
 $("clear").addEventListener("click",()=>{
