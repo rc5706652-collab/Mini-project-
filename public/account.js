@@ -29,8 +29,9 @@ form.addEventListener("submit",async event=>{
   }else if(!await verifyProfile(current,username,password.value))throw Error("Incorrect username or password. Profiles are specific to this browser.");
   sessionStorage.setItem(SESSION_KEY,current.name);
   if(sessionName(readProfile())!==current.name)throw Error("Your browser could not save the sign-in session.");
-  form.reset();location.replace("./");
+  sessionStorage.setItem("notewave-workspace-entry-v1",current.name);form.reset();location.replace("./");
  }catch(error){status.textContent=explain(error);}
  finally{submit.disabled=false;submit.textContent=label;}
 });
-$("account-signout").addEventListener("click",()=>{try{sessionStorage.removeItem(SESSION_KEY);location.replace("./account.html");}catch(error){status.textContent=explain(error);}});
+for(const link of [$("account-back"),$("account-signed-in").querySelector("a.submit")])link.addEventListener("click",event=>{event.preventDefault();try{const active=sessionName(readProfile());if(!active){location.replace("./account.html");return;}sessionStorage.setItem("notewave-workspace-entry-v1",active);location.replace("./");}catch(error){status.textContent=explain(error);}});
+$("account-signout").addEventListener("click",()=>{try{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem("notewave-workspace-entry-v1");location.replace("./account.html");}catch(error){status.textContent=explain(error);}});
