@@ -112,8 +112,23 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   console.log("PASS",webkitEngine?"WebKit":"Chromium",width+"x"+height,"system dark?",systemDark,"saved?",saved||"no","study?",exercise);
  }finally{await context.close();}
 }
+async function verifyInitialPaint(browser,scheme){
+ const context=await browser.newContext({colorScheme:scheme,reducedMotion:"reduce"}),page=await context.newPage();
+ try{
+  await seedProfile(page);
+  // Simulate the interaction module being unavailable: the final colors must already be present.
+  await page.route("**/enterprise-ui.js",route=>route.abort());
+  await page.goto(url,{waitUntil:"domcontentloaded"});
+  const initial=await page.evaluate(()=>({theme:document.documentElement.dataset.theme,canvas:getComputedStyle(document.documentElement).backgroundColor,bodyClass:document.body.classList.contains("nw-enterprise"),background:getComputedStyle(document.body).backgroundImage,ink:getComputedStyle(document.body).color}));
+  assert.equal(initial.theme,scheme);assert.equal(initial.bodyClass,true,"Workspace class must be present in HTML, not added after first paint");
+  assert.equal(initial.canvas,scheme==="light"?"rgb(245, 244, 239)":"rgb(23, 29, 27)");
+  assert.equal(initial.ink,scheme==="light"?"rgb(36, 44, 43)":"rgb(245, 244, 239)");
+  assert.ok(initial.background.includes(scheme==="light"?"249, 250, 244":"28, 34, 32"),"Workspace must use resolved theme before interaction module: "+initial.background);
+ }finally{await context.close();}
+}
 try{
  chrome=await chromium.launch({headless:true,args:["--no-sandbox"]});
+ await verifyInitialPaint(chrome,"light");await verifyInitialPaint(chrome,"dark");
  await verify(chrome,{width:320,height:740,systemDark:false,exercise:true});
  await verify(chrome,{width:390,height:844,systemDark:true});
  await verify(chrome,{width:768,height:1024,systemDark:false});
