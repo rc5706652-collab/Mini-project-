@@ -173,9 +173,18 @@ $("pip-clear").addEventListener("click",()=>{
 });
 document.addEventListener("notewave:pdf-source",event=>{
  if(busy)cancelGeneration();pdfSource=event.detail?.source||null;
- const mode=$("pip-mode"),option=mode.querySelector('option[value="pdf"]');option.disabled=!pdfSource;
- if(pdfSource){history=[];messages.replaceChildren();mode.value="pdf";addMessage("assistant","I have your PDF: "+pdfSource.title+". Ask me about its contents.");setStatus("PDF ready for local questions.");}
- else if(mode.value==="pdf"){history=[];messages.replaceChildren();mode.value=notes?"notes":"general";addMessage("assistant","PDF removed. Choose another lecture or ask a general question.");setStatus("PDF source cleared.");}
+ const mode=$("pip-mode"),option=mode.querySelector('option[value="pdf"]');
+ if(pdfSource){
+  option.disabled=false;option.removeAttribute("disabled");history=[];messages.replaceChildren();mode.value="pdf";
+  addMessage("assistant","I have your PDF: "+pdfSource.title+". Ask me about its contents.");setStatus("PDF ready for local questions.");
+ }else{
+  // Switch away from the selected option before disabling it. Clear PDF-derived
+  // conversation regardless of which source mode was active.
+  if(mode.value==="pdf")mode.value=notes?"notes":"general";
+  option.disabled=true;option.setAttribute("disabled","");
+  history=[];messages.replaceChildren();
+  addMessage("assistant","PDF removed. Choose another lecture or ask a general question.");setStatus("PDF source cleared.");
+ }
 });
 document.addEventListener("notewave:notes-ready",event=>{
  notes=event.detail?.notes||null;

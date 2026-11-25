@@ -98,7 +98,10 @@ async function testFlow(browser,{mobile=false,mockPDF=false}={}){
   await page.locator(mobile?"#nw-dock-quiz-studio":"#nav-quiz").click();
   await page.locator("#quiz-pdf-clear").click();
   assert.ok(await page.locator("#quiz-pdf-ask").isDisabled());
-  assert.ok(await page.locator('#pip-mode option[value="pdf"]').isDisabled());
+  assert.equal(await page.locator('#pip-mode option[value="pdf"]').evaluate(option=>option.disabled&&option.hasAttribute("disabled")),true);
+  assert.notEqual(await page.locator("#pip-mode").inputValue(),"pdf");
+  assert.match(await page.locator("#pip-messages").textContent(),/PDF removed/);
+  assert.equal(await page.locator(".pip-citation").count(),0);
   const dimension=await page.evaluate(()=>({
    scroll:document.documentElement.scrollWidth,
    available:document.documentElement.clientWidth

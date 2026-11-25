@@ -55,7 +55,14 @@ function updateSourceMode(){
 }
 $("quiz-lecture").addEventListener("change",updateSourceMode);
 const pdfInput=$("quiz-pdf-file"),pdfInfo=$("quiz-pdf-info"),buildButton=$("quiz-build"),askPdf=$("quiz-pdf-ask");
-function publishPdf(source){askPdf.disabled=!source;document.dispatchEvent(new CustomEvent("notewave:pdf-source",{detail:{source}}));}
+function publishPdf(source){
+ askPdf.disabled=!source;
+ const mode=$("pip-mode"),option=mode.querySelector('option[value="pdf"]');
+ // The UI must never expose a cleared source, even before chat listeners run.
+ if(!source&&mode.value==="pdf")mode.value="general";
+ option.disabled=!source;option.toggleAttribute("disabled",!source);
+ document.dispatchEvent(new CustomEvent("notewave:pdf-source",{detail:{source}}));
+}
 askPdf.addEventListener("click",()=>{if(!pdfLecture)return;toggleView(false);$("nav-new").click();$("pip-mode").value="pdf";$("pip-chat").scrollIntoView({block:"start"});$("pip-question").focus({preventScroll:true});});
 function resetPdf(){
  pdfReadToken++;pdfLecture=null;pdfReading=false;publishPdf(null);
