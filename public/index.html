@@ -4,14 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#171d1b">
-  <style>html[data-entry="signed-out"] body{visibility:hidden!important}</style>
+  <style>
+    html{background:#f5f4ef}
+    html[data-theme="dark"]{background:#171d1b}
+    html[data-theme="light"]{background:#f5f4ef}
+    html[data-entry="signed-out"]{background:#26373a!important}
+    html[data-entry="signed-out"] body{visibility:hidden!important}
+  </style>
   <script>
     // Browser-local profile navigation, not server authorization.
-    (function(){var valid=false;try{var name=sessionStorage.getItem("notewave-device-session-v1");var entry=sessionStorage.getItem("notewave-workspace-entry-v1");sessionStorage.removeItem("notewave-workspace-entry-v1");var p=name&&JSON.parse(localStorage.getItem("notewave-profile-v2:"+name)||localStorage.getItem("notewave-device-profile-v1")||"null");valid=!!(name&&entry===name&&p&&p.version===1&&typeof name==="string"&&p.name===name&&/^[0-9a-f]{32}$/i.test(p.salt)&&/^[0-9a-f]{64}$/.test(p.verifier));}catch(e){}if(!valid){document.documentElement.dataset.entry="signed-out";try{sessionStorage.removeItem("notewave-device-session-v1");sessionStorage.setItem("notewave-entry-animation","pending");}catch(e){}location.replace("./account.html");}})();
+    (function(){var valid=false;try{var name=sessionStorage.getItem("notewave-device-session-v1");var entry=sessionStorage.getItem("notewave-workspace-entry-v1");sessionStorage.removeItem("notewave-workspace-entry-v1");var p=name&&JSON.parse(localStorage.getItem("notewave-profile-v2:"+name)||localStorage.getItem("notewave-device-profile-v1")||"null");valid=!!(name&&entry===name&&p&&p.version===1&&typeof name==="string"&&p.name===name&&/^[0-9a-f]{32}$/i.test(p.salt)&&/^[0-9a-f]{64}$/.test(p.verifier));}catch(e){}if(!valid){document.documentElement.dataset.entry="signed-out";document.querySelector('meta[name="theme-color"]').content="#26373a";try{sessionStorage.removeItem("notewave-device-session-v1");sessionStorage.setItem("notewave-entry-animation","pending");}catch(e){}location.replace("./account.html");}})();
   </script>
   <script>
     // Prevent a white/dark flash: select the saved or OS preference before CSS paints.
     (function(){
+      if(document.documentElement.dataset.entry==="signed-out")return;
       var pref="system";
       try{
         var stored=localStorage.getItem("notewave-theme-v1");
@@ -38,7 +45,7 @@
   <link rel="stylesheet" href="./loisel.css">
   <link rel="stylesheet" href="./loisel-experience.css">
 </head>
-<body>
+<body class="nw-enterprise">
 <div class="aurora aurora-one" aria-hidden="true"></div><div class="aurora aurora-two" aria-hidden="true"></div>
 <div class="app-shell">
   <div id="workspace-edge" aria-hidden="true"></div>
