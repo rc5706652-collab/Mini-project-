@@ -27,3 +27,13 @@ test("chat history and model responses are size bounded",()=>{
  assert.equal(sanitizeModelAnswer("Assistant: Hello world"),"Hello world");
  assert.equal(Object.keys(CHAT_MODELS).length,2);
 });
+
+test("PDF questions use selected document and carry real page references",()=>{
+ const pdf={title:"lecture.pdf",pages:[{page:1,text:"Mitochondria produce energy for cells."},{page:2,text:"Chloroplasts convert sunlight into chemical energy."}]};
+ const result=prepareQuestion("What do chloroplasts convert?",{mode:"pdf",pdf});
+ assert.equal(result.error,null);
+ assert.equal(result.citations[0].page,2);
+ assert.match(result.evidence[0],/sunlight/);
+ assert.ok(prepareQuestion("volcanic magma",{mode:"pdf",pdf}).error);
+ assert.ok(prepareQuestion("What is biology?",{mode:"pdf"}).error);
+});

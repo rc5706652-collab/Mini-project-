@@ -3,7 +3,7 @@
 import {quickAnswer,prepareQuestion,sanitizeModelAnswer} from "./companion-core.js";
 const $=id=>document.getElementById(id);
 const messages=$("pip-messages"),form=$("pip-form"),question=$("pip-question"),sendButton=$("pip-send"),micButton=$("pip-mic"),status=$("pip-status");
-let notes=null,history=[],busy=false,requestId=0,chatWorker=null;
+let notes=null,pdfSource=null,history=[],busy=false,requestId=0,chatWorker=null;
 let recorder=null,stream=null,voiceTimer=0,speechWorker=null,voiceBusy=false;
 let speaking=false,cinematicTimer=0;
 function robot(mode,label){
@@ -56,20 +56,22 @@ function cancelGeneration(){
  setStatus("Stopped. Ask Loisel another question.");
  robot("idle","Loisel is ready");
 }
-function runLocalModel(input){
+function runLocalModel(input,timeoutMs=0){
  return new Promise((resolve,reject)=>{
   const expected=++requestId;
   try{chatWorker??=new Worker("./companion-worker.js",{type:"module"});}
   catch(e){reject(e);return;}
   const worker=chatWorker;
+  let timer;const done=(error,value)=>{clearTimeout(timer);if(error)reject(error);else resolve(value);};
+  if(timeoutMs)timer=setTimeout(()=>{worker.terminate();if(chatWorker===worker)chatWorker=null;done(Error("Local AI took too long."));},timeoutMs);
   worker.onmessage=({data})=>{
    if(data.requestId!==expected)return;
    if(data.type==="stage")setStatus(data.message);
    if(data.type==="progress")setStatus("Downloading on-device AI model: "+Math.max(0,Math.min(100,data.progress))+"% · first use only");
-   if(data.type==="answer")resolve(data.answer);
-   if(data.type==="error")reject(new Error(data.message));
+   if(data.type==="answer")done(null,data.answer);
+   if(data.type==="error")done(new Error(data.message));
   };
-  worker.onerror=()=>{worker.terminate();if(chatWorker===worker)chatWorker=null;reject(new Error("Local AI model failed to initialize."));};
+  worker.onerror=()=>{worker.terminate();if(chatWorker===worker)chatWorker=null;done(new Error("Local AI model failed to initialize."));};
   worker.postMessage({type:"ask",requestId:expected,mode:$("pip-model").value,prompt:input.prompt,messages:input.messages});
  });
 }
@@ -94,12 +96,27 @@ async function askQuestion(raw){
    say(answer);return;
   }
  }
- const prepared=prepareQuestion(text,{mode,notes,history});
+ const prepared=prepareQuestion(text,{mode,notes,pdf:pdfSource,history});
+ const pdfFallback=()=>prepared.citations.map(c=>c.text).join("\n\n");
+ const appendSources=(outer)=>{
+  for(const evidence of prepared.evidence){
+   const quote=document.createElement("div");quote.className="pip-citation";
+   const head=document.createElement("span");head.className="pip-source-label";
+   const citation=prepared.citations?.find(c=>c.text===evidence);
+   head.textContent=mode==="pdf"?"PDF · "+pdfSource.title+" · Page "+citation?.page:"SOURCE FROM YOUR RECORDING";
+   const line=document.createElement("span");line.textContent=evidence;quote.append(head,line);outer.append(quote);
+  }
+ };
  if(prepared.error){
   addMessage("assistant",prepared.error);robot("idle","Loisel is ready");setStatus("No model needed for that answer.");return;
  }
  // All model prompts remain on the device. The optional Enhanced model requires WebGPU.
  const model=$("pip-model").value;
+ if(mode==="pdf"&&(model==="fast"||(model==="enhanced"&&!navigator.gpu))){
+  const answer=pdfFallback();const reply=addMessage("assistant",answer,[],"Relevant passages from your PDF · extractive answer");appendSources(reply);
+  history.push({role:"user",content:text},{role:"assistant",content:answer});history=history.slice(-12);
+  setStatus("Answered from your PDF locally. Enhanced AI can provide a synthesized explanation on supported devices.");robot("complete","Loisel found relevant PDF passages");say(answer);return;
+ }
  if(model==="enhanced"&&!navigator.gpu){
   const info="Enhanced AI needs WebGPU. Choose Fast local for this browser, then ask me again.";
   addMessage("assistant",info);setStatus(info);robot("idle","Loisel is ready");return;
@@ -109,19 +126,14 @@ async function askQuestion(raw){
  setStatus("Preparing "+(model==="enhanced"?"enhanced WebGPU":"lightweight CPU")+" language model locally…");
  const started=requestId;
  try{
-  const response=sanitizeModelAnswer(await runLocalModel(prepared));
+  const response=sanitizeModelAnswer(await runLocalModel(prepared,mode==="pdf"?20000:0));
   if(requestId!==started+1)return;
   const answer=response||"I'm not sure how to answer that yet. Try asking a shorter question.";
   placeholder.querySelector("p").textContent=answer;
-  for(const evidence of prepared.evidence){
-   const quote=document.createElement("div");quote.className="pip-citation";
-   const head=document.createElement("span");head.className="pip-source-label";head.textContent="SOURCE FROM YOUR RECORDING";
-   const line=document.createElement("span");line.textContent=evidence;
-   quote.append(head,line);placeholder.append(quote);
-  }
-  if(mode==="notes"){
+  appendSources(placeholder);
+  if(mode==="notes"||mode==="pdf"){
    const caution=document.createElement("small");caution.className="pip-source-label";
-   caution.textContent="AI explanation — verify against the cited transcript above.";
+   caution.textContent="AI explanation — verify against the cited source passages.";
    placeholder.append(caution);
   }
   history.push({role:"user",content:text},{role:"assistant",content:answer});history=history.slice(-12);
@@ -130,6 +142,11 @@ async function askQuestion(raw){
   say(answer);
  }catch(error){
   if(requestId===started+1){
+   if(mode==="pdf"){
+    const answer=pdfFallback();placeholder.querySelector("p").textContent=answer;appendSources(placeholder);
+    history.push({role:"user",content:text},{role:"assistant",content:answer});history=history.slice(-12);
+    setStatus("AI unavailable; showing matching PDF passages instead.");robot("complete","Loisel found relevant PDF passages");return;
+   }
    placeholder.querySelector("p").textContent="I couldn't run the local language model on this device. "+String(error?.message||"Please check storage, internet, or browser memory.")+" Try Fast local or a shorter question.";
    setStatus("AI unavailable. Other NoteWave tools still work.");robot("idle","Loisel is ready");
   }
@@ -154,16 +171,23 @@ $("pip-clear").addEventListener("click",()=>{
  addMessage("assistant","Fresh start! I'm Loisel, ready for your next question. ✨");
  setStatus("Chat history cleared from this page.");robot("idle","Loisel is ready");
 });
+document.addEventListener("notewave:pdf-source",event=>{
+ if(busy)cancelGeneration();pdfSource=event.detail?.source||null;
+ const mode=$("pip-mode"),option=mode.querySelector('option[value="pdf"]');option.disabled=!pdfSource;
+ if(pdfSource){history=[];messages.replaceChildren();mode.value="pdf";addMessage("assistant","I have your PDF: "+pdfSource.title+". Ask me about its contents.");setStatus("PDF ready for local questions.");}
+ else if(mode.value==="pdf"){history=[];messages.replaceChildren();mode.value=notes?"notes":"general";addMessage("assistant","PDF removed. Choose another lecture or ask a general question.");setStatus("PDF source cleared.");}
+});
 document.addEventListener("notewave:notes-ready",event=>{
  notes=event.detail?.notes||null;
  if(notes){$("pip-mode").value="notes";setStatus("Your recording is ready. Ask Loisel about it!");}
 });
 document.addEventListener("notewave:notes-reset",()=>{
- notes=null;$("pip-mode").value="general";setStatus("New session. Ask about any topic or generate a recording.");
+ notes=null;$("pip-mode").value=pdfSource?"pdf":"general";setStatus("New session. Ask about any topic or generate a recording.");
 });
 document.addEventListener("notewave:quiz-help",event=>{
  const detail=event.detail||{};
- if(detail.notes?.transcript){notes=detail.notes;$("pip-mode").value="notes";}
+ if(detail.pdf&&pdfSource){$("pip-mode").value="pdf";}
+ else if(detail.notes?.transcript){notes=detail.notes;$("pip-mode").value="notes";}
  question.value=String(detail.question||"").slice(0,450);
  setStatus("Loisel is ready to help explain a concept from your quiz. Press Send.");
  question.focus({preventScroll:true});

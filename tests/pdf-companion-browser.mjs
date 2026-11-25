@@ -64,15 +64,12 @@ async function testFlow(browser,{mobile=false,mockPDF=false}={}){
  }
  try{
   await page.goto(root,{waitUntil:"domcontentloaded"});
-  const logo=page.locator(".loisel-letter-mark svg"),buddy=page.locator("#loisel-buddy-toggle");
-  assert.ok(await logo.isVisible(),"Missing cinematic L");
+  const logo=page.locator(".loisel-knowledge-scene"),buddy=page.locator("#loisel-buddy-toggle");
+  assert.ok(await logo.isVisible(),"Missing animated knowledge core");
   assert.equal(await page.locator(".loisel-hero-photo").count(),0);
-  await buddy.waitFor({state:"visible"});
-  assert.equal(await page.locator("#loisel-buddy-audio").getAttribute("aria-pressed"),"false");
-  await buddy.click();assert.ok(await page.locator("#loisel-buddy-panel").isVisible());
-  await page.locator("#loisel-buddy-quiz").click();
+  assert.equal(await buddy.count(),0);
+  await page.locator(mobile?"#nw-dock-quiz-studio":"#nav-quiz").click();
   assert.ok(await page.locator("#quiz-hub-view").isVisible());
-  assert.ok(await buddy.isVisible(),"Mini companion must persist in Quiz Studio");
   await page.locator("#quiz-lecture").selectOption("pdf");
   assert.ok(await page.locator("#quiz-pdf-group").isVisible());
   await page.locator("#quiz-pdf-file").setInputFiles({name:"solar-lecture.pdf",mimeType:"application/pdf",buffer:validPdf});
@@ -87,34 +84,21 @@ async function testFlow(browser,{mobile=false,mockPDF=false}={}){
   await page.locator(".quiz-pdf-citation").first().waitFor({state:"visible"});
   assert.match(await page.locator(".quiz-pdf-citation").first().innerText(),/Page 1/);
   assert.ok(await page.locator(".quiz-video-link").count()>0);
-  await buddy.click();
-  await page.locator("#loisel-buddy-ask").click();
-  assert.ok(await page.locator("#pip-chat").isVisible(),"Mini companion should open chat in Studio");
-  assert.equal(await page.locator("#quiz-hub-view").isVisible(),false);
+  await page.locator("#quiz-pdf-ask").click();
+  assert.ok(await page.locator("#pip-chat").isVisible());
+  assert.equal(await page.locator("#pip-mode").inputValue(),"pdf");
+  await page.locator("#pip-question").fill("What do solar panels convert?");
+  await page.locator("#pip-send").click();
+  await page.locator(".pip-citation").first().waitFor({state:"visible"});
+  assert.match(await page.locator(".pip-citation").first().innerText(),/Page 1/);
+  assert.match(await page.locator("#pip-messages").innerText(),/sunlight into electricity/);
   await page.locator(mobile?"#nw-dock-library":"#nav-saved").click();
   assert.ok(await page.locator("#saved-panel").isVisible());
-  assert.ok(await buddy.isVisible(),"Mini companion should persist in Library");
-  // The redesigned rounded sprite really hides behind its book and moves spots.
-  assert.ok(await page.locator(".loisel-pocket-shell").isVisible());
-  await buddy.click();
-  await page.locator("#loisel-buddy-game").click();
-  assert.equal(await page.locator("#loisel-buddy").getAttribute("data-game"),"seek");
-  assert.ok(await page.locator(".loisel-pocket-hide-cover").isVisible());
-  let previous=await page.locator("#loisel-buddy").getAttribute("data-spot");
-  for(let round=0;round<3;round++){
-   await buddy.click();
-   const current=await page.locator("#loisel-buddy").getAttribute("data-spot");
-   assert.notEqual(current,previous,"Lumi must find a new hiding spot after being caught");
-   previous=current;
-  }
-  assert.equal(await page.locator("#loisel-buddy").getAttribute("data-game"),"celebrate");
-  assert.match(await page.locator("#loisel-buddy-words").innerText(),/found me three times/i);
-
-  await page.locator("#loisel-buddy-quiet").click();
-  assert.equal(await page.locator("#loisel-buddy").getAttribute("data-hidden"),"true");
-  await page.locator("#loisel-buddy-quiet").click();
-  assert.equal(await page.locator("#loisel-buddy").getAttribute("data-hidden"),"false");
-  assert.ok(await buddy.isVisible());
+  assert.equal(await buddy.count(),0);
+  await page.locator(mobile?"#nw-dock-quiz-studio":"#nav-quiz").click();
+  await page.locator("#quiz-pdf-clear").click();
+  assert.ok(await page.locator("#quiz-pdf-ask").isDisabled());
+  assert.ok(await page.locator('#pip-mode option[value="pdf"]').isDisabled());
   const dimension=await page.evaluate(()=>({
    scroll:document.documentElement.scrollWidth,
    available:document.documentElement.clientWidth
