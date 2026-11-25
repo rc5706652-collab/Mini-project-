@@ -26,3 +26,72 @@ html[data-theme="light"] .account-ribbons{opacity:.86}
 .field input:-webkit-autofill{-webkit-text-fill-color:var(--ink);-webkit-box-shadow:0 0 0 1000px #34423c inset}
 html[data-theme="dark"] .field input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #28322e inset}
 
+
+/* Reference-inspired orbital glass composition: decorative CSS only.
+   The saved workspace theme and all account functionality are unchanged. */
+html[data-theme="light"],html[data-theme="dark"]{
+ --ink:#f8f8f2;--muted:#e1e9e2;--account-accent:#f4d797;color-scheme:dark;
+}
+html[data-theme="light"] body{
+ background:radial-gradient(ellipse at 50% 92%,#49646a80,transparent 65%),radial-gradient(ellipse at 15% 8%,#4c566b66,transparent 58%),linear-gradient(145deg,#26373a,#18282f 58%,#354e55);
+}
+html[data-theme="dark"] body{
+ background:radial-gradient(ellipse at 50% 95%,#45616a65,transparent 64%),radial-gradient(ellipse at 15% 7%,#46405f52,transparent 58%),linear-gradient(145deg,#243337,#17242b 58%,#2d454b);
+}
+.account-main{--orb-size:clamp(575px,49vw,650px);padding:20px 16px 26px}
+.account-spheres{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.account-sphere{display:block;position:absolute;border-radius:50%;aspect-ratio:1;will-change:transform;animation:account-drift 16s ease-in-out infinite}
+.sphere-amber{
+ width:clamp(110px,13.5vw,190px);left:calc(50% - var(--orb-size)*.49);top:calc(50% - var(--orb-size)*.56);
+ background:radial-gradient(circle at 30% 20%,#ffe5a5 0%,#efbc68 35%,#d28962 72%,#a35d57 100%);
+ box-shadow:0 0 42px #e6af6040,inset -12px -15px 24px #8e4d4b40;
+}
+.sphere-sage{
+ width:clamp(135px,18vw,225px);left:calc(50% + var(--orb-size)*.34);top:calc(50% + var(--orb-size)*.22);
+ background:radial-gradient(circle at 28% 22%,#e8efd9,#c3d7ad 38%,#9daf89 70%,#6c8876);
+ box-shadow:0 0 36px #dce8d82e;filter:blur(5px);animation-delay:-5s;
+}
+.sphere-lavender{
+ width:clamp(160px,19vw,265px);left:calc(50% + var(--orb-size)*.02);top:calc(50% - var(--orb-size)*.27);
+ background:radial-gradient(circle at 34% 27%,#ebd9cd,#bba6d5 42%,#7d80a2 76%,#555773);
+ opacity:.77;animation-delay:-8s;
+}
+.sphere-peach{
+ width:clamp(180px,25vw,355px);left:calc(50% - var(--orb-size)*.85);top:calc(50% + var(--orb-size)*.33);
+ background:radial-gradient(circle at 35% 20%,#e9c8a3,#bb8869 48%,#7b5b53 85%);
+ filter:blur(12px);opacity:.69;animation-delay:-11s;
+}
+@keyframes account-drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-12px,0)}}
+html[data-theme] .account-glass{
+ width:min(100%,var(--orb-size));min-height:var(--orb-size);aspect-ratio:1;
+ background:radial-gradient(ellipse at 24% 9%,#dce8d82b,transparent 55%),radial-gradient(ellipse at 78% 83%,#b6cde12a,transparent 66%),linear-gradient(155deg,#59766b84,#506b728f 47%,#78929b9c);
+ border:1px solid #e1efe67a;box-shadow:inset 1px 1px 3px #f5f4ef44,inset -6px -9px 34px #b7cbd31c,0 25px 70px #10191d45;
+ backdrop-filter:blur(23px);-webkit-backdrop-filter:blur(23px);
+ padding:65px 86px;
+}
+html[data-theme] .account-glass:has(#confirm-group:not([hidden])){width:min(100%,690px);min-height:690px}
+.account-content{width:min(100%,350px);position:relative}
+html[data-theme] .eyebrow{color:#e8e9de;font-size:10px;letter-spacing:2px}
+#account-title{color:var(--account-accent);font-weight:750;letter-spacing:-1.2px}
+.intro{color:#f0f3ed}
+label{color:#f8f8f2;font-size:13px}
+html[data-theme] .field{
+ background:#e1e9e5;border:1px solid #edf3ed;border-radius:8px;box-shadow:0 2px 12px #1f343018;
+}
+html[data-theme] .field input,html[data-theme] .field button{color:#253a37}
+html[data-theme] .field input::placeholder{color:#4e625c;opacity:1}
+html[data-theme] .field svg{stroke:#4e625c}
+html[data-theme] .field:focus-within{border-color:#f4d797;box-shadow:0 0 0 2px #f4d79770}
+html[data-theme] .field input:-webkit-autofill{-webkit-text-fill-color:#253a37;-webkit-box-shadow:0 0 0 1000px #e1e9e5 inset}
+html[data-theme] .submit{width:min(100%,190px);margin:23px auto 0;border-radius:8px;background:linear-gradient(140deg,#edf0e5,#dce8d8 55%,#e7e0f0);color:#253a37;border-color:#f5f4efb0;box-shadow:0 5px 18px #1c2b3040}
+.switch{text-align:center;margin-top:17px;color:#f4f4ee}
+.privacy{text-align:center;font-size:11px;line-height:1.55;color:#e6eee7}
+html[data-theme] #account-status{color:#ffecd5;text-align:center}
+footer{color:#dce8df}
+@media(max-width:660px){
+ .account-main{--orb-size:420px;padding:22px 17px}
+ html[data-theme] .account-glass,html[data-theme] .account-glass:has(#confirm-group:not([hidden])){width:min(100%,430px);min-height:0;aspect-ratio:auto;border-radius:34px;padding:36px 25px}
+ .sphere-amber{top:3%;left:1%}.sphere-sage{right:-12%;left:auto;top:68%}
+ .sphere-lavender{left:48%;top:22%}.sphere-peach{left:-38%;top:78%}
+}
+@media(prefers-reduced-motion:reduce){.account-sphere{animation:none;will-change:auto}}
