@@ -11,7 +11,7 @@ let preference="system";
 try{const stored=localStorage.getItem(motionKey);if(stored==="reduce")preference=stored;}catch{}
 let state=null;
 let lastView="home",lastResults=false;
-let restoringRoute=false;
+let restoringRoute=false,initialized=false;
 const make=(tag,css,text)=>{
  const node=document.createElement(tag);
  if(css)node.className=css;
@@ -228,13 +228,15 @@ function workspaceNavigation(){
  document.addEventListener("keydown",event=>{if(event.key==="Escape"&&sidebar.dataset.open==="true")close();});
  sidebar.addEventListener("click",event=>{if(event.target.closest("button.side-link,button.recent-item"))close();});
  $("nav-home").addEventListener("click",()=>showWorkspace("home"));
+ sidebar.querySelector(".brand")?.addEventListener("click",event=>{event.preventDefault();showWorkspace("home");close();});
  $("nav-chat").addEventListener("click",()=>showWorkspace("chat"));
  $("nav-session").addEventListener("click",()=>$("top-create").click());
  for(const [id,view] of [["home-start","studio"],["home-chat","chat"]])$(id).addEventListener("click",event=>{event.preventDefault();execute(view);});
  document.addEventListener("notewave:workspace-view",event=>showWorkspace(event.detail.view));
  document.addEventListener("notewave:quiz-navigation",()=>showWorkspace("quiz-studio"));
  function restore(){restoringRoute=true;const view=routeFromLocation();if(view==="home"||view==="chat")showWorkspace(view);else execute(view);restoringRoute=false;}
- window.addEventListener("popstate",restore);restore();
+ window.addEventListener("popstate",restore);
+ window.addEventListener("hashchange",()=>{if(routeFromLocation()!==lastView)restore();});restore();
 }
 function keyboardTabs(){
  // WAI-ARIA Tabs keyboard navigation with arrows, Home, End. Works for dynamically added AI tabs.
@@ -357,7 +359,9 @@ function handleWebGL(){
  }
 }
 function init(){
- if(document.body.classList.contains("nw-enterprise"))return;
+ // The enterprise class is present before first paint; it is not an initialization flag.
+ if(initialized||document.documentElement.dataset.entry==="signed-out")return;
+ initialized=true;
  buildShell();
  workspaceNavigation();
  keyboardTabs();

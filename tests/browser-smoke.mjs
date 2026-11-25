@@ -22,6 +22,19 @@ try{
  page.on("pageerror",error=>crashes.push(error.message));
  await seedProfile(page);
  await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
+ // Regression: pre-applied first-paint styling must not disable any workspace wiring.
+ assert.equal(await page.locator("body").getAttribute("class").then(s=>s.includes("nw-enterprise")),true);
+ await page.locator("#nw-command-open").waitFor({state:"visible"});
+ await page.locator("#workspace-menu").click();
+ await page.locator("#nav-home").click();
+ await page.locator("#home-view").waitFor({state:"visible"});
+ await page.locator("#home-chat").click();
+ await page.locator("#chat-view").waitFor({state:"visible"});
+ await page.locator("#workspace-menu").click();
+ await page.locator("#workspace-sidebar .brand").click();
+ await page.locator("#home-view").waitFor({state:"visible"});
+ await page.locator("#home-start").click();
+ await page.locator("#main-view").waitFor({state:"visible"});
  await page.locator("#text-tab").click();
  await page.locator("#pasted").fill(transcript);
  await page.locator("#generate").click();
