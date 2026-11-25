@@ -454,7 +454,7 @@ html[data-theme="dark"] .nw-enterprise .hero--centered #orb-stage .orb-glow{
  overflow:hidden;perspective:1050px;isolation:isolate;
 }
 .nw-enterprise .hero--centered .knowledge-assembly{
- width:min(64%,340px);max-width:100%;aspect-ratio:1;
+ width:min(64%,340px,clamp(245px,28vw,340px));max-width:100%;aspect-ratio:1;
  animation:knowledge-center-float 10s ease-in-out infinite;
 }
 .nw-enterprise .hero--centered .knowledge-core{
@@ -499,7 +499,7 @@ html[data-theme="dark"] .nw-enterprise .hero--centered #orb-stage .orb-glow{
  .nw-enterprise .hero.hero--centered{padding:26px 0 24px}
  .nw-enterprise .hero--centered h1{font-size:clamp(33px,8.8vw,48px);margin-top:15px}
  .nw-enterprise .hero--centered #orb-stage{height:clamp(205px,67vw,310px)}
- .nw-enterprise .hero--centered .knowledge-assembly{width:min(77%,270px)}
+ .nw-enterprise .hero--centered .knowledge-assembly{width:min(77%,270px,clamp(185px,62vw,270px))}
  .nw-enterprise .hero--centered .hero-details>p{font-size:13px}
  .nw-enterprise .hero--centered .hero-actions{gap:10px;margin:17px 0 21px}
  .nw-enterprise .hero--centered .hero-stats{gap:clamp(11px,4vw,28px)}
