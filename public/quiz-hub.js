@@ -54,10 +54,19 @@ function updateSourceMode(){
  $("quiz-pdf-group").classList.toggle("hidden",value!=="pdf");
 }
 $("quiz-lecture").addEventListener("change",updateSourceMode);
-const pdfInput=$("quiz-pdf-file"),pdfInfo=$("quiz-pdf-info"),buildButton=$("quiz-build");
+const pdfInput=$("quiz-pdf-file"),pdfInfo=$("quiz-pdf-info"),buildButton=$("quiz-build"),askPdf=$("quiz-pdf-ask");
+function publishPdf(source){
+ askPdf.disabled=!source;
+ const mode=$("pip-mode"),option=mode.querySelector('option[value="pdf"]');
+ // The UI must never expose a cleared source, even before chat listeners run.
+ if(!source&&mode.value==="pdf")mode.value="general";
+ option.disabled=!source;option.toggleAttribute("disabled",!source);
+ document.dispatchEvent(new CustomEvent("notewave:pdf-source",{detail:{source}}));
+}
+askPdf.addEventListener("click",()=>{if(!pdfLecture)return;toggleView(false);$("nav-new").click();$("pip-mode").value="pdf";$("pip-chat").scrollIntoView({block:"start"});$("pip-question").focus({preventScroll:true});});
 function resetPdf(){
- pdfReadToken++;pdfLecture=null;pdfReading=false;
- pdfInput.value="";pdfInfo.textContent="Your PDF stays in this browser and is used only to create this quiz.";
+ pdfReadToken++;pdfLecture=null;pdfReading=false;publishPdf(null);
+ pdfInput.value="";pdfInfo.textContent="Your PDF stays in this browser for quizzes and Loisel questions.";
  buildButton.disabled=false;
 }
 $("quiz-pdf-clear").addEventListener("click",()=>{
@@ -65,7 +74,7 @@ $("quiz-pdf-clear").addEventListener("click",()=>{
 });
 pdfInput.addEventListener("change",async()=>{
  const file=pdfInput.files?.[0],token=++pdfReadToken;
- pdfLecture=null;clearQuiz();
+ pdfLecture=null;publishPdf(null);clearQuiz();
  if(!file){resetPdf();return;}
  try{validateLecturePdf(file);}
  catch(error){pdfReading=false;buildButton.disabled=false;pdfInfo.textContent=error.message;notify(error.message);pdfInput.value="";return;}
@@ -77,9 +86,9 @@ pdfInput.addEventListener("change",async()=>{
    pdfInfo.textContent="Reading page "+progress.page+" / "+progress.total+" · "+progress.characters.toLocaleString()+" characters";
   }});
   if(token!==pdfReadToken)return;
-  pdfLecture=result;
+  pdfLecture=result;publishPdf(result);
   pdfInfo.textContent="✓ "+result.title+" · "+result.pageCount+" page"+(result.pageCount===1?"":"s")+" · "+result.characters.toLocaleString()+" characters extracted locally";
-  notify("Lecture PDF ready! Select a topic or generate questions from the whole document.");
+  notify("Lecture PDF ready! Generate questions or ask Loisel about this PDF.");
  }catch(error){
   if(token===pdfReadToken){
    pdfLecture=null;
@@ -124,10 +133,12 @@ $("quiz-form").addEventListener("submit",event=>{
  if(pdfReading){notify("The PDF is still being read. Wait until the pages are ready.");return;}
  if($("quiz-lecture").value==="pdf"&&!pdfLecture){notify("Choose a searchable PDF and wait for the lecture text to be extracted.");return;}
  const chosen=lecture();
- if(chosen.text.length<80){notify("Choose a lecture with at least a short paragraph of information. A topic name alone is not a reliable source for a quiz.");return;}
+ if(chosen.text.length<($("quiz-lecture").value==="pdf"?30:80)){notify("Choose a lecture with at least a short paragraph of information. A topic name alone is not a reliable source for a quiz.");return;}
  sourceTitle=chosen.title;quizLanguage=chosen.language;quizPages=chosen.pages||[];
  const focus=$("quiz-topic").value.trim();
- const attempt=buildLectureQuiz(chosen.text,{topic:focus,count:Number($("quiz-count").value)});
+ let attempt;
+ try{attempt=buildLectureQuiz(chosen.text,{topic:focus,count:Number($("quiz-count").value)});}
+ catch(error){notify("Quiz generation failed: "+(error.message||"Try another lecture."));return;}
  if(attempt.error){notify(attempt.error);return;}
  quiz=attempt.questions;quizNotes=attempt.notes;
  renderQuiz();
@@ -190,7 +201,7 @@ $("quiz-submit").addEventListener("click",()=>{
     const excerpt=quizNotes;
     document.dispatchEvent(new CustomEvent("notewave:quiz-help",{detail:{
      question:"Please explain "+question.answer+" in simple steps using this lecture: "+question.evidence,
-     notes:excerpt
+     notes:excerpt,pdf:quizPages.length?pdfLecture:null
     }}));
     toggleView(false);$("nav-new").click();
     $("pip-chat").scrollIntoView({behavior:"smooth",block:"start"});

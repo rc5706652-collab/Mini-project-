@@ -67,23 +67,18 @@
           <div class="hero-stats"><div><strong>08<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
         </div>
         <div class="hero-visual">
-          <div id="orb-stage" class="orb-stage loisel-stage loisel-logo-stage" data-mode="idle" aria-label="Cinematic rotating Loisel L logo">
+          <div id="orb-stage" class="orb-stage loisel-stage loisel-logo-stage" data-mode="idle" aria-label="Animated iridescent knowledge core with golden orbital rings">
             <div class="orb-glow"></div>
-            <div class="loisel-logo-shell" aria-hidden="true">
-              <span class="loisel-logo-halo"></span>
-              <span class="loisel-logo-orbit loisel-orbit-a"></span><span class="loisel-logo-orbit loisel-orbit-b"></span>
-              <div class="loisel-letter-mark"><svg viewBox="0 0 330 300" role="presentation" focusable="false">
-                <defs><linearGradient id="loisel-l-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5f4ef"/><stop offset=".28" stop-color="#e7e0f0"/><stop offset=".66" stop-color="#9b91ce"/><stop offset="1" stop-color="#dce8d8"/></linearGradient>
-                <linearGradient id="loisel-l-edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#526859"/><stop offset="1" stop-color="#302944"/></linearGradient></defs>
-                <path d="M100 43 L154 43 L154 205 L257 205 L257 248 L100 248 Z" fill="#171e1b" opacity=".35" transform="translate(12 14)"/>
-                <path d="M98 40 L147 40 L161 52 L161 194 L270 194 L270 239 L257 252 L98 252 Z" fill="url(#loisel-l-edge)"/>
-                <path d="M98 40 L148 40 L148 204 L257 204 L257 248 L98 248 Z" fill="url(#loisel-l-metal)" stroke="#faf5ea" stroke-width="2"/>
-                <path d="M148 40 L161 52 L161 194 L270 194 L257 204 L148 204 Z" fill="#728c84" opacity=".83"/>
-                <path d="M98 40 L148 40 L161 52 L111 52 Z" fill="#f7f2f4" opacity=".84"/>
-                <path d="M257 204 L270 194 L270 239 L257 248 Z" fill="#737fa0"/>
-                <path d="M111 54 L111 234 L244 234" stroke="#fff" stroke-opacity=".6" stroke-width="2" fill="none"/>
-              </svg></div>
-              <span class="loisel-logo-spark spark-left">✦</span><span class="loisel-logo-spark spark-right">✧</span>
+            <div class="loisel-knowledge-scene" aria-hidden="true">
+              <div class="knowledge-stars"><i style="--x:12%;--y:18%;--delay:0s"></i><i style="--x:27%;--y:76%;--delay:-0.31s"></i><i style="--x:71%;--y:16%;--delay:-0.62s"></i><i style="--x:84%;--y:69%;--delay:-0.9299999999999999s"></i><i style="--x:18%;--y:48%;--delay:-1.24s"></i><i style="--x:63%;--y:87%;--delay:-1.55s"></i><i style="--x:89%;--y:32%;--delay:-1.8599999999999999s"></i><i style="--x:40%;--y:8%;--delay:-2.17s"></i><i style="--x:9%;--y:86%;--delay:-2.48s"></i><i style="--x:75%;--y:50%;--delay:-2.79s"></i><i style="--x:54%;--y:22%;--delay:-3.1s"></i><i style="--x:31%;--y:59%;--delay:-3.41s"></i></div>
+              <div class="knowledge-assembly">
+                <div class="knowledge-halo"></div>
+                <div class="knowledge-core"><div class="knowledge-surface"></div><div class="knowledge-reflection"></div></div>
+                <div class="knowledge-orbit knowledge-orbit-gold"><i></i><b></b></div>
+                <div class="knowledge-orbit knowledge-orbit-blue"><i></i></div>
+                <div class="knowledge-orbit knowledge-orbit-violet"><i></i></div>
+                <div class="knowledge-satellite satellite-a"></div><div class="knowledge-satellite satellite-b"></div>
+              </div>
             </div>
             <div class="orb-grain" aria-hidden="true"></div>
             <div class="float-chip chip-a"><span class="chip-icon">✦</span><span>MEET LOISEL <strong>YOUR LEARNING GUIDE</strong></span></div>
@@ -101,7 +96,7 @@
           <span class="pip-chat-online"><span class="live-dot"></span> LOCAL FIRST</span>
         </div>
         <div class="pip-chat-tools">
-          <label for="pip-mode">Ask about <select id="pip-mode"><option value="general">Any topic</option><option value="notes">My recording</option></select></label>
+          <label for="pip-mode">Ask about <select id="pip-mode"><option value="general">Any topic</option><option value="notes">My recording</option><option value="pdf" disabled>My lecture PDF</option></select></label>
           <label for="pip-model">AI engine <select id="pip-model"><option value="fast">Fast local · smaller model</option><option value="enhanced">Enhanced · WebGPU required</option></select></label>
           <label class="pip-voice-toggle"><input type="checkbox" id="pip-speak"> Read replies aloud</label>
         </div>
@@ -247,7 +242,7 @@
             </label>
             <div class="quiz-pdf-actions">
               <input type="file" id="quiz-pdf-file" accept=".pdf,application/pdf" aria-describedby="quiz-pdf-info" />
-              <button type="button" id="quiz-pdf-clear" class="soft-button">Remove PDF</button>
+              <button type="button" id="quiz-pdf-clear" class="soft-button">Remove PDF</button><button type="button" id="quiz-pdf-ask" class="soft-button" disabled>Ask Loisel about PDF ↗</button>
             </div>
             <p id="quiz-pdf-info" role="status" aria-live="polite">Only PDFs with selectable text are supported. Scanned/image-only PDFs need OCR first.</p>
           </div>
@@ -278,7 +273,7 @@
 <script type="module" src="./app.js"></script>
 <script type="module" src="./robot-chat.js"></script>
 <script type="module" src="./quiz-hub.js"></script>
-<script type="module" src="./loisel-companion.js"></script>
+<!-- Pocket mascot retired; Loisel chat remains available. -->
 <script type="module" src="./enterprise-ui.js"></script>
 <script type="module" src="./theme.js"></script>
 </body>

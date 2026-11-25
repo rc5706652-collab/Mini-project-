@@ -12,9 +12,42 @@ export function buildLectureQuiz(transcript,{topic="",count=6}={}){
  const scoped=focusLecture(transcript,topic);
  if(!scoped)return {error:"No passage matched the selected topic. Try a topic mentioned in the lecture.",notes:null,questions:[]};
  const notes=createNotes(scoped);
- const questions=makeQuiz(notes,Math.max(3,Math.min(12,Number(count)||6)));
- if(questions.length<2)return {error:"This lecture needs more distinct facts for a reliable quiz. Add more lecture content.",notes,questions:[]};
+ const target=Math.max(3,Math.min(12,Number(count)||6));
+ const questions=makeQuiz(notes,target);
+ if(questions.length<target){
+  for(const q of shortPassageQuestions(scoped,transcript,target)){
+   if(questions.length>=target)break;
+   if(questions.some(old=>old.question===q.question||old.answer===q.answer))continue;
+   questions.push({...q,id:"q"+(questions.length+1)});
+  }
+ }
+ if(!questions.length)return {error:"This lecture needs more readable facts for a reliable quiz. Try another topic or add more lecture text.",notes,questions:[]};
  return {error:null,notes,questions:questions.map(q=>({...q,topic:q.answer}))};
+}
+// Short bullet lines and wrapped PDF text often lack the long sentences
+// required by makeQuiz. Keep answers and alternatives drawn from the lecture.
+function shortPassageQuestions(scoped,full,target){
+ const pool=[...new Set(tokenize(full))].filter(t=>t.length>=3);
+ const out=[],used=new Set();
+ for(const evidence of splitSentences(scoped)){
+  if(evidence.trim().split(/\s+/).length<3||evidence.length>500)continue;
+  const words=[...new Set(tokenize(evidence))].filter(t=>t.length>=3);
+  for(const answer of words){
+   if(used.has(answer))continue;
+   const escaped=answer.replace(/[|\\{}()[\]^$+*?.]/g,"\\$&");
+   const re=new RegExp("(^|[^\\p{L}\\p{M}\\p{N}])("+escaped+")(?=$|[^\\p{L}\\p{M}\\p{N}])","iu");
+   const question=evidence.replace(re,(_,prefix)=>prefix+"______");
+   if(question===evidence)continue;
+   const others=pool.filter(t=>t!==answer&&!words.includes(t)).slice(0,3);
+   if(!others.length)continue;
+   const choices=[answer,...others],offset=(out.length+1)%choices.length;
+   out.push({id:"fallback"+(out.length+1),question,answer,evidence,choices:[...choices.slice(offset),...choices.slice(0,offset)]});
+   used.add(answer);
+   break;
+  }
+  if(out.length>=target)break;
+ }
+ return out;
 }
 export function diagnoseQuiz(questions,answers){
  const graded=gradeQuiz(questions,answers);

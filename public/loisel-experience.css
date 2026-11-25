@@ -373,3 +373,37 @@ html[data-motion="reduced"] .loisel-pocket-hide-cover{
 }
 .nw-enterprise .translation-choice-actions button:disabled{cursor:not-allowed;opacity:.64}
 .nw-enterprise #translation-choice-status:not(:empty){font-weight:650;overflow-wrap:anywhere}
+
+/* Hero only: a cinematic, layered CSS 3D planet. No downloaded artwork or GPU
+   library; the existing theme, floating labels and chat controls stay intact. */
+.nw-enterprise .loisel-logo-stage{background:radial-gradient(ellipse at 50% 48%,#30223f 0%,#121a2c 48%,#090c16 83%);border-color:#8485ad55;overflow:hidden}
+.nw-enterprise .loisel-logo-stage .orb-glow{background:radial-gradient(ellipse at 50% 53%,#c5a0ff40,transparent 57%)}
+.loisel-knowledge-scene{position:absolute;inset:0;display:grid;place-items:center;perspective:850px;pointer-events:none;z-index:2;overflow:hidden}
+.knowledge-stars{position:absolute;inset:8%;opacity:.8}
+.knowledge-stars i{position:absolute;left:var(--x);top:var(--y);width:3px;height:3px;border-radius:50%;background:#e4edff;box-shadow:0 0 8px 2px #b1c9ff;animation:knowledge-twinkle 4s var(--delay) ease-in-out infinite}
+.knowledge-stars i:nth-child(3n){width:5px;height:5px;background:#ffdf95;box-shadow:0 0 11px 2px #ffc450}
+.knowledge-assembly{position:relative;width:min(77%,390px);aspect-ratio:1;transform-style:preserve-3d;display:grid;place-items:center;animation:knowledge-float 8s ease-in-out infinite}
+.knowledge-halo{position:absolute;width:90%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#845bff42,transparent 68%);filter:blur(15px)}
+.knowledge-core{position:absolute;width:53%;aspect-ratio:1;border-radius:50%;overflow:hidden;transform:translateZ(6px);background:radial-gradient(ellipse at 25% 16%,#efffff 0%,#73d6f6 11%,#7654cc 29%,#19243b 50%,#ca8bda 68%,#17243b 86%);box-shadow:inset -13px -18px 30px #080c24c9,inset 5px 4px 15px #e7f9ffa6,0 0 30px #8e82ff91,0 25px 35px #0008}
+.knowledge-surface{position:absolute;inset:-20%;border-radius:50%;background:conic-gradient(from 35deg,transparent,#b9f9ff90,#4c38a780,transparent 35%,#f1b0eab0,#313e8f90,transparent 73%,#ffe09b90,transparent);filter:blur(8px);mix-blend-mode:screen;animation:knowledge-spin 16s linear infinite}
+.knowledge-reflection{position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 26% 21%,#fff 0%,#f2ffffc9 3%,transparent 23%),radial-gradient(ellipse at 76% 80%,#d8a2ff8c,transparent 32%),radial-gradient(ellipse at 50% 46%,transparent 52%,#0a102b99 79%);box-shadow:inset 0 0 10px #d4e9ffb3}
+.knowledge-orbit{position:absolute;width:97%;aspect-ratio:1;border-radius:50%;transform-style:preserve-3d}
+.knowledge-orbit-gold{border:clamp(7px,1.2vw,15px) solid #ffd76c;box-shadow:0 0 9px #fff5b0,inset 0 0 11px #ffed8d,0 0 28px 6px #ffad2f80,inset 0 0 24px #ffb22c63;transform:rotateZ(-19deg) rotateX(68deg);animation:knowledge-gold 13s ease-in-out infinite}
+.knowledge-orbit-gold:after{content:"";position:absolute;inset:-6px;border:2px solid #fff3bb;border-radius:50%;box-shadow:0 0 12px #ffaf3e}
+.knowledge-orbit-blue{width:83%;border:2px solid #7bdfffad;box-shadow:0 0 10px #82dfff77;transform:rotateZ(46deg) rotateX(68deg);animation:knowledge-blue 18s ease-in-out infinite}
+.knowledge-orbit-violet{width:76%;border:1px solid #d5b6ff9c;box-shadow:0 0 14px #c58bff77;transform:rotateZ(-66deg) rotateX(68deg)}
+.knowledge-orbit i,.knowledge-orbit b{position:absolute;top:3%;left:65%;width:12px;height:12px;border-radius:50%;background:#fff5c2;box-shadow:0 0 12px 4px #ffe07d;animation:knowledge-twinkle 3s ease-in-out infinite}
+.knowledge-orbit b{top:86%;left:18%;width:6px;height:6px;animation-delay:-1s}
+.knowledge-orbit-blue i{background:#c1f5ff;box-shadow:0 0 10px 3px #72dcff}
+.knowledge-orbit-violet i{width:5px;height:5px;background:#eee0ff;box-shadow:0 0 9px #da9dff}
+.knowledge-satellite{position:absolute;width:15%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 28% 24%,#ebffff,#7ed3dc 21%,#6450a7 43%,#101e36 76%);box-shadow:inset -4px -5px 9px #08162aa1,0 0 16px #7dccff70;animation:knowledge-satellite 6s ease-in-out infinite}
+.satellite-a{top:17%;right:7%;transform:translateZ(30px)}
+.satellite-b{width:10%;bottom:15%;left:8%;animation-delay:-3s;background:radial-gradient(circle at 25% 20%,#ffefd4,#d7a1f5 26%,#5743a3 60%,#152137)}
+@keyframes knowledge-float{0%,100%{transform:translateY(-3%) rotateY(-10deg)}50%{transform:translateY(3%) rotateY(12deg)}}
+@keyframes knowledge-gold{0%,100%{transform:rotateZ(-19deg) rotateX(68deg)}50%{transform:rotateZ(-8deg) rotateX(56deg)}}
+@keyframes knowledge-blue{0%,100%{transform:rotateZ(46deg) rotateX(68deg)}50%{transform:rotateZ(68deg) rotateX(74deg)}}
+@keyframes knowledge-spin{to{transform:rotate(360deg)}}
+@keyframes knowledge-twinkle{50%{opacity:.35}}
+@keyframes knowledge-satellite{50%{translate:0 -10px}}
+@media(prefers-reduced-motion:reduce){.loisel-knowledge-scene *{animation:none!important}}
+:root[data-motion="reduced"] .loisel-knowledge-scene *{animation:none!important}

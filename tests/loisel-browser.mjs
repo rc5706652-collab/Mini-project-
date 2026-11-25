@@ -21,11 +21,11 @@ async function quizScenario(browser,width,height){
   assert.match(await page.locator("#hero-title").innerText(),/Loisel/);
   await page.locator("#pip-chat-title").waitFor({state:"visible",timeout:8000});
   assert.match(await page.locator("#pip-chat-title").innerText(),/Loisel/);
-  const logo=page.locator(".loisel-letter-mark svg");
+  const logo=page.locator(".loisel-knowledge-scene");
   assert.ok(await logo.isVisible(),"Cinematic L hero mark is missing");
   assert.equal(await page.locator(".loisel-hero-photo").count(),0,"Old full-size android image must not render");
   assert.equal(await page.locator(".pip-css").count(),0,"Old full-size generated robot must not render");
-  assert.ok(await page.locator("#loisel-buddy-toggle").isVisible(),"Mini Loisel must appear in every section");
+  assert.equal(await page.locator("#loisel-buddy-toggle").count(),0);
   if(width<700){await page.locator("#nw-dock-quiz-studio").click();}
   else{await page.locator("#nav-quiz").click();}
   assert.ok(await page.locator("#quiz-hub-view").isVisible());

@@ -2,6 +2,8 @@
 // Use PDF.js's published browser build directly (not the problematic ESM wrapper).
 export const PDFJS_VERSION="4.10.38";
 const CDN="https://cdn.jsdelivr.net/npm/pdfjs-dist@"+PDFJS_VERSION+"/build/";
+const LEGACY_CDN="https://cdn.jsdelivr.net/npm/pdfjs-dist@"+PDFJS_VERSION+"/legacy/build/";
+function bounded(promise,ms,message){let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(message)),ms);})]).finally(()=>clearTimeout(timer));}
 export const MAX_PDF_BYTES=15*1024*1024;
 export const MAX_PDF_PAGES=100;
 export const MAX_PDF_CHARS=120000;
@@ -36,25 +38,28 @@ export function pageForEvidence(pages,evidence){
 }
 export async function extractLecturePdf(file,{onProgress=()=>{},library=null}={}){
  validateLecturePdf(file);
- let lib=library,loading=null,doc=null;
+ let lib=library,loading=null,doc=null,workerBase=CDN;
  if(!lib){
-  try{lib=await import(CDN+"pdf.mjs");}
-  catch{throw Error("PDF reader could not load. Check your internet connection and retry.");}
+  try{lib=await bounded(import(CDN+"pdf.mjs"),12000,"PDF reader timed out.");}
+  catch{
+   try{workerBase=LEGACY_CDN;lib=await bounded(import(LEGACY_CDN+"pdf.mjs"),12000,"PDF reader timed out.");}
+   catch{throw Error("PDF reader could not load. Check your internet connection and retry.");}
+  }
  }
  if(!lib?.getDocument)throw Error("PDF reader is unavailable.");
- if(lib.GlobalWorkerOptions)lib.GlobalWorkerOptions.workerSrc=CDN+"pdf.worker.mjs";
+ if(lib.GlobalWorkerOptions)lib.GlobalWorkerOptions.workerSrc=workerBase+"pdf.worker.mjs";
  try{
   loading=lib.getDocument({
    data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false,
    useSystemFonts:true
   });
-  doc=await loading.promise;
+  doc=await bounded(loading.promise,25000,"PDF reader timed out while opening this file. Retry or use a smaller PDF.");
   if(doc.numPages>MAX_PDF_PAGES)throw Error("This PDF has "+doc.numPages+" pages; the current limit is 100. Split the lecture into smaller PDFs.");
   const pages=[],result=[];
   let total=0;
   for(let n=1;n<=doc.numPages;n++){
    const page=await doc.getPage(n);
-   const contents=await page.getTextContent();
+   const contents=await bounded(page.getTextContent(),12000,"PDF text extraction timed out. Try a smaller or searchable PDF.");
    const lines=[];let line="";
    for(const item of contents.items||[]){
     if(typeof item.str!=="string")continue;
@@ -71,7 +76,7 @@ export async function extractLecturePdf(file,{onProgress=()=>{},library=null}={}
    onProgress({page:n,total:doc.numPages,characters:total});
   }
   const text=normalizePdfText(result.join("\n"));
-  if(text.length<80)throw Error("This PDF has too little selectable text to create reliable questions. If it contains scanned pages or photos, please use a text/OCR version.");
+  if(text.length<30)throw Error("This PDF has too little selectable text to create reliable questions. If it contains scanned pages or photos, please use a text/OCR version.");
   return {title:String(file.name||"Lecture PDF").slice(0,140),text,pages,pageCount:doc.numPages,characters:text.length};
  }catch(error){
   if(error?.name==="PasswordException")throw Error("This PDF is password-protected. Unlock it locally before uploading.");

@@ -36,3 +36,10 @@ test("topic focus refuses unrelated lecture topics and video links are search UR
  assert.equal(u.pathname,"/results");
  assert.ok(u.searchParams.get("search_query").includes("Hindi"));
 });
+
+test("short PDF-style bullet lines still generate source-derived questions",()=>{
+ const source="Solar panels convert sunlight.\nBatteries store electricity.\nInverters change current.\nTurbines generate power.";
+ const result=buildLectureQuiz(source,{count:5});
+ assert.equal(result.error,null);assert.ok(result.questions.length>=2);
+ for(const q of result.questions){assert.ok(source.includes(q.evidence));assert.ok(q.choices.includes(q.answer));assert.ok(new Set(q.choices).size>=2);}
+});
