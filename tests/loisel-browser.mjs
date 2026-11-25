@@ -19,15 +19,14 @@ async function quizScenario(browser,width,height){
  try{
   await page.goto(url,{waitUntil:"domcontentloaded"});
   assert.match(await page.locator("#hero-title").innerText(),/Loisel/);
-  await page.locator("#pip-chat-title").waitFor({state:"visible",timeout:8000});
-  assert.match(await page.locator("#pip-chat-title").innerText(),/Loisel/);
+  assert.equal(await page.locator("#pip-chat-title").isVisible(),false);
   const logo=page.locator(".loisel-knowledge-scene");
   assert.ok(await logo.isVisible(),"Cinematic L hero mark is missing");
   assert.equal(await page.locator(".loisel-hero-photo").count(),0,"Old full-size android image must not render");
   assert.equal(await page.locator(".pip-css").count(),0,"Old full-size generated robot must not render");
   assert.equal(await page.locator("#loisel-buddy-toggle").count(),0);
   if(width<700){await page.locator("#nw-dock-quiz-studio").click();}
-  else{await page.locator("#nav-quiz").click();}
+  else{await page.locator("#workspace-menu").click();await page.locator("#nav-quiz").click();}
   assert.ok(await page.locator("#quiz-hub-view").isVisible());
   await page.locator("#quiz-lecture").selectOption("paste");
   await page.locator("#quiz-lecture-text").fill(transcript);
@@ -82,7 +81,7 @@ async function translatedAudioScenario(browser){
   };
  });
  try{
-  await page.goto(url,{waitUntil:"domcontentloaded"});
+  await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
   await page.locator("#audio-language").selectOption("hi");
   await page.locator("#audio-output").selectOption("ta");
   await page.locator("#file").setInputFiles({name:"lecture.wav",mimeType:"audio/wav",buffer:wavFixture()});
@@ -143,7 +142,7 @@ async function installedBrowserTranslationScenario(browser){
   };
  });
  try{
-  await page.goto(url,{waitUntil:"domcontentloaded"});
+  await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
   await page.locator("#audio-language").selectOption("hi");
   await page.locator("#audio-output").selectOption("ta");
   await page.locator("#file").setInputFiles({name:"lesson.wav",mimeType:"audio/wav",buffer:wavFixture()});

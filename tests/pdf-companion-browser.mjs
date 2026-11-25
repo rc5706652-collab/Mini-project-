@@ -68,6 +68,7 @@ async function testFlow(browser,{mobile=false,mockPDF=false}={}){
   assert.ok(await logo.isVisible(),"Missing animated knowledge core");
   assert.equal(await page.locator(".loisel-hero-photo").count(),0);
   assert.equal(await buddy.count(),0);
+  if(!mobile)await page.locator("#workspace-menu").click();
   await page.locator(mobile?"#nw-dock-quiz-studio":"#nav-quiz").click();
   assert.ok(await page.locator("#quiz-hub-view").isVisible());
   await page.locator("#quiz-lecture").selectOption("pdf");
@@ -86,15 +87,19 @@ async function testFlow(browser,{mobile=false,mockPDF=false}={}){
   assert.ok(await page.locator(".quiz-video-link").count()>0);
   await page.locator("#quiz-pdf-ask").click();
   assert.ok(await page.locator("#pip-chat").isVisible());
+  assert.equal(await page.locator("#main-view").isVisible(),false);
+  assert.equal(await page.locator("#home-view").isVisible(),false);
   assert.equal(await page.locator("#pip-mode").inputValue(),"pdf");
   await page.locator("#pip-question").fill("What do solar panels convert?");
   await page.locator("#pip-send").click();
   await page.locator(".pip-citation").first().waitFor({state:"visible"});
   assert.match(await page.locator(".pip-citation").first().innerText(),/Page 1/);
   assert.match(await page.locator("#pip-messages").innerText(),/sunlight into electricity/);
+  if(!mobile)await page.locator("#workspace-menu").click();
   await page.locator(mobile?"#nw-dock-library":"#nav-saved").click();
   assert.ok(await page.locator("#saved-panel").isVisible());
   assert.equal(await buddy.count(),0);
+  if(!mobile)await page.locator("#workspace-menu").click();
   await page.locator(mobile?"#nw-dock-quiz-studio":"#nav-quiz").click();
   await page.locator("#quiz-pdf-clear").click();
   assert.ok(await page.locator("#quiz-pdf-ask").isDisabled());

@@ -36,12 +36,16 @@
 <body>
 <div class="aurora aurora-one" aria-hidden="true"></div><div class="aurora aurora-two" aria-hidden="true"></div>
 <div class="app-shell">
-  <aside class="sidebar" aria-label="Navigation">
+  <div id="workspace-edge" aria-hidden="true"></div>
+  <aside id="workspace-sidebar" class="sidebar" aria-label="Workspace navigation" data-open="false" inert>
     <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">L</span><span>note<span class="brand-light">wave</span><small>AI COMPANION STUDIO</small></span></a>
     <div class="nav-kicker">WORKSPACE</div>
-    <button class="side-link selected" id="nav-new"><span class="side-icon">✦</span> AI studio <span class="nav-dot"></span></button>
+    <button class="side-link selected" id="nav-home"><span class="side-icon">⌂</span> Home</button>
+    <button class="side-link" id="nav-new"><span class="side-icon">✦</span> AI studio <span class="nav-dot"></span></button>
+    <button class="side-link" id="nav-chat"><span class="side-icon">✧</span> Loisel chat</button>
     <button class="side-link" id="nav-saved"><span class="side-icon">▤</span> My library <span id="count" class="count">0</span></button>
     <button class="side-link" id="nav-quiz"><span class="side-icon">◇</span> Quiz studio</button>
+    <button class="side-link" id="nav-session"><span class="side-icon">＋</span> New session</button>
     <div class="nav-kicker nav-gap">RECENT SESSIONS</div>
     <div id="recent" class="recent-list"><p class="muted tiny">Your saved notes appear here.</p></div>
     <div class="side-footer">
@@ -53,11 +57,11 @@
 
   <main class="main">
     <header class="topbar">
-      <div class="crumb"><span class="crumb-muted">Workspace</span><span class="slash">/</span><strong id="breadcrumb">AI studio</strong></div>
+      <div class="crumb"><button id="workspace-menu" type="button" aria-label="Open workspace menu" aria-controls="workspace-sidebar" aria-expanded="false"><span aria-hidden="true">☰</span></button><span class="crumb-muted">Workspace</span><span class="slash">/</span><strong id="breadcrumb">Home</strong></div>
       <div class="top-actions"><span class="online"><span class="live-dot"></span> Private processing</span><button class="top-create" id="top-create">＋ New session</button></div>
     </header>
 
-    <div id="main-view">
+    <div id="home-view">
       <section class="hero hero--centered" aria-labelledby="hero-title">
         <div class="hero-copy hero-heading">
           <span class="hero-kicker"><span class="kicker-mark">✳</span> YOUR AI LEARNING COMPANION</span>
@@ -82,12 +86,12 @@
         </div>
         <div class="hero-copy hero-details">
           <p>Turn lectures into notes, ask questions, and discover what to practise next with your multilingual AI learning companion.</p>
-          <div class="hero-actions"><a href="#create-panel" class="cta">Start creating <span>↗</span></a><span class="hero-sub">Private, on-device AI</span></div>
+          <div class="hero-actions"><a href="#studio" id="home-start" class="cta">Start creating <span>↗</span></a><a href="#chat" id="home-chat" class="home-chat-link">Talk to Loisel <span aria-hidden="true">↗</span></a></div>
           <div class="hero-stats"><div><strong>08<span>+</span></strong><small>LEARNING MODES</small></div><div><strong>100<span>%</span></strong><small>LOCAL AUDIO</small></div><div><strong>0<span>₹</span></strong><small>API FEES</small></div></div>
         </div>
       </section>
-
-
+    </div>
+    <div id="chat-view" class="hidden">
       <section id="pip-chat" class="pip-chat glass" aria-labelledby="pip-chat-title">
         <div class="pip-chat-intro">
           <div class="pip-chat-avatar loisel-avatar loisel-letter-avatar" aria-hidden="true"><span>L</span></div>
@@ -116,7 +120,8 @@
         <div class="pip-chat-footer"><span id="pip-status" role="status">AI models download on first use; replies may be imperfect. Audio input is optional.</span><button type="button" id="pip-clear" class="pip-clear">Clear chat</button></div>
         <p class="pip-disclaimer">Loisel uses a small local language model, not a cloud chatbot. It can't browse live information. Voice input uses browser microphone permission and local Whisper transcription; speech playback uses your device's speech synthesis service. Double-check important answers.</p>
       </section>
-
+    </div>
+    <div id="main-view" class="hidden">
       <div class="flow-line" aria-label="Workflow"><div><span>01</span> CAPTURE</div><i></i><div><span>02</span> UNDERSTAND</div><i></i><div><span>03</span> LEARN</div></div>
 
       <section id="create-panel" class="creator-layout" aria-labelledby="create-title">

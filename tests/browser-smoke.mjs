@@ -19,7 +19,7 @@ try{
  const page=await browser.newPage({viewport:{width:1380,height:900},acceptDownloads:true});
  const crashes=[];
  page.on("pageerror",error=>crashes.push(error.message));
- await page.goto(url,{waitUntil:"domcontentloaded"});
+ await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  await page.locator("#text-tab").click();
  await page.locator("#pasted").fill(transcript);
  await page.locator("#generate").click();
@@ -51,7 +51,7 @@ try{
  await page.locator("#export").click();
  assert.equal((await dl).suggestedFilename(),"NoteWave-notes.md");
  await page.locator("#save").click();
- await page.locator("#nav-saved").click();
+ await page.locator("#workspace-menu").click();await page.locator("#nav-saved").click();
  await page.locator("#memory-results .saved-item").first().waitFor({state:"visible",timeout:8000});
  await page.locator("#memory-search").fill("solar");
  assert.ok((await page.locator("#memory-results .saved-item").count())>=1);
@@ -63,7 +63,7 @@ try{
  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:1});
  const mobileErrors=[];
  mobile.on("pageerror",err=>mobileErrors.push(err.message));
- await mobile.goto(url,{waitUntil:"domcontentloaded"});
+ await mobile.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  await mobile.locator("#text-tab").click();
  await mobile.locator("#pasted").fill(transcript);
  await mobile.locator("#generate").click();
@@ -94,7 +94,7 @@ try{
      terminate(){this.cancelled=true;}
    };
  });
- await audio.goto(url,{waitUntil:"domcontentloaded"});
+ await audio.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  function wavFixture(){
    const frames=16000,sampleRate=16000,b=Buffer.alloc(44+frames*2);
    b.write("RIFF",0);b.writeUInt32LE(36+frames*2,4);b.write("WAVE",8);
@@ -149,7 +149,7 @@ try{
  const reduced=await browser.newPage({viewport:{width:390,height:844},reducedMotion:"reduce"});
  const reducedErrors=[];
  reduced.on("pageerror",err=>reducedErrors.push(err.message));
- await reduced.goto(url,{waitUntil:"domcontentloaded"});
+ await reduced.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  await reduced.locator("#text-tab").click();
  await reduced.locator("#pasted").fill(transcript);
  await reduced.locator("#generate").click();

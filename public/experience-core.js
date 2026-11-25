@@ -28,6 +28,8 @@ export function tiltFromPointer(x,y,width,height,maxAngle=3){
  return {x:Number((-ny*strength).toFixed(2)),y:Number((nx*strength).toFixed(2))};
 }
 export const paletteCommands=Object.freeze([
+ {id:"home",label:"Home",description:"Return to the NoteWave landing page",shortcut:"H"},
+ {id:"chat",label:"Loisel chat",description:"Ask your AI companion about a lecture or PDF",shortcut:"C"},
  {id:"studio",label:"AI Studio",description:"Go to your recording workspace",shortcut:"S"},
  {id:"new",label:"New session",description:"Start a fresh recording or transcript",shortcut:"N"},
  {id:"library",label:"Library · Knowledge Memory",description:"Search saved notes and recordings",shortcut:"L"},

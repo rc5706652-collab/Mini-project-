@@ -510,3 +510,44 @@ html[data-theme="dark"] .nw-enterprise .hero--centered #orb-stage .orb-glow{
  .nw-enterprise .hero--centered .knowledge-assembly{animation:none!important}
 }
 :root[data-motion="reduced"] .nw-enterprise .hero--centered .knowledge-assembly{animation:none!important}
+
+/* Full-width workspace and taskbar-style overlay navigation. */
+.nw-enterprise .app-shell{display:block;min-height:100vh}
+.nw-enterprise .main{width:100%;margin-inline:auto}
+.nw-enterprise #workspace-sidebar{
+ position:fixed;inset:0 auto 0 0;width:min(282px,calc(100vw - 35px));height:100dvh;max-height:100dvh;
+ z-index:100;display:flex;flex-direction:column;align-items:stretch;padding:22px 15px 15px;
+ overflow-y:auto;overscroll-behavior:contain;transform:translateX(-102%);visibility:hidden;
+ transition:transform .22s cubic-bezier(.2,.8,.2,1),visibility .22s;box-shadow:12px 0 45px #0003;
+}
+.nw-enterprise #workspace-sidebar[data-open="true"]{transform:translateX(0);visibility:visible}
+.nw-enterprise #workspace-sidebar .brand{padding:0 6px 24px;font-size:25px}
+.nw-enterprise #workspace-sidebar .side-link{display:flex;min-height:44px;margin:3px 0;padding:9px 11px}
+.nw-enterprise #workspace-sidebar .nav-kicker{display:block}
+.nw-enterprise #workspace-sidebar .nav-gap{margin-top:18px}
+.nw-enterprise #workspace-sidebar .recent-list{display:block;min-height:60px;flex:1 0 60px}
+.nw-enterprise #workspace-sidebar .side-footer{display:block;margin-top:10px}
+#workspace-edge{position:fixed;left:0;top:0;bottom:0;width:10px;z-index:99;display:none}
+@media(hover:hover) and (pointer:fine){#workspace-edge{display:block}}
+#workspace-menu{display:inline-grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid var(--nw-hairline);border-radius:11px;background:var(--nw-card);color:var(--nw-foreground);font-size:20px;line-height:1}
+#workspace-menu:hover,#workspace-menu[aria-expanded="true"]{background:var(--nw-card-strong)}
+.nw-enterprise .home-chat-link{color:var(--nw-foreground);font-size:13px;font-weight:700;padding:12px 10px}
+.nw-enterprise .home-chat-link:hover{text-decoration:underline}
+.nw-enterprise #home-view .hero--centered{min-height:min(680px,calc(100svh - 108px))}
+.nw-enterprise #chat-view{max-width:1120px;margin:0 auto;padding:clamp(24px,4vw,48px) 0}
+.nw-enterprise #chat-view #pip-chat{margin-top:0}
+.nw-enterprise #main-view{padding-top:20px}
+.nw-enterprise #main-view .flow-line{margin-top:0}
+@media(max-width:760px){
+ .nw-enterprise .main{padding-inline:clamp(12px,4vw,24px)}
+ .nw-enterprise .topbar{gap:6px}.nw-enterprise .crumb{gap:7px;min-width:0}
+ .nw-enterprise .crumb-muted,.nw-enterprise .slash{display:none}
+ .nw-enterprise .crumb strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .nw-enterprise #home-view .hero--centered{min-height:0}
+ .nw-enterprise #chat-view{padding-top:18px}
+ .nw-enterprise .nw-dock{gap:3px}.nw-enterprise .nw-dock-item{font-size:9px;padding-inline:2px}
+}
+@media(max-height:510px) and (orientation:landscape) and (max-width:940px){.nw-enterprise .nw-dock{max-width:310px}.nw-enterprise #home-view .hero--centered{min-height:0}}
+@media(prefers-reduced-motion:reduce){.nw-enterprise #workspace-sidebar{transition:none!important}}
+:root[data-motion="reduced"] .nw-enterprise #workspace-sidebar{transition:none!important}
+@media print{#workspace-edge,#workspace-menu,#workspace-sidebar,#home-view,#chat-view{display:none!important}}

@@ -10,7 +10,8 @@ const motionKey="notewave-motion-v1";
 let preference="system";
 try{const stored=localStorage.getItem(motionKey);if(stored==="reduce")preference=stored;}catch{}
 let state=null;
-let lastView="studio",lastResults=false;
+let lastView="home",lastResults=false;
+let restoringRoute=false;
 const make=(tag,css,text)=>{
  const node=document.createElement(tag);
  if(css)node.className=css;
@@ -65,10 +66,11 @@ function buildShell(){
  const dock=make("nav","nw-dock");
  dock.id="nw-dock";dock.setAttribute("aria-label","Quick mobile navigation");
  const items=[
+  ["home","⌂","Home"],
   ["studio","✦","Studio"],
+  ["chat","✧","Chat"],
   ["library","▤","Library"],
-  ["quiz-studio","◇","Quiz"],
-  ["new","＋","New"]
+  ["quiz-studio","◇","Quiz"]
  ];
  for(const [key,glyph,label] of items){
   const btn=make("button","nw-dock-item");btn.id="nw-dock-"+key;btn.type="button";
@@ -113,7 +115,7 @@ function buildShell(){
  input.addEventListener("input",renderPalette);
  dialog.addEventListener("close",()=>{input.value="";});
  function renderPalette(){
-  const available=filterCommands(input.value,!$("results")?.classList.contains("hidden")&&!$("main-view")?.classList.contains("hidden"));
+  const available=filterCommands(input.value,!$("results")?.classList.contains("hidden"));
   list.replaceChildren();
   if(!available.length)list.append(make("p","nw-palette-empty","No matching commands. Generate notes to unlock study actions."));
   for(const command of available){
@@ -136,21 +138,23 @@ function buildShell(){
  document.addEventListener("keydown",event=>{
   if(event.metaKey||event.ctrlKey||event.altKey||dialog.open)return;
   if(event.target?.closest?.("input,textarea,select,[contenteditable]"))return;
-  const keys={s:"studio",n:"new",l:"library",g:"galaxy",q:"quiz-studio",t:"tutor"};
+  const keys={s:"studio",n:"new",l:"library",g:"galaxy",q:"quiz-studio",t:"tutor",h:"home",c:"chat"};
   const cmd=keys[event.key.toLowerCase()];
   if(cmd){event.preventDefault();execute(cmd);}
  });
 }
 function execute(key){
- const targetView=key==="library"?"nav-saved":"nav-new";
- if(key==="studio"||key==="library"){
-  $(targetView)?.click();
+ const targets={home:"nav-home",studio:"nav-new",chat:"nav-chat",library:"nav-saved"};
+ if(targets[key]){
+  $(targets[key])?.click();
  }else if(key==="new"){
   $("top-create")?.click();
  }else if(key==="quiz-studio"){
   $("nav-quiz")?.click();
  }else if(["galaxy","quiz","tutor"].includes(key)){
-  if($("results")?.classList.contains("hidden")||$("main-view")?.classList.contains("hidden")){announce("Open a note in the Studio to use learning tools");return;}
+  if($("results")?.classList.contains("hidden")){announce("Open a note in the Studio to use learning tools");return;}
+  if(lastView!=="studio")$("nav-new")?.click();
+  if(lastView!=="studio")return;
   $(key+"-tab")?.click();
   $(key+"-panel")?.scrollIntoView({block:"nearest",behavior:state?.useMotion?"smooth":"auto"});
  }else if(key==="export"){
@@ -166,10 +170,7 @@ function announce(message){
  announce.timeout=setTimeout(()=>toast.classList.remove("visible"),2900);
 }
 function updateDock(){
- const library=!$("saved-panel")?.classList.contains("hidden");
- const quiz=!$("quiz-hub-view")?.classList.contains("hidden");
- lastView=quiz?"quiz-studio":library?"library":"studio";
- for(const target of ["studio","library","quiz-studio","new"]){
+ for(const target of ["home","studio","chat","library","quiz-studio"]){
   const item=$("nw-dock-"+target);
   if(!item)continue;
   const current=target===lastView;
@@ -179,6 +180,60 @@ function updateDock(){
  }
  const top=$("nw-command-open");
  if(top)top.setAttribute("title","Command palette (Ctrl/Cmd + K)");
+}
+// Page routing preserves local session state; only New session resets it.
+const workspaceViews={
+ home:{id:"home-view",nav:"nav-home",label:"Home"},studio:{id:"main-view",nav:"nav-new",label:"AI studio"},
+ chat:{id:"chat-view",nav:"nav-chat",label:"Loisel chat"},library:{id:"saved-panel",nav:"nav-saved",label:"My library"},
+ "quiz-studio":{id:"quiz-hub-view",nav:"nav-quiz",label:"Quiz studio"}
+};
+function routeFromLocation(){const hash=location.hash.slice(1);return hash==="create-panel"?"studio":Object.hasOwn(workspaceViews,hash)?hash:"home";}
+function showWorkspace(view){
+ if(!Object.hasOwn(workspaceViews,view))return;
+ const changed=lastView!==view;lastView=view;document.body.dataset.workspaceView=view;
+ for(const [name,page] of Object.entries(workspaceViews)){
+  $(page.id).classList.toggle("hidden",name!==view);
+  const nav=$(page.nav);nav.classList.toggle("selected",name===view);
+  if(name===view)nav.setAttribute("aria-current","page");else nav.removeAttribute("aria-current");
+ }
+ $("breadcrumb").textContent=workspaceViews[view].label;
+ document.title=view==="home"?"NoteWave | Loisel — Multilingual AI Study Companion":workspaceViews[view].label+" | NoteWave";
+ if(!restoringRoute&&routeFromLocation()!==view)history.pushState(null,"","#"+view);
+ if(changed)window.scrollTo({top:0,behavior:"instant"});updateDock();
+}
+function workspaceNavigation(){
+ const sidebar=$("workspace-sidebar"),edge=$("workspace-edge"),menu=$("workspace-menu");
+ let closeTimer=0,openedByClick=false,inside=false;
+ const desktop=()=>matchMedia("(hover: hover) and (pointer: fine)").matches;
+ const close=()=>{
+  clearTimeout(closeTimer);openedByClick=false;
+  if(sidebar.contains(document.activeElement))menu.focus({preventScroll:true});
+  sidebar.dataset.open="false";sidebar.inert=true;
+  menu.setAttribute("aria-expanded","false");menu.setAttribute("aria-label","Open workspace menu");
+ };
+ const open=(click=false)=>{
+  clearTimeout(closeTimer);openedByClick=click||openedByClick;
+  sidebar.inert=false;sidebar.dataset.open="true";
+  menu.setAttribute("aria-expanded","true");menu.setAttribute("aria-label","Close workspace menu");
+ };
+ edge.addEventListener("pointerenter",event=>{if(desktop()&&event.pointerType!=="touch")open();});
+ edge.addEventListener("pointerleave",()=>{if(!openedByClick)closeTimer=setTimeout(()=>{if(!inside)close();},240);});
+ sidebar.addEventListener("pointerenter",()=>{inside=true;clearTimeout(closeTimer);});
+ sidebar.addEventListener("pointerleave",event=>{
+  inside=false;if(desktop()&&event.pointerType!=="touch"&&!openedByClick)closeTimer=setTimeout(close,170);
+ });
+ menu.addEventListener("click",()=>{if(sidebar.dataset.open==="true")close();else{open(true);$("nav-home").focus({preventScroll:true});}});
+ document.addEventListener("pointerdown",event=>{if(sidebar.dataset.open==="true"&&!sidebar.contains(event.target)&&!menu.contains(event.target)&&event.target!==edge)close();});
+ document.addEventListener("keydown",event=>{if(event.key==="Escape"&&sidebar.dataset.open==="true")close();});
+ sidebar.addEventListener("click",event=>{if(event.target.closest("button.side-link,button.recent-item"))close();});
+ $("nav-home").addEventListener("click",()=>showWorkspace("home"));
+ $("nav-chat").addEventListener("click",()=>showWorkspace("chat"));
+ $("nav-session").addEventListener("click",()=>$("top-create").click());
+ for(const [id,view] of [["home-start","studio"],["home-chat","chat"]])$(id).addEventListener("click",event=>{event.preventDefault();execute(view);});
+ document.addEventListener("notewave:workspace-view",event=>showWorkspace(event.detail.view));
+ document.addEventListener("notewave:quiz-navigation",()=>showWorkspace("quiz-studio"));
+ function restore(){restoringRoute=true;const view=routeFromLocation();if(view==="home"||view==="chat")showWorkspace(view);else execute(view);restoringRoute=false;}
+ window.addEventListener("popstate",restore);restore();
 }
 function keyboardTabs(){
  // WAI-ARIA Tabs keyboard navigation with arrows, Home, End. Works for dynamically added AI tabs.
@@ -272,8 +327,7 @@ function observeWorkflow(){
  const watcher=new MutationObserver(()=>{
   const visible=!$("results")?.classList.contains("hidden");
   if(visible!==lastResults){lastResults=visible;updateDock();glassTilt();}
-  const library=!$("saved-panel")?.classList.contains("hidden");
-  if((library?"library":"studio")!==lastView)updateDock();
+  updateDock();
   const working=$("working");
   document.body.classList.toggle("nw-processing",Boolean(working&&!working.classList.contains("hidden")));
  });
@@ -304,6 +358,7 @@ function handleWebGL(){
 function init(){
  if(document.body.classList.contains("nw-enterprise"))return;
  buildShell();
+ workspaceNavigation();
  keyboardTabs();
  responsive();
  contentReveals();
