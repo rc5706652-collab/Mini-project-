@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {startStaticServer} from "./static-server.mjs";
+import {seedProfile} from "./profile-fixture.mjs";
 import {chromium,webkit} from "playwright";
 
 // Responsive UI regression suite. WebKit approximates Safari rendering on CI;
@@ -22,7 +23,8 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
  page.on("pageerror",err=>crashes.push(err.message));
  try{
   if(width>=730)await page.mouse.move(Math.floor(width/2),Math.floor(height/2));
-  await page.goto(root,{waitUntil:"domcontentloaded"});
+  await seedProfile(page);
+ await page.goto(root,{waitUntil:"domcontentloaded"});
   await page.locator("#nw-command-open").waitFor({state:"visible",timeout:9000});
   assert.equal(await page.locator("html").getAttribute("data-motion"),"reduced");
   assert.ok(await page.locator("#hero-title").isVisible());
@@ -42,8 +44,8 @@ async function scenario(browser,width,height,{ios=false,landscape=false}={}){
   assert.equal(await panel.isVisible(),false);
   assert.equal(await page.locator("#pip-chat").isVisible(),false);
   assert.equal(await page.locator("#workspace-sidebar").getAttribute("data-open"),"false");
-  if(width>940){
-   await page.mouse.move(1,120);
+  if(width>940&&await page.evaluate(()=>matchMedia("(hover: hover) and (pointer: fine)").matches)){
+   await page.mouse.move(Math.floor(width/2),150);await page.mouse.move(Math.floor(width/2)+10,150);await page.mouse.move(1,120,{steps:5});
    await page.waitForFunction(()=>document.getElementById("workspace-sidebar").dataset.open==="true");
    await page.mouse.move(120,120);await page.mouse.move(width-20,120);
    await page.waitForFunction(()=>document.getElementById("workspace-sidebar").dataset.open==="false");

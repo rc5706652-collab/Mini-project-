@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {chromium,webkit} from "playwright";
 import {startStaticServer} from "./static-server.mjs";
+import {seedProfile} from "./profile-fixture.mjs";
 const PORT=8774,url="http://127.0.0.1:"+PORT;
 const server=await startStaticServer(PORT);
 const transcript="Solar panels convert sunlight into electricity during clear days. Engineers measured electrical voltage from a small solar panel prototype. Renewable energy technologies can reduce dependence on fossil fuels. Students should submit the solar energy project by Friday. Energy storage batteries help save electricity for later use. Wind turbines generate electricity from moving air. A solar inverter changes direct current to alternating current. Scientists use controlled experiments to evaluate energy conversion efficiency.";
@@ -17,7 +18,8 @@ async function quizScenario(browser,width,height){
  const page=await browser.newPage({viewport:{width,height},isMobile:width<700,hasTouch:width<700,reducedMotion:"reduce"});
  const errors=[];page.on("pageerror",e=>errors.push(e.message));
  try{
-  await page.goto(url,{waitUntil:"domcontentloaded"});
+  await seedProfile(page);
+ await page.goto(url,{waitUntil:"domcontentloaded"});
   assert.match(await page.locator("#hero-title").innerText(),/Loisel/);
   assert.equal(await page.locator("#pip-chat-title").isVisible(),false);
   const logo=page.locator(".loisel-knowledge-scene");
@@ -81,7 +83,8 @@ async function translatedAudioScenario(browser){
   };
  });
  try{
-  await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
+  await seedProfile(page);
+ await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
   await page.locator("#audio-language").selectOption("hi");
   await page.locator("#audio-output").selectOption("ta");
   await page.locator("#file").setInputFiles({name:"lecture.wav",mimeType:"audio/wav",buffer:wavFixture()});
@@ -142,7 +145,8 @@ async function installedBrowserTranslationScenario(browser){
   };
  });
  try{
-  await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
+  await seedProfile(page);
+ await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
   await page.locator("#audio-language").selectOption("hi");
   await page.locator("#audio-output").selectOption("ta");
   await page.locator("#file").setInputFiles({name:"lesson.wav",mimeType:"audio/wav",buffer:wavFixture()});

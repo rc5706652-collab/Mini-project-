@@ -2,10 +2,10 @@ import {PROFILE_KEY,SESSION_KEY,readProfile,sessionName,createProfile,verifyProf
 const $=id=>document.getElementById(id);
 const signup=new URLSearchParams(location.search).get("mode")==="signup",form=$("account-form"),password=$("password"),confirm=$("confirm-password"),status=$("account-status"),submit=$("account-submit");
 const profile=readProfile(),name=sessionName(profile);
-function signedIn(value){form.hidden=true;$("account-switch-line").hidden=true;$("account-signed-in").hidden=false;$("account-title").textContent="You're signed in";$("account-intro").textContent="Local profile on this browser.";$("account-welcome").textContent="Welcome, "+value+".";}
+function signedIn(value){$("account-back").hidden=false;document.title="Account | NoteWave";form.hidden=true;$("account-switch-line").hidden=true;$("account-signed-in").hidden=false;$("account-title").textContent="You're signed in";$("account-intro").textContent="Local profile on this browser.";$("account-welcome").textContent="Welcome, "+value+".";}
 if(name)signedIn(name);
 else if(signup){
- $("account-title").textContent="Create your profile";$("account-intro").textContent="Start your own learning journey.";
+ document.title="Sign up | NoteWave";$("account-title").textContent="Create your profile";$("account-intro").textContent="Start your own learning journey.";
  $("confirm-group").hidden=false;confirm.required=true;password.autocomplete="new-password";password.minLength=12;password.placeholder="At least 12 characters";
  submit.textContent="Create profile ↗";$("account-switch-line").replaceChildren(document.createTextNode("Already have a profile? "));const a=document.createElement("a");a.href="./account.html";a.textContent="Sign in";$("account-switch-line").append(a);
 }
@@ -22,7 +22,7 @@ form.addEventListener("submit",async event=>{
    if(readProfile())throw Error("A profile already exists in this browser.");
    localStorage.setItem(PROFILE_KEY,JSON.stringify(current));
   }else if(!await verifyProfile(current,username,password.value))throw Error("Incorrect username or password. Profiles are specific to this browser.");
-  sessionStorage.setItem(SESSION_KEY,current.name);form.reset();signedIn(current.name);
+  sessionStorage.setItem(SESSION_KEY,current.name);form.reset();location.replace("./");
  }catch(error){status.textContent=error.message||"Could not open the local profile.";}
  finally{password.value="";confirm.value="";submit.disabled=false;}
 });

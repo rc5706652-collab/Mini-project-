@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {chromium,webkit} from "playwright";
 import {startStaticServer} from "./static-server.mjs";
+import {seedProfile} from "./profile-fixture.mjs";
 const PORT=8772,url="http://127.0.0.1:"+PORT;
 const server=await startStaticServer(PORT);
 let chrome,safari;
@@ -26,7 +27,8 @@ async function verify(browser,{width=1440,height=900,systemDark=true,saved,webki
   }catch{}
  },saved);
  try{
-  await page.goto(url,{waitUntil:"domcontentloaded"});
+  await seedProfile(page);
+ await page.goto(url,{waitUntil:"domcontentloaded"});
   const chosen=saved||"system",resolved=chosen==="system"?(systemDark?"dark":"light"):chosen;
   assert.equal(await page.locator("html").getAttribute("data-theme"),resolved,"theme before first paint");
   await page.locator("#nw-theme-trigger").waitFor({state:"visible",timeout:9000});

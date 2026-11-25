@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {startStaticServer} from "./static-server.mjs";
+import {seedProfile} from "./profile-fixture.mjs";
 import { chromium } from "playwright";
 
 const port=8765, url="http://127.0.0.1:"+port;
@@ -19,6 +20,7 @@ try{
  const page=await browser.newPage({viewport:{width:1380,height:900},acceptDownloads:true});
  const crashes=[];
  page.on("pageerror",error=>crashes.push(error.message));
+ await seedProfile(page);
  await page.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  await page.locator("#text-tab").click();
  await page.locator("#pasted").fill(transcript);
@@ -63,6 +65,7 @@ try{
  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:1});
  const mobileErrors=[];
  mobile.on("pageerror",err=>mobileErrors.push(err.message));
+ await seedProfile(mobile);
  await mobile.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  await mobile.locator("#text-tab").click();
  await mobile.locator("#pasted").fill(transcript);
@@ -94,6 +97,7 @@ try{
      terminate(){this.cancelled=true;}
    };
  });
+ await seedProfile(audio);
  await audio.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  function wavFixture(){
    const frames=16000,sampleRate=16000,b=Buffer.alloc(44+frames*2);
@@ -149,6 +153,7 @@ try{
  const reduced=await browser.newPage({viewport:{width:390,height:844},reducedMotion:"reduce"});
  const reducedErrors=[];
  reduced.on("pageerror",err=>reducedErrors.push(err.message));
+ await seedProfile(reduced);
  await reduced.goto(url+"#studio",{waitUntil:"domcontentloaded"});
  await reduced.locator("#text-tab").click();
  await reduced.locator("#pasted").fill(transcript);
