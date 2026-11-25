@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10121b"><title>Account | NoteWave</title>
+<link rel="stylesheet" href="./account.css">
+</head>
+<body>
+<header class="account-header"><a class="brand" href="./" aria-label="NoteWave home"><span class="brand-mark">L</span> note<span>wave</span></a><a class="back" href="./">Back to workspace <span aria-hidden="true">↗</span></a></header>
+<main class="account-main">
+<div class="account-ribbons" aria-hidden="true">
+<svg viewBox="0 0 1400 760" preserveAspectRatio="xMidYMid slice"><defs>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffcc62" stop-opacity=".06"/><stop offset=".54" stop-color="#f4d27f" stop-opacity=".9"/><stop offset="1" stop-color="#fff2b7" stop-opacity=".2"/></linearGradient>
+<linearGradient id="rose" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#74254c" stop-opacity=".03"/><stop offset=".5" stop-color="#b44c9c" stop-opacity=".65"/><stop offset="1" stop-color="#f58cc7" stop-opacity=".8"/></linearGradient>
+</defs><g class="ribbon-gold" fill="url(#gold)"><path d="M-100 535C145 380 310 650 480 390S720 260 805 410C540 230 560 600 320 645S30 605-100 690Z"/><path d="M-100 620C170 490 330 700 510 420S710 300 780 402C605 350 565 655 310 710S-20 710-100 752Z" opacity=".48"/><path d="M-100 605C185 475 319 697 500 410S717 290 805 410" stroke="#ffe8a8" stroke-opacity=".7" fill="none" stroke-width="2"/></g>
+<g class="ribbon-rose" fill="url(#rose)"><path d="M600 455C815 200 1000 630 1490 78L1490 250C1080 754 880 310 600 455Z"/><path d="M690 408C930 260 1070 515 1490 145L1490 385C1070 690 930 320 690 408Z" opacity=".52"/><path d="M600 455C815 200 1000 630 1490 78" stroke="#ffb4e3" stroke-opacity=".65" stroke-width="2" fill="none"/></g></svg>
+</div>
+<section class="account-glass" aria-labelledby="account-title">
+<div class="account-content">
+<p class="eyebrow">NOTEWAVE · LOCAL PROFILE</p>
+<h1 id="account-title">Sign in</h1>
+<p id="account-intro" class="intro">Welcome back to your learning space.</p>
+<form id="account-form">
+<label for="username">Username</label><div class="field"><input id="username" name="username" autocomplete="username" required minlength="3" maxlength="32" placeholder="Your username" autocapitalize="none" spellcheck="false"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21v-3a8 8 0 0 1 16 0v3"/></svg></div>
+<label for="password">Password</label><div class="field"><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="128" placeholder="Your password"><button id="password-toggle" type="button" aria-label="Show password" aria-pressed="false">Show</button></div>
+<div id="confirm-group" hidden><label for="confirm-password">Confirm password</label><div class="field"><input id="confirm-password" type="password" autocomplete="new-password" maxlength="128" placeholder="Repeat password"></div></div>
+<button class="submit" id="account-submit" type="submit">Sign in <span aria-hidden="true">↗</span></button>
+</form>
+<div id="account-signed-in" hidden><p id="account-welcome"></p><a class="submit" href="./">Open workspace ↗</a><button class="text-button" id="account-signout" type="button">Sign out</button></div>
+<p id="account-switch-line" class="switch">New to NoteWave? <a id="account-switch" href="?mode=signup">Create a profile</a></p>
+<p id="account-status" role="status" aria-live="polite"></p>
+<p class="privacy">This profile works on this browser only. It does not secure or sync your saved notes. <a href="./">Continue as guest</a>.</p>
+</div></section>
+</main><footer>PRIVATE BY DESIGN <span>·</span> LEARN AT YOUR OWN PACE</footer>
+<script type="module" src="./account.js"></script>
+</body></html>

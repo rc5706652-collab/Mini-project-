@@ -551,3 +551,8 @@ html[data-theme="dark"] .nw-enterprise .hero--centered #orb-stage .orb-glow{
 @media(prefers-reduced-motion:reduce){.nw-enterprise #workspace-sidebar{transition:none!important}}
 :root[data-motion="reduced"] .nw-enterprise #workspace-sidebar{transition:none!important}
 @media print{#workspace-edge,#workspace-menu,#workspace-sidebar,#home-view,#chat-view{display:none!important}}
+
+.workspace-account-link{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;min-height:40px;padding:7px 12px;border:1px solid var(--nw-hairline);border-radius:10px;background:var(--nw-card);color:var(--nw-foreground);font-size:12px;font-weight:700}
+.workspace-account-link:hover{background:var(--nw-card-strong)}
+@media(max-width:760px){.workspace-account-link{padding:7px 8px;font-size:11px}.nw-enterprise .top-actions .online{display:none}.nw-enterprise .top-actions .nw-motion-toggle{display:none}}
+@media(max-width:390px){.nw-enterprise .topbar .crumb strong{display:none}.nw-enterprise .topbar .crumb{gap:0}}

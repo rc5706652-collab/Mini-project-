@@ -45,12 +45,13 @@
     <button class="side-link" id="nav-chat"><span class="side-icon">✧</span> Loisel chat</button>
     <button class="side-link" id="nav-saved"><span class="side-icon">▤</span> My library <span id="count" class="count">0</span></button>
     <button class="side-link" id="nav-quiz"><span class="side-icon">◇</span> Quiz studio</button>
+    <a class="side-link" href="./account.html" id="nav-account"><span class="side-icon">◉</span> Account</a>
     <button class="side-link" id="nav-session"><span class="side-icon">＋</span> New session</button>
     <div class="nav-kicker nav-gap">RECENT SESSIONS</div>
     <div id="recent" class="recent-list"><p class="muted tiny">Your saved notes appear here.</p></div>
     <div class="side-footer">
       <div class="privacy-indicator"><span class="live-dot"></span> LOCAL-FIRST AI</div>
-      <p>Audio stays in your browser.<br>No account or API keys.</p>
+      <p>Audio stays in your browser.<br>No account required for study tools.</p>
       <div class="side-version">NOTEWAVE / EXPERIENCE 4.0</div>
     </div>
   </aside>
@@ -58,7 +59,7 @@
   <main class="main">
     <header class="topbar">
       <div class="crumb"><button id="workspace-menu" type="button" aria-label="Open workspace menu" aria-controls="workspace-sidebar" aria-expanded="false"><span aria-hidden="true">☰</span></button><span class="crumb-muted">Workspace</span><span class="slash">/</span><strong id="breadcrumb">Home</strong></div>
-      <div class="top-actions"><span class="online"><span class="live-dot"></span> Private processing</span><button class="top-create" id="top-create">＋ New session</button></div>
+      <div class="top-actions"><a id="account-link" class="workspace-account-link" href="./account.html">Sign in</a><span class="online"><span class="live-dot"></span> Private processing</span><button class="top-create" id="top-create">＋ New session</button></div>
     </header>
 
     <div id="home-view">
@@ -280,5 +281,6 @@
 <!-- Pocket mascot retired; Loisel chat remains available. -->
 <script type="module" src="./enterprise-ui.js"></script>
 <script type="module" src="./theme.js"></script>
+<script type="module" src="./account-link.js"></script>
 </body>
 </html>
