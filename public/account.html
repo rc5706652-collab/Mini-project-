@@ -4,17 +4,31 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#171d1b"><title>Sign in | NoteWave</title>
 <script>(function(){var pref="system";try{var s=localStorage.getItem("notewave-theme-v1");if(s==="light"||s==="dark")pref=s;}catch(e){}var theme=pref==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):pref;document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme="dark";document.querySelector('meta[name="theme-color"]').content=theme==="light"?"#26373a":"#202c2f";})();</script>
+<script>
+(function(){
+ try{
+  var pending=sessionStorage.getItem("notewave-entry-animation")==="pending";
+  var first=!sessionStorage.getItem("notewave-entry-animation");
+  var signup=new URLSearchParams(location.search).get("mode")==="signup";
+  if(!signup&&(pending||first)&&!sessionStorage.getItem("notewave-device-session-v1")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
+   document.documentElement.dataset.arrival="play";
+  }
+  sessionStorage.setItem("notewave-entry-animation","seen");
+ }catch(e){}
+})();
+</script>
 <link rel="stylesheet" href="./account.css">
 </head>
 <body>
-<header class="account-header"><a class="brand" href="./account.html" aria-label="NoteWave account"><span class="brand-mark">L</span> note<span>wave</span></a><a id="account-back" class="back" href="./" hidden>Back to workspace <span aria-hidden="true">↗</span></a></header>
-<main class="account-main">
 <div class="account-spheres" aria-hidden="true">
   <span class="account-sphere sphere-amber"></span>
   <span class="account-sphere sphere-sage"></span>
   <span class="account-sphere sphere-lavender"></span>
   <span class="account-sphere sphere-peach"></span>
 </div>
+<div id="account-entrance" class="account-entrance" aria-hidden="true"><div class="arrival-scene"><i class="arrival-halo"></i><i class="arrival-ring ring-one"></i><i class="arrival-ring ring-two"></i><i class="arrival-ring ring-three"></i><i class="arrival-core"></i></div></div>
+<header class="account-header"><a class="brand" href="./account.html" aria-label="NoteWave account"><span class="brand-mark">L</span> note<span>wave</span></a><a id="account-back" class="back" href="./" hidden>Back to workspace <span aria-hidden="true">↗</span></a></header>
+<main class="account-main">
 <section class="account-glass" aria-labelledby="account-title">
 <div class="account-content">
 <p class="eyebrow">NOTEWAVE · LOCAL PROFILE</p>
