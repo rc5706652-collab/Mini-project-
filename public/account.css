@@ -95,3 +95,60 @@ footer{color:#dce8df}
  .sphere-lavender{left:48%;top:22%}.sphere-peach{left:-38%;top:78%}
 }
 @media(prefers-reduced-motion:reduce){.account-sphere{animation:none;will-change:auto}}
+
+/* One edge-to-edge canvas. No clipping at header/main/footer seams. */
+html[data-theme]{
+ min-height:100%;background:#223337;
+ --orb-size:clamp(520px,min(49vw,calc(100svh - 100px)),650px);
+}
+html[data-theme] body{
+ position:relative;isolation:isolate;min-height:100vh;min-height:100svh;
+ display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+ background-attachment:fixed;overflow-x:hidden;
+}
+.account-header{position:relative;padding:13px clamp(18px,5vw,70px);min-height:62px}
+.account-main{--orb-size:inherit;position:relative;isolation:auto;overflow:visible;min-height:0;padding:8px 16px 12px}
+.account-spheres{position:fixed;inset:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none}
+.account-spheres .account-sphere{--orb-size:inherit}
+html[data-theme] .account-glass{padding:clamp(25px,5vh,55px) clamp(56px,6vw,86px)}
+html[data-theme] .account-glass:has(#confirm-group:not([hidden])){width:min(100%,max(var(--orb-size),600px));min-height:max(var(--orb-size),600px)}
+footer{position:relative;padding:5px 10px 12px;min-height:28px}
+.sphere-amber{left:calc(50% - var(--orb-size)*.57);top:calc(50% - var(--orb-size)*.56)}
+.sphere-sage{left:calc(50% + var(--orb-size)*.39);top:calc(50% + var(--orb-size)*.24)}
+.sphere-peach{left:calc(50% - var(--orb-size)*.91);top:calc(50% + var(--orb-size)*.33)}
+/* Fast, CSS-only dimensional arrival. Decorative; never blocks form input. */
+.account-entrance{display:none;position:fixed;inset:0;z-index:20;pointer-events:none;overflow:hidden;
+ background:radial-gradient(ellipse at center,#33484e,#17272e 58%,#101c23)}
+html[data-arrival="play"] .account-entrance{display:grid;place-items:center;animation:arrival-dismiss 1.65s ease-in-out both}
+.arrival-scene{position:relative;width:min(54vw,300px);aspect-ratio:1;display:grid;place-items:center;perspective:750px;transform-style:preserve-3d;animation:arrival-approach 1.65s cubic-bezier(.22,.75,.23,1) both}
+.arrival-scene i{position:absolute;display:block;border-radius:50%}
+.arrival-halo{inset:-32%;background:radial-gradient(circle,#dce8d830, #bba6d51c 36%,transparent 69%);animation:arrival-glow 1.65s ease-out both}
+.arrival-core{width:48%;aspect-ratio:1;background:radial-gradient(circle at 29% 23%,#f8efd4 0%,#d6cbe9 24%,#8ba49f 49%,#465b68 75%,#293e48);box-shadow:inset -10px -12px 22px #18282f70,0 0 45px #dce8d855}
+.arrival-ring{width:98%;aspect-ratio:1;border:2px solid #dce8d8a0;box-shadow:0 0 14px #dce8d83b,inset 0 0 10px #dce8d81f}
+.ring-one{border-color:#f4d797;transform:rotateX(66deg) rotateY(-16deg) rotateZ(-30deg);animation:arrival-ring-one 1.65s ease-in-out both}
+.ring-two{border-color:#c7befd96;transform:rotateY(65deg) rotateX(20deg);animation:arrival-ring-two 1.65s ease-in-out both}
+.ring-three{width:120%;border-width:1px;border-color:#bdd8c16e;transform:rotateX(55deg) rotateY(35deg)}
+@keyframes arrival-dismiss{0%,60%{opacity:1;visibility:visible}99%{opacity:0;visibility:visible}100%{opacity:0;visibility:hidden}}
+@keyframes arrival-approach{0%{transform:scale(.25) rotateY(-50deg) translateZ(-190px)}45%{transform:scale(1) rotateY(12deg)}100%{transform:scale(3.8) rotateY(0deg) translateZ(100px)}}
+@keyframes arrival-glow{0%{opacity:.25}50%{opacity:1}100%{opacity:.5}}
+@keyframes arrival-ring-one{0%{transform:rotateX(82deg) rotateY(-40deg) rotateZ(-120deg)}100%{transform:rotateX(50deg) rotateY(10deg) rotateZ(30deg)}}
+@keyframes arrival-ring-two{0%{transform:rotateY(84deg) rotateX(-35deg)}100%{transform:rotateY(35deg) rotateX(45deg)}}
+html[data-arrival="play"] .account-glass{animation:arrival-reveal 1.65s ease-out both}
+@keyframes arrival-reveal{0%,50%{opacity:0;transform:scale(.97)}100%{opacity:1;transform:none}}
+/* Keyboard or pointer interaction must reveal the form immediately. */
+html[data-arrival="play"]:has(.account-glass:focus-within) .account-entrance{display:none}
+html[data-arrival="play"]:has(.account-glass:focus-within) .account-glass{animation:none}
+@media(max-width:660px){
+ html[data-theme]{--orb-size:420px}
+ .account-header{padding:12px 18px;min-height:56px}
+ .account-main{padding:12px 17px 16px}
+ html[data-theme] .account-glass,html[data-theme] .account-glass:has(#confirm-group:not([hidden])){width:min(100%,430px);min-height:0;aspect-ratio:auto;border-radius:34px;padding:30px 25px}
+ .sphere-amber{top:3%;left:1%}.sphere-sage{right:-12%;left:auto;top:68%}.sphere-peach{left:-38%;top:78%}
+}
+@media(min-width:661px) and (max-height:690px){
+ html[data-theme] .account-glass,html[data-theme] .account-glass:has(#confirm-group:not([hidden])){width:min(100%,560px);min-height:0;aspect-ratio:auto;border-radius:45% 45% 42% 42%;padding:30px 70px}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-arrival="play"] .account-entrance{display:none!important}
+ html[data-arrival="play"] .account-glass,.arrival-scene,.arrival-scene i{animation:none!important}
+}
